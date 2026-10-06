@@ -169,3 +169,33 @@ npm run lint
 ```
 
 Die beiden Paketbauer werden ausschließlich unter `backend/.local/vercel-builder*` installiert, nicht als Produktabhängigkeit. Ergebnisse: `backend/.local/vercel-artifact-vercel-builder-result.json` und `vercel-artifact-vercel-builder-20-result.json`. Runtime-Packpfad **2 → 9,5/10** für den jetzt tatsächlich ausgeführten Paketstand; echter neuer Vercel-Liveaufruf bleibt separat beim Orchestrator. Eigentum: `api/*.ts`, `api/tsconfig.json`, relative Imports in `backend/runtime/*.ts`, neuer Paketprüfer und dieser Bericht. Keine Gitmutation; Orchestrator veröffentlicht.
+
+## Livefund: Providerfehler vor erster Textausgabe — 06.10.2026
+
+Nach nutzerseitigem Login auf `2b9bb8b` funktionierten Dashboard/Gesprächsanlage, die erste echte KI-Antwort scheiterte vor Textausgabe. Das ist kein bestandenes KI-Gate. Die erste Vercelprüfung zeigte HTTP200 für den SSE-Weg und keine Anbieterdiagnose; daraus folgt weder ein erfolgreicher Provideraufruf noch eine bestimmte Ursache.
+
+Enger Diagnosestand in `backend/runtime/provider.ts` und `handler.ts`: genau feste Fehlerkategorie, verifizierte Vorgangs-ID, numerischer HTTP-Status und klassifizierte Content-Type-/Modell-/Fehlercodewerte. Unbekannte externe Namen werden `other/missing`, keine rohe Fehlermeldung, kein Body, Prompt, Text, Schlüssel, URL oder Stack. HTTP401/402/400/422/429/500/503 können so sicher von Stream-/Modell-/Usage-/Terminalfehlern unterschieden werden. Diagnosefehler ändern die bestehende Audit-/Kostenfinalisierung nicht; Abbruch bleibt Abbruch. Öffentlicher JSON-/SSE-Vertrag unverändert.
+
+Tatsächlich Backend-Typecheck/Build und **146/146Tests** grün, darunter12 neue gezielte Diagnose-/Datenschutzprüfungen. Kompletter SQL-/Stacklauf wird für diese reine Providerdiagnose nicht unnötig wiederholt; keine Migration/Schemaänderung, keine eigene Hosted-Schreiboperation, kein echter Anbieteraufruf, keine Konten. Prüf-HTTP-Listener der bestehenden Tests im finally geschlossen, kein Browser oder zusätzlicher Stack gestartet.
+
+Aktuelle technische Primärquellen tatsächlich per HTTPS gelesen: [ChatCompletions](https://api-docs.deepseek.com/api/create-chat-completion/) verlangt aktuell Usage im letzten choices[0]-Chunk, nicht in einem separaten Usage-only-Chunk; [ThinkingMode](https://api-docs.deepseek.com/guides/thinking_mode/) bestätigt `thinking.type=disabled`; [Fehlercodes](https://api-docs.deepseek.com/quick_start/error_codes) unterscheidet ungültiges Format400, Auth401, Guthaben402, Parameter422 und Rate429. Der jetzige Request/Terminalvertrag stimmt damit überein. Keine unbelegte Änderung der Modellkennung oder Usagebehandlung allein auf Verdacht.
+
+Wiederholung ohne Schlüssel-/Providerkontakt:
+
+```sh
+npm --prefix backend run typecheck
+npm --prefix backend test
+npm --prefix backend run build
+```
+
+**Noch offen:** Orchestrator veröffentlicht genau diesen Diagnosestand und prüft die tatsächlich aufgetretene Anbieterantwort geschützt. Ohne lokalen Providerkey kann der Backendagent den konkreten HTTP-/ersten Framefehler nicht selbst live abfragen. Die Diagnose ist vorbereitet und getestet, die Liveursache damit noch nicht als behoben behauptet.
+
+### Bestätigter Liveabschluss der Diagnose: HTTP401
+
+Der Orchestrator hat Diagnosestand `f489365` veröffentlicht und die gezielte Liveprobe am06.10.2026 **19:18:13 Europe/Berlin** geprüft: `HTTP_REJECTED`, `httpStatus:401`, `contentType:json`. Der tatsächliche DeepSeek-Zugang wurde vom Anbieter abgelehnt. Das vorherige fehlgeschlagene Gespräch hatte Länge0 und keine bekannten Eingabe-/Ausgabetoken; daraus wurde vor dieser Diagnose keine unbelegte Ursache abgeleitet. Keine weiteren Provideranfragen durch den Backendagenten.
+
+Anschließende reine Quellprüfung: `cloudEnvironment` kopiert die Serverprozesswerte ohne Bearbeitung des Keys; `cloudConfiguration` verändert ausschließlich Supabase-URL/Public-Key-/DB-Konfiguration. Der Handler liest genau `DEEPSEEK_API_KEY`, reicht diesen getrennt vom Supabase-Bearer an `DeepSeekProvider` weiter; der Adapter setzt ausschließlich den Präfix `Bearer ` davor. Keine Quote-/Base64-/JSON-/Trim-/Ersetzungsoperation, kein fremder Key-Fallback, kein Supabase-Token an den KI-Anbieter, kein Auslesen aus dem Browser. Endpoint `https://api.deepseek.com/chat/completions` ist offiziell. Kein belegter Quellfehler, der einen gültigen Schlüssel beschädigt. Ob der **geschützt gespeicherte externe Wert** versehentlich Leerzeichen/Anführungszeichen enthält, ungültig oder widerrufen ist, lässt sich ohne dessen autorisierte geschützte Prüfung nicht aus dem Quelltext bestimmen; er wurde hier niemals gelesen oder ausgegeben.
+
+**Konkrete externe Grenze:** gültigen DeepSeek-API-Key geschützt in Vercel als `DEEPSEEK_API_KEY` für die aktive Umgebung ersetzen und neu bereitstellen; diese Einrichtung übernimmt der Orchestrator mit dem Nutzer. Kein Passwort/Key im Chat. Keine eigenmächtige Konto-/Tarif-/Guthabenänderung und keine zusätzlichen Blindwiederholungen. Erst danach eine bewusst begrenzte tatsächliche Liveantwort prüfen. HTTP401 ist laut [offiziellen DeepSeek-Fehlercodes](https://api-docs.deepseek.com/quick_start/error_codes) Anbieter-Authentifizierung; kein bestandener Chat und kein Nachweis eines Guthabenfehlers402.
+
+Diagnosequalität **3→9,5/10**: vorher generischer Providerfehler, jetzt Liveursache sicher und inhaltsfrei belegt;146Backendtests, strikter Typecheck/Build und vom Orchestrator ausgeführter echter Vercel-Artefaktnachweis20Prüfungen grün. Reiner Quellanschluss unverändert; keine neue Migration oder erneute Stackprüfung nötig. **Echter KI-Flow bleibt am abgelehnten Anbieterzugang offen**. Keine eigene Veröffentlichung/Commit/Push, keine laufenden eigenen Server/Browser/Supabaseprozesse. Backendarbeit nach diesem Bericht beendet; nächste Änderung nur nach konkretem neuen Livebefund.

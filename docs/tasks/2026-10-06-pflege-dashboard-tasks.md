@@ -142,3 +142,8 @@ Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .giti
 - [x] Alltagssprachlichen Dialog mit 15 Beispielanfragen in fünf Themen geliefert und unabhängig geprüft; Auswahl nur als bearbeitbarer Entwurf.
 - [ ] Bewusst gespeicherte Anmeldung, Wiederaufnahme und echtes Abmelden prüfen; kein Passwort speichern.
 - [ ] Unabhängige Live-Browserprüfung mit vorhandenem Nutzerkonto: echte DeepSeek-Antwort, Datenbezug, Verlauf/Neuladen und beide Themes.
+
+- [x] Tatsächlicher Nutzerlogin und Wiederaufnahme nach Neuladen bestanden, aktive gespeicherte Sitzung mit 30 Tagen bestätigt; kein Passwort gespeichert.
+- [x] Vorlagen live: 5×3 Auswahlmöglichkeiten, Entwurf erhalten, kein automatisches Senden.
+- [x] Echten Providerfehler eingegrenzt: DeepSeek weist Vercel-Schlüssel mit HTTP401 ab. Sichere Diagnose veröffentlicht (`f489365`).
+- [ ] Gültigen Schlüssel durch Nutzer geschützt in Vercel ersetzen, danach reale Antwort/Folgefrage/Verlauf abnehmen.
