@@ -187,48 +187,158 @@ export class OpenAIProvider implements Provider {
   }
 }
 
+export type DeepSeekDiagnostic = {
+  reason:
+    | "HTTP_REJECTED"
+    | "RESPONSE_SHAPE"
+    | "NETWORK"
+    | "INVALID_JSON"
+    | "EVENT_ENVELOPE"
+    | "CHOICE_SHAPE"
+    | "USAGE_SHAPE"
+    | "MODEL_MISMATCH"
+    | "FINISH_REASON"
+    | "TOKEN_BOUND"
+    | "TERMINAL_DELTA"
+    | "DELTA_SHAPE"
+    | "CONTENT_SHAPE"
+    | "INCOMPLETE_STREAM"
+    | "UNEXPECTED_REASONING"
+    | "UNEXPECTED_TOOLS"
+    | "EARLY_USAGE";
+  httpStatus?: number;
+  contentType?: "sse" | "json" | "other" | "missing";
+  observedModel?:
+    | "deepseek-flash"
+    | "deepseek-v4-flash"
+    | "deepseek-v4-flash-vision-exp"
+    | "deepseek-v4-pro"
+    | "deepseek-chat"
+    | "deepseek-reasoner"
+    | "other"
+    | "missing";
+  errorCode?:
+    | "invalid_request_error"
+    | "authentication_error"
+    | "insufficient_balance"
+    | "insufficient_quota"
+    | "rate_limit_exceeded"
+    | "model_not_found"
+    | "invalid_api_key"
+    | "other"
+    | "missing";
+};
+function classifiedDeepSeekModel(
+  value: unknown,
+): DeepSeekDiagnostic["observedModel"] {
+  const known = [
+    "deepseek-flash",
+    "deepseek-v4-flash",
+    "deepseek-v4-flash-vision-exp",
+    "deepseek-v4-pro",
+    "deepseek-chat",
+    "deepseek-reasoner",
+  ];
+  return typeof value !== "string"
+    ? "missing"
+    : known.includes(value)
+      ? (value as DeepSeekDiagnostic["observedModel"])
+      : "other";
+}
+function classifiedDeepSeekError(
+  value: unknown,
+): DeepSeekDiagnostic["errorCode"] {
+  if (!value || typeof value !== "object") return "missing";
+  const known = [
+    "invalid_request_error",
+    "authentication_error",
+    "insufficient_balance",
+    "insufficient_quota",
+    "rate_limit_exceeded",
+    "model_not_found",
+    "invalid_api_key",
+  ];
+  const code =
+    (value as Record<string, unknown>).code ??
+    (value as Record<string, unknown>).type;
+  return typeof code === "string" && known.includes(code)
+    ? (code as DeepSeekDiagnostic["errorCode"])
+    : "other";
+}
+
 /** Official DeepSeek Chat Completions SSE; no tools, retries or fallback. */
 export class DeepSeekProvider implements Provider {
   constructor(
     private key: string,
     private fetcher: typeof fetch = fetch,
+    private report: (diagnostic: DeepSeekDiagnostic) => void = () => {},
   ) {}
+  private fail(
+    reason: DeepSeekDiagnostic["reason"],
+    metadata: Omit<DeepSeekDiagnostic, "reason"> = {},
+  ): never {
+    // All fields are locally classified constants; no response text, key, URL or prompt.
+    try {
+      this.report({ reason, ...metadata });
+    } catch {
+      /* Diagnostics must not change finalization. */
+    }
+    throw new AppError("PROVIDER_FAILED", 502);
+  }
   async *stream(
     context: Context,
     signal: AbortSignal,
   ): AsyncGenerator<ProviderPart> {
     if (context.model.provider !== "deepseek" || !this.key)
       throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
-    const response = await this.fetcher(
-      "https://api.deepseek.com/chat/completions",
-      {
-        method: "POST",
-        redirect: "error",
-        signal,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.key}`,
+    let response: Response;
+    try {
+      response = await this.fetcher(
+        "https://api.deepseek.com/chat/completions",
+        {
+          method: "POST",
+          redirect: "error",
+          signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.key}`,
+          },
+          body: JSON.stringify({
+            model: context.model.providerModelId,
+            messages: [
+              { role: "system", content: context.instructions },
+              ...context.input,
+            ],
+            thinking: { type: "disabled" },
+            max_tokens: context.maxOutputTokens,
+            stream: true,
+            stream_options: { include_usage: true },
+          }),
         },
-        body: JSON.stringify({
-          model: context.model.providerModelId,
-          messages: [
-            { role: "system", content: context.instructions },
-            ...context.input,
-          ],
-          thinking: { type: "disabled" },
-          max_tokens: context.maxOutputTokens,
-          stream: true,
-          stream_options: { include_usage: true },
-        }),
-      },
-    );
+      );
+    } catch {
+      if (signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
+      this.fail("NETWORK");
+    }
+    const mime = response.headers.get("content-type")?.toLowerCase();
+    const contentType: NonNullable<DeepSeekDiagnostic["contentType"]> =
+      mime?.includes("text/event-stream")
+        ? "sse"
+        : mime?.includes("application/json")
+          ? "json"
+          : mime
+            ? "other"
+            : "missing";
     if (
       !response.ok ||
       !response.body ||
       !response.headers.get("content-type")?.includes("text/event-stream")
     ) {
       await response.body?.cancel();
-      throw new AppError("PROVIDER_FAILED", 502);
+      this.fail(!response.ok ? "HTTP_REJECTED" : "RESPONSE_SHAPE", {
+        httpStatus: response.status,
+        contentType,
+      });
     }
     let terminal = false,
       done = false,
@@ -243,8 +353,14 @@ export class DeepSeekProvider implements Provider {
       try {
         event = JSON.parse(data);
       } catch {
-        throw new AppError("PROVIDER_FAILED", 502);
+        this.fail("INVALID_JSON");
       }
+      const metadata = {
+        httpStatus: response.status,
+        contentType,
+        observedModel: classifiedDeepSeekModel(event?.model),
+        errorCode: classifiedDeepSeekError(event?.error),
+      };
       if (
         terminal ||
         !event ||
@@ -254,7 +370,7 @@ export class DeepSeekProvider implements Provider {
         event.model.length < 1 ||
         event.model.length > 300
       )
-        throw new AppError("PROVIDER_FAILED", 502);
+        this.fail("EVENT_ENVELOPE", metadata);
       observed ??= event.model;
       consistent &&= observed === event.model;
       if (
@@ -262,7 +378,7 @@ export class DeepSeekProvider implements Provider {
         event.choices.length !== 1 ||
         event.choices[0]?.index !== 0
       )
-        throw new AppError("PROVIDER_FAILED", 502);
+        this.fail("CHOICE_SHAPE", metadata);
       const choice = event.choices[0],
         delta = choice.delta;
       const ending =
@@ -275,7 +391,7 @@ export class DeepSeekProvider implements Provider {
           !Number.isSafeInteger(usage?.completion_tokens) ||
           usage.completion_tokens < 0
         )
-          throw new AppError("PROVIDER_FAILED", 502);
+          this.fail("USAGE_SHAPE", metadata);
         // Even failed/mismatched terminals carry known usage to conservative SQL finalization.
         yield {
           usage: {
@@ -294,7 +410,17 @@ export class DeepSeekProvider implements Provider {
           delta?.tool_calls?.length ||
           delta?.reasoning_content
         )
-          throw new AppError("PROVIDER_FAILED", 502);
+          this.fail(
+            !consistent || event.model !== context.model.providerModelId
+              ? "MODEL_MISMATCH"
+              : choice.finish_reason !== "stop"
+                ? "FINISH_REASON"
+                : usage.prompt_tokens > context.inputTokenBound ||
+                    usage.completion_tokens > context.maxOutputTokens
+                  ? "TOKEN_BOUND"
+                  : "TERMINAL_DELTA",
+            metadata,
+          );
         terminal = true;
       } else {
         if (
@@ -304,14 +430,27 @@ export class DeepSeekProvider implements Provider {
           delta.reasoning_content ||
           event.usage
         )
-          throw new AppError("PROVIDER_FAILED", 502);
+          this.fail(
+            delta?.tool_calls?.length
+              ? "UNEXPECTED_TOOLS"
+              : delta?.reasoning_content
+                ? "UNEXPECTED_REASONING"
+                : event.usage
+                  ? "EARLY_USAGE"
+                  : "DELTA_SHAPE",
+            metadata,
+          );
         if (delta.content !== null && delta.content !== undefined) {
           if (typeof delta.content !== "string")
-            throw new AppError("PROVIDER_FAILED", 502);
+            this.fail("CONTENT_SHAPE", metadata);
           if (delta.content) yield { text: delta.content };
         }
       }
     }
-    if (!terminal || !done) throw new AppError("PROVIDER_FAILED", 502);
+    if (!terminal || !done)
+      this.fail("INCOMPLETE_STREAM", {
+        httpStatus: response.status,
+        contentType,
+      });
   }
 }

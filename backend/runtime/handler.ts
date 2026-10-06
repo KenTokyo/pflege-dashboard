@@ -132,7 +132,15 @@ export function chatHandler(deps: Dependencies) {
       const provider =
         deps.provider ??
         (context.model.provider === "deepseek"
-          ? new DeepSeekProvider(deepseekKey ?? "")
+          ? new DeepSeekProvider(deepseekKey ?? "", fetch, (diagnostic) => {
+              console.warn(
+                JSON.stringify({
+                  component: "deepseek_provider",
+                  requestId: id,
+                  ...diagnostic,
+                }),
+              );
+            })
           : new OpenAIProvider(key ?? ""));
       const controller = new AbortController();
       let cancelled = false;

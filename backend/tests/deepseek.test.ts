@@ -224,3 +224,126 @@ describe("DeepSeek real adapter with synthetic transport only", () => {
     expect(cancelled).toBe(true);
   });
 });
+
+describe("safe real-adapter diagnostics without provider response content", () => {
+  it.each([400, 401, 402, 422, 429, 500, 503])(
+    "records only fixed metadata for HTTP %s",
+    async (status) => {
+      const secret = "fixture-private-key-and-response-content";
+      const report = vi.fn();
+      const provider = new DeepSeekProvider(
+        secret,
+        vi.fn(
+          async () =>
+            new Response(
+              JSON.stringify({ error: { message: secret, code: secret } }),
+              {
+                status,
+                headers: {
+                  "Content-Type": "application/json; secret=" + secret,
+                },
+              },
+            ),
+        ) as typeof fetch,
+        report,
+      );
+      await expect(collect(provider)).rejects.toMatchObject({
+        code: "PROVIDER_FAILED",
+      });
+      expect(report).toHaveBeenCalledExactlyOnceWith({
+        reason: "HTTP_REJECTED",
+        httpStatus: status,
+        contentType: "json",
+      });
+      expect(JSON.stringify(report.mock.calls)).not.toContain(secret);
+    },
+  );
+  it("untrusted provider metadata never becomes diagnostic text", async () => {
+    const secret = "fixture-private-value";
+    const report = vi.fn();
+    const x = mock([
+      {
+        model: secret,
+        error: { code: secret, type: secret, message: secret },
+        choices: [],
+      },
+    ]);
+    const provider = new DeepSeekProvider(
+      secret,
+      x.fetcher as typeof fetch,
+      report,
+    );
+    await expect(collect(provider)).rejects.toMatchObject({
+      code: "PROVIDER_FAILED",
+    });
+    expect(report).toHaveBeenCalledExactlyOnceWith({
+      reason: "EVENT_ENVELOPE",
+      httpStatus: 200,
+      contentType: "sse",
+      observedModel: "other",
+      errorCode: "other",
+    });
+    expect(JSON.stringify(report.mock.calls)).not.toContain(secret);
+  });
+  it("known public upstream error is allowlisted, message is discarded", async () => {
+    const report = vi.fn();
+    const x = mock([
+      {
+        model: "deepseek-flash",
+        error: { code: "invalid_request_error", message: "never log" },
+        choices: [],
+      },
+    ]);
+    await expect(
+      collect(
+        new DeepSeekProvider("synthetic", x.fetcher as typeof fetch, report),
+      ),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+    expect(report.mock.calls[0][0]).toMatchObject({
+      reason: "EVENT_ENVELOPE",
+      errorCode: "invalid_request_error",
+      observedModel: "deepseek-flash",
+    });
+    expect(JSON.stringify(report.mock.calls)).not.toContain("never log");
+  });
+  it("separates request/network failure without printing exception", async () => {
+    const report = vi.fn();
+    const provider = new DeepSeekProvider(
+      "synthetic",
+      vi.fn(async () => {
+        throw new Error("secret request header");
+      }) as typeof fetch,
+      report,
+    );
+    await expect(collect(provider)).rejects.toMatchObject({
+      code: "PROVIDER_FAILED",
+    });
+    expect(report).toHaveBeenCalledExactlyOnceWith({ reason: "NETWORK" });
+  });
+  it("broken diagnostics cannot prevent safe provider failure", async () => {
+    const x = mock([null]);
+    await expect(
+      collect(
+        new DeepSeekProvider("synthetic", x.fetcher as typeof fetch, () => {
+          throw new Error("logging unavailable");
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+  });
+  it("does not diagnose user abort as upstream failure", async () => {
+    const report = vi.fn();
+    const controller = new AbortController();
+    controller.abort();
+    const provider = new DeepSeekProvider(
+      "synthetic",
+      vi.fn(async () => {
+        throw new Error("abort detail");
+      }) as typeof fetch,
+      report,
+    );
+    await expect(
+      provider.stream(context, controller.signal).next(),
+    ).rejects.toMatchObject({ code: "REQUEST_ABORTED" });
+    expect(report).not.toHaveBeenCalled();
+  });
+});
