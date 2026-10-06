@@ -41,6 +41,7 @@ export type AuthSession = {
   userId: string;
   email: string | null;
   accessToken: string;
+  rememberSession?: boolean;
 };
 
 export type AuthChange = 'signed_in' | 'signed_out' | 'refreshed' | 'other';
@@ -57,11 +58,12 @@ export type DetachedSession = {
 };
 
 export interface AuthPort {
-  /** Aktuelle Sitzung (nur im Speicher). Erneuert ein abgelaufenes Token bei Bedarf. */
+  getRememberPreference(): boolean;
+  /** Aktuelle Sitzung (gewählter Browser-Speicher). Erneuert ein abgelaufenes Token bei Bedarf. */
   getSession(): Promise<AuthSession | null>;
   onChange(listener: (session: AuthSession | null, change: AuthChange) => void): () => void;
   /** Wirft AppError mit verständlichem Code. Eine während der Anmeldung abgetrennte Sitzung wird verworfen. */
-  signIn(email: string, password: string): Promise<AuthSession>;
+  signIn(email: string, password: string, remember?: boolean): Promise<AuthSession>;
   /**
    * Lokale Abmeldung, synchron und ohne Netz: Ab sofort hat keine Anfrage mehr ein Token.
    * Gibt die abgetrennte Sitzung für einen optionalen, begrenzten Server-Widerruf zurück.
@@ -104,7 +106,7 @@ export interface ChatPort {
 
 /** Serverseitige App-Sitzung (POST /api/session, eigener Node-Server). Kein Heartbeat, nur bei echter Interaktion. */
 export interface SessionPort {
-  touch(workspaceId: string): Promise<SessionResult>;
+  touch(workspaceId: string, rememberSession?: boolean): Promise<SessionResult>;
   /** Mit `via` gegen eine bereits abgetrennte Sitzung (Abmeldung); `signal` begrenzt die Dauer. */
   end(workspaceId: string, options?: { via?: DetachedSession; signal?: AbortSignal }): Promise<void>;
 }

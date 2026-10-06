@@ -169,6 +169,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
         </div>
       ) : null}
       <Composer
+        personName={people.find((person) => person.id === conv.care_recipient_id)?.name ?? null}
         value={draft}
         onChange={setDraft}
         onSend={send}

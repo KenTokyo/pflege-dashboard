@@ -32,6 +32,7 @@ try {
   };
   for (const [name, args] of [
     ["edge_session", { ...ids, p_action: "end" }],
+    ["edge_session", { ...ids, p_action: "touch", p_remember_session:true }],
     ["edge_chat_check", ids],
     ["edge_chat_reap", ids],
     ["edge_chat_replay", request],

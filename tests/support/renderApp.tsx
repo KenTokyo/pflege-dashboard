@@ -39,6 +39,8 @@ export async function signedInApp(options: FakeOptions = {}, path = '/') {
   const user = userEvent.setup();
   await user.type(await screen.findByLabelText('E-Mail-Adresse'), TEST_EMAIL);
   await user.type(screen.getByLabelText('Passwort'), TEST_PASSWORD);
+  const remember = screen.getByLabelText<HTMLInputElement>('Anmeldung auf diesem Gerät speichern');
+  if (remember.checked !== (options.rememberSession ?? false)) await user.click(remember);
   await user.click(screen.getByRole('button', { name: 'Anmelden' }));
   return { fake, queryClient, history, user, ...c };
 }

@@ -69,7 +69,7 @@ const upstream = createHttpServer((req, res) => {
         return;
       }
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ expiresAt: '2026-10-06T20:00:00Z', idleExpiresAt: '2026-10-06T12:15:00Z' }));
+      res.end(JSON.stringify({ workspaceId: WS, sessionPolicy: 'standard', expiresAt: '2026-10-06T20:00:00Z', idleExpiresAt: '2026-10-06T12:15:00Z', inactivitySeconds: 900, timeboxSeconds: 28800 }));
       return;
     }
     if (req.url === '/api/chat-stream' && req.method === 'POST') {

@@ -101,23 +101,27 @@ const RULES = [
   [/refetchInterval/, 'Abfrage-Polling'],
   [/new\s+EventSource/, 'EventSource (Token in URL)'],
   [/dangerouslySetInnerHTML/, 'ungefiltertes HTML'],
-  [/sessionStorage|indexedDB/, 'dauerhafter Speicher außer Theme'],
+  [/indexedDB/, 'unfreigegebener dauerhafter Speicher'],
   [/console\.(log|debug|info)\(/, 'Konsolenausgabe'],
   [/from ['"][./]*tests\//, 'Import aus tests/'],
   [/service_role|sb_secret_|OPENAI_API_KEY|SUPABASE_DB_PASSWORD|DATABASE_URL/, 'Server-Geheimnisname'],
-  [/persistSession:\s*true|autoRefreshToken:\s*true/, 'dauerhafte Sitzung/Hintergrund-Refresh'],
+  [/autoRefreshToken:\s*true/, 'automatischer Hintergrund-Refresh'],
   [/functions\/v1|\.functions\b/, 'Edge-Function-Aufruf (Nutzerkorrektur: nur eigener /api-Server)'],
 ];
 for (const f of src) {
   const s = read(f);
   for (const [re, label] of RULES) if (re.test(s)) problems.push(`${label} in ${f}`);
-  if (/localStorage/.test(s) && !/ThemeProvider\.tsx$/.test(f)) problems.push(`localStorage außerhalb des Themes in ${f}`);
+  const authStorage = f === 'src/auth/sessionStorage.ts';
+  if (/localStorage/.test(s) && !/ThemeProvider\.tsx$/.test(f) && !authStorage) problems.push(`localStorage außerhalb von Theme/Anmeldung in ${f}`);
+  if (/sessionStorage/.test(s) && !authStorage && f !== 'src/services/supabaseBackend.ts') problems.push(`sessionStorage außerhalb des Anmeldespeichers in ${f}`);
+  if (/persistSession:\s*true/.test(s) && f !== 'src/services/supabaseBackend.ts') problems.push(`persistSession außerhalb des Auth-Adapters in ${f}`);
   const lines = s.split('\n').length;
   if (lines > 1200) problems.push(`${f} hat ${lines} Zeilen (> 1200)`);
   // Vertrag: Abfragen nie bei Fokus/Wiederverbindung im Hintergrund nachladen.
 }
 if (!/refetchOnWindowFocus:\s*false/.test(read('src/data/queries.ts'))) problems.push('refetchOnWindowFocus nicht abgeschaltet');
-if (!/persistSession:\s*false/.test(read('src/services/supabaseBackend.ts'))) problems.push('persistSession:false fehlt');
+const authAdapter = read('src/services/supabaseBackend.ts');
+if (!/persistSession:\s*true, storage: saved\.storage, storageKey: saved\.storageKey, autoRefreshToken:\s*false/.test(authAdapter)) problems.push('Expliziter Anmeldespeicher ohne Hintergrund-Refresh fehlt');
 // App-Server nur gleicher Ursprung: kein fester Host, kein Port im Client.
 if (!/export const API_BASE = '\/api';/.test(read('src/services/api.ts'))) problems.push("API_BASE ist nicht '/api'");
 for (const f of src) if (/127\.0\.0\.1|localhost:\d+/.test(read(f))) problems.push(`fester lokaler Host in ${f}`);

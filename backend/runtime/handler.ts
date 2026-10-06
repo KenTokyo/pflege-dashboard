@@ -35,7 +35,12 @@ export function sessionHandler(deps: Dependencies) {
         !uuid(data.workspaceId) ||
         typeof data.action !== "string" ||
         !["touch", "end"].includes(data.action) ||
-        Object.keys(data).some((k) => !["workspaceId", "action"].includes(k))
+        (Object.hasOwn(data, "rememberSession") &&
+          (data.action !== "touch" ||
+            typeof data.rememberSession !== "boolean")) ||
+        Object.keys(data).some(
+          (k) => !["workspaceId", "action", "rememberSession"].includes(k),
+        )
       )
         throw new AppError("VALIDATION_FAILED", 400);
       const result = await deps.platform.rpc(
@@ -45,6 +50,9 @@ export function sessionHandler(deps: Dependencies) {
           p_user_id: actor.userId,
           p_session_id: actor.sessionId,
           p_action: data.action,
+          ...(data.action === "touch"
+            ? { p_remember_session: data.rememberSession ?? false }
+            : {}),
         },
         request.signal,
       );

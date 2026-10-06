@@ -103,21 +103,20 @@ try {
     [w, system],
   );
   await owner.query("commit");
-  // Discover exact test reservation without retaining a request or increasing the actual demo budget.
-  await owner.query("begin");
-  const max =
-    (await prepare(owner, uidA, chatA, requestA)).rows[0].value.context
-      .maximumCostMicrousd;
-  await owner.query("rollback");
-  await owner.query(
-    "update public.workspace_budgets set monthly_cap_microusd=$1 where workspace_id=$2",
-    [max, w],
-  );
   stage = "budget-race";
   await a.query("begin");
   await b.query("begin");
   const first = (await prepare(a, uidA, chatA, requestA)).rows[0].value;
   equal(first.replayed, false);
+  // Use the winning request's actual immutable snapshot. A separate calibration
+  // transaction has another clock string length and can differ by a micro-USD.
+  // Only this synthetic fixture workspace is configured, under the already-held
+  // budget row lock, before the competing transaction can observe its budget.
+  const max = first.context.maximumCostMicrousd;
+  await a.query(
+    "update public.workspace_budgets set monthly_cap_microusd=$1 where workspace_id=$2",
+    [max,w],
+  );
   const second = prepare(b, uidB, chatB, requestB).then(
     (value) => ({ value }),
     (error) => ({ error }),
@@ -127,6 +126,7 @@ try {
   const loser = await second;
   equal(loser.error?.message, "BUDGET_EXCEEDED");
   await b.query("rollback");
+  equal(Number((await owner.query("select monthly_cap_microusd from public.workspace_budgets where workspace_id=$1",[w])).rows[0].monthly_cap_microusd),max);
   equal(
     (await owner.query(
       "select count(*)::int as n from public.chat_requests where workspace_id=$1",

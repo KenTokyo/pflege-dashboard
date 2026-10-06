@@ -16,6 +16,8 @@ const cli = path.join(backend, 'node_modules', '.bin', 'supabase');
 const action = process.argv[2];
 const runtimeOnly = process.argv.includes('--runtime-only');
 const phase1Base = process.argv.includes('--phase1-base');
+const sessionBase = process.argv.includes('--session-base');
+if(sessionBase && !['start','reset'].includes(action)) throw new Error('--session-base gilt nur für den gezielten Zehn-zu-elf-Upgradeprüflauf.');
 if (phase1Base && !['start','reset'].includes(action)) throw new Error('--phase1-base gilt nur für den gezielten Acht-zu-zehn-Upgradeprüflauf.');
 const actions = {
   start: ['start', '--runtime', 'native', '--exclude', 'realtime,studio,mail,analytics,pooler,functions'],
@@ -39,9 +41,10 @@ for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests']) {
 }
 // Preserve all real source files; only the isolated test mirror uses the historical eight.
 if (phase1Base) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
-  if (['20261006160000_deepseek_provider.sql','20261006161000_deepseek_demo_cap.sql'].includes(name))
+  if (name >= '20261006160000')
     await rm(path.join(mirror,'supabase/migrations',name));
 }
+if (sessionBase) await rm(path.join(mirror,'supabase/migrations/20261006162000_remember_session_clock.sql'));
 // Retire only the owned old mirror; no Edge runtime participates in the Node product.
 await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});
 const config = await readFile(path.join(mirror, 'supabase', 'config.toml'), 'utf8');

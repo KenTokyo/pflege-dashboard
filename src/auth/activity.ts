@@ -29,6 +29,8 @@ const MAX_DELAY = 2_147_483_647;
 export class ActivityTracker {
   private readonly o: ActivityOptions;
   private lastActivity = 0;
+  private idleMs: number;
+  private idleExpiresAt = Number.POSITIVE_INFINITY;
   private lastTouch = Number.NEGATIVE_INFINITY;
   private touchInFlight = false;
   private touchPending = false;
@@ -39,6 +41,7 @@ export class ActivityTracker {
 
   constructor(options: ActivityOptions) {
     this.o = options;
+    this.idleMs = options.idleMs;
   }
 
   /** Nach erfolgreicher Anmeldung: Startzeit setzen und sofort einmal beim Server melden. */
@@ -46,7 +49,7 @@ export class ActivityTracker {
     if (this.running) return;
     this.running = true;
     this.lastActivity = this.o.clock.now();
-    this.armIdle(this.o.idleMs);
+    this.armIdle(this.idleMs);
     this.sendTouch();
   }
 
@@ -66,7 +69,7 @@ export class ActivityTracker {
     if (!this.running) return;
     const now = this.o.clock.now();
     // Eine überfällige Sitzung wird durch Interaktion nicht wiederbelebt.
-    if (now - this.lastActivity >= this.o.idleMs) {
+    if (this.idleRemaining(now) <= 0) {
       this.expire();
       return;
     }
@@ -88,7 +91,18 @@ export class ActivityTracker {
   /** Beim Zurückkehren in den sichtbaren Tab: Hintergrund-Timer können gedrosselt gewesen sein. */
   checkNow(): void {
     if (!this.running) return;
-    if (this.o.clock.now() - this.lastActivity >= this.o.idleMs) this.expire();
+    if (this.idleRemaining(this.o.clock.now()) <= 0) this.expire();
+  }
+
+  /** Erst nach gültiger Serverantwort anwenden, niemals aus einer lokalen Merken-Auswahl. */
+  setIdleTimeout(idleMs: number, idleExpiresAt?: number): void {
+    if (!Number.isFinite(idleMs) || idleMs <= 0 || !this.running) return;
+    this.idleMs = idleMs;
+    if (idleExpiresAt !== undefined && Number.isFinite(idleExpiresAt)) this.idleExpiresAt = idleExpiresAt;
+    if (this.idleTimer !== null) this.o.clock.clearTimeout(this.idleTimer);
+    const remaining = this.idleRemaining(this.o.clock.now());
+    if (remaining <= 0) this.expire();
+    else this.armIdle(remaining);
   }
 
   setTimebox(expiresAt: number | null): void {
@@ -118,14 +132,18 @@ export class ActivityTracker {
       });
   }
 
+  private idleRemaining(now: number): number {
+    return Math.min(this.lastActivity + this.idleMs, this.idleExpiresAt) - now;
+  }
+
   private armIdle(delay: number): void {
     this.idleTimer = this.o.clock.setTimeout(() => {
       this.idleTimer = null;
       if (!this.running) return;
-      const remaining = this.lastActivity + this.o.idleMs - this.o.clock.now();
+      const remaining = this.idleRemaining(this.o.clock.now());
       if (remaining <= 0) this.expire();
       else this.armIdle(remaining);
-    }, delay);
+    }, Math.min(delay, MAX_DELAY));
   }
 
   private expire(): void {

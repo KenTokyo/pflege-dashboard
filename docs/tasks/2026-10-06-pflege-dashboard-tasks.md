@@ -135,3 +135,10 @@ Ziel: echter Login und DeepSeek-Chat auf pflege-dashboard-puce.vercel.app.
 - [ ] Schlussbericht mit tatsächlich erreichten Nachweisen und verbleibenden Grenzen.
 
 Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .gitignore-Änderung erhalten.
+
+## Autonome Nacharbeit und Vorführbarkeit
+
+- [x] Vercel-Laufzeitfehler ERR_MODULE_NOT_FOUND mit echtem Paketnachweis behoben und live mit erwarteten HTTP-Antworten geprüft.
+- [x] Alltagssprachlichen Dialog mit 15 Beispielanfragen in fünf Themen geliefert und unabhängig geprüft; Auswahl nur als bearbeitbarer Entwurf.
+- [ ] Bewusst gespeicherte Anmeldung, Wiederaufnahme und echtes Abmelden prüfen; kein Passwort speichern.
+- [ ] Unabhängige Live-Browserprüfung mit vorhandenem Nutzerkonto: echte DeepSeek-Antwort, Datenbezug, Verlauf/Neuladen und beide Themes.

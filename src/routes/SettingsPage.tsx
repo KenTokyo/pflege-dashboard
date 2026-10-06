@@ -241,11 +241,11 @@ export function SettingsPage() {
             <div className="set-row">
               <div>
                 <strong>Automatische Abmeldung</strong>
-                <span className="small muted">Nach 15 Minuten ohne Aktivität, spätestens nach 8 Stunden. Die Anmeldung wird nicht gespeichert.</span>
+                <span className="small muted">{serverSession.state === 'active' && serverSession.sessionPolicy === 'remembered' ? 'Auf diesem Gerät bleibt die Anmeldung bis zu 30 Tage gespeichert. Abmelden entfernt sie sofort.' : 'Ohne gespeicherte Anmeldung: nach 15 Minuten ohne Aktivität, spätestens nach 8 Stunden.'}</span>
                 <span className="mt-1 flex items-center gap-1.5 small muted">
                   <Clock className="i" size={14} aria-hidden="true" />
                   {serverSession.state === 'active'
-                    ? `Serverseitige Sitzung aktiv bis spätestens ${formatTime(serverSession.expiresAt)} Uhr.`
+                    ? `Zugang gültig bis spätestens ${formatDate(serverSession.expiresAt)} um ${formatTime(serverSession.expiresAt)} Uhr.`
                     : serverSession.state === 'unavailable'
                       ? `Serverseitige Sitzungsprüfung nicht erreichbar: ${serverSession.error.message}`
                       : 'Serverseitige Sitzung wird geprüft …'}

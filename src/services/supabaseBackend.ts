@@ -1,4 +1,5 @@
 import { createClient, type Session, type SupabaseClient } from '@supabase/supabase-js';
+import { createSessionStorage } from '../auth/sessionStorage';
 import type { BackendDatabase } from '../../types/rpc';
 import type { PublicConfig } from '../lib/env';
 import { AppError, fromDbError } from './errors';
@@ -7,9 +8,9 @@ import type { AuthChange, AuthSession, Backend, CareRecipient, DataPort, Workspa
 
 type Client = SupabaseClient<BackendDatabase>;
 
-function toSession(session: Session | null): AuthSession | null {
+function toSession(session: Session | null, rememberSession = false): AuthSession | null {
   if (!session) return null;
-  return { userId: session.user.id, email: session.user.email ?? null, accessToken: session.access_token };
+  return { userId: session.user.id, email: session.user.email ?? null, accessToken: session.access_token, rememberSession };
 }
 
 function must<T>(result: { data: T; error: { code?: string; message?: string } | null }): NonNullable<T> {
@@ -77,16 +78,19 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
   const listeners = new Set<(session: AuthSession | null, change: AuthChange) => void>();
   const emit = (session: AuthSession | null, change: AuthChange) => listeners.forEach((l) => l(session, change));
 
-  // Sitzung nur im flüchtigen Speicher, kein automatischer Hintergrund-Refresh (kein Timer im Leerlauf).
+  const stores = new WeakMap<Client, ReturnType<typeof createSessionStorage>>();
+  // Wiederaufnahme aus dem gewählten Browser-Speicher; kein Refresh-Timer im Leerlauf.
   // getSession() erneuert ein ablaufendes Token bei der nächsten echten Anfrage.
   const make = (): Client => {
+    const saved = createSessionStorage(config.supabaseUrl);
     const client = createClient<BackendDatabase>(config.supabaseUrl, config.publishableKey, {
-      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      auth: { persistSession: true, storage: saved.storage, storageKey: saved.storageKey, autoRefreshToken: false, detectSessionInUrl: false },
     });
+    stores.set(client, saved);
     client.auth.onAuthStateChange((event, session) => {
       if (client !== current) return;
-      if (event === 'SIGNED_OUT') emit(null, 'signed_out');
-      else if (event === 'TOKEN_REFRESHED') emit(toSession(session), 'refreshed');
+      if (event === 'SIGNED_OUT' && saved.storage.getItem(saved.storageKey) === null) emit(null, 'signed_out');
+      else if (event === 'TOKEN_REFRESHED') emit(toSession(session, saved.isRemembered()), 'refreshed');
     });
     return client;
   };
@@ -96,7 +100,7 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
   const getSession = async (): Promise<AuthSession | null> => {
     const { data, error } = await current.auth.getSession();
     if (error) return null;
-    return toSession(data.session);
+    return toSession(data.session, stores.get(current)?.isRemembered());
   };
   const token = async () => (await getSession())?.accessToken ?? null;
 
@@ -311,13 +315,15 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
 
   return {
     auth: {
+      getRememberPreference: () => stores.get(current)?.preferredRemember() ?? true,
       getSession,
       onChange(listener) {
         listeners.add(listener);
         return () => listeners.delete(listener);
       },
-      async signIn(email, password) {
+      async signIn(email, password, remember = false) {
         const client = current;
+        stores.get(client)?.remember(remember);
         let result: Awaited<ReturnType<Client['auth']['signInWithPassword']>>;
         try {
           result = await client.auth.signInWithPassword({ email, password });
@@ -326,7 +332,7 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
         }
         // Während der Anmeldung lokal abgemeldet (oder neu begonnen): Ergebnis nie übernehmen, Sitzung widerrufen.
         if (client !== current) {
-          if (result.data.session) void client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+          if (result.data.session) void client.auth.dispose().then(() => client.auth.signOut({ scope: 'local' })).catch(() => undefined);
           throw new AppError('AUTH_REQUIRED');
         }
         const { data: auth, error } = result;
@@ -336,7 +342,7 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
           if (error.name === 'AuthRetryableFetchError' || !error.status) throw new AppError('NETWORK');
           throw new AppError('INTERNAL_ERROR');
         }
-        const session = toSession(auth.session);
+        const session = toSession(auth.session, remember);
         if (!session) throw new AppError('INVALID_CREDENTIALS');
         emit(session, 'signed_in');
         return session;
@@ -345,6 +351,9 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
         // Sofort einen leeren Client einsetzen: Daten, Chat und Touch haben ab jetzt kein Token mehr.
         // Der alte Client lebt nur noch für den begrenzten Widerruf; seine Ereignisse werden ignoriert.
         const previous = current;
+        stores.get(previous)?.detach();
+        // Broadcast und Listener vor einem späten Widerruf schließen.
+        const disposed = previous.auth.dispose();
         current = make();
         return {
           getToken: async () => {
@@ -352,6 +361,7 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
             return data.session?.access_token ?? null;
           },
           revoke: async () => {
+            await disposed;
             await previous.auth.signOut({ scope: 'local' });
           },
         };

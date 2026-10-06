@@ -1,5 +1,9 @@
 import { AppError } from "./errors.js";
 export type Context = {
+  // New snapshots include trusted DB time; historical completed replays may predate it.
+  serverNow?: string;
+  serverDate?: string;
+  serverTimeZone?: "Europe/Berlin";
   model: {
     registryId: string;
     provider: "openai" | "deepseek";

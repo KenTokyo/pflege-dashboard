@@ -134,3 +134,26 @@ describe('ActivityTracker', () => {
     expect(s.pending()).toBe(0);
   });
 });
+
+describe('ActivityTracker: bestätigte lange Sitzung', () => {
+  it('respektiert einen früheren tatsächlichen Ablauf des Servers', async () => {
+    const s = setup();
+    s.tracker.start();
+    s.tracker.setIdleTimeout(30 * 24 * 60 * MIN, s.clock.now() + 5 * MIN);
+    await s.advance(5 * MIN);
+    expect(s.onIdle).toHaveBeenCalledTimes(1);
+    expect(s.pending()).toBe(0);
+  });
+  it('übernimmt 30 Tage erst aus der Serverantwort und begrenzt Browser-Timer korrekt', async () => {
+    const s = setup();
+    s.tracker.start();
+    const duration = 30 * 24 * 60 * MIN;
+    s.tracker.setIdleTimeout(duration);
+    await s.advance(16 * MIN);
+    expect(s.onIdle).not.toHaveBeenCalled();
+    await s.advance(duration - 16 * MIN);
+    expect(s.onIdle).toHaveBeenCalledTimes(1);
+    expect(s.touch).toHaveBeenCalledTimes(1);
+    expect(s.pending()).toBe(0);
+  });
+});

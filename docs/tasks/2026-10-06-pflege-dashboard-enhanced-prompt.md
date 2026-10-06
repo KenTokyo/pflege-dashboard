@@ -115,3 +115,19 @@ Original: „ersmtal keine limits bei deepseek“. Die vorherige 5-USD-Grenze is
 ### Vorrangige Git-Korrektur
 
 Original: „ja bitte!“ und „nein die regal niemals pushen soll raus“. Die Push-Sperre vollständig aus den aktiven Projektvorgaben entfernen. Geprüfte Änderungen dürfen im Rahmen des beauftragten Projekts hochgeladen und über Vercel bereitgestellt werden, ohne wiederholt nachzufragen.
+
+### Autonome Fertigstellung und Anfragevorlagen — direkte Nutzerangaben
+
+„bugs gleichzeitig beheben autonom aribeten, bis alles funktioniert, auch prompt vorlagen bereitstellen, also ein dialog was man alles machen kann, wie jemand was schreiben würde, auch soriteren in afragen machen unsw alltagssprache“
+
+„also ab jetzt tests machen, und behebne alles, du kannst auch ein gpt 6.1 sol agent shciekn für backend aufgaben also 2 max parallel auch ein frontend agent evtl max 3 parallel und einer der bwrwoser testet und du spielst orchestrierer also autonom alles beheben“
+
+„aut login bitte das nervt ja und ein login button für dich einbauen bitte, das muss alles laufen“
+
+„bitte im live system auch am ende testen mit dem erstellen account“
+
+„das muss bis morgen laufen, ich möchte nicht mehr soviel mitmachen bitte arbeite so gut es geht autonom“
+
+„ja soll ich dir das pw geben, du musst dich ja eingloggen oder ich logge mich ein aber bitte. abspeichern das login, damit ich mich nicht einloggen muss jedes mal“
+
+Arbeitsauftrag: Backend behebt Vercel-Paketfehler, Frontend liefert Alltagshilfen und bewusst gespeicherte Supabase-Sitzung ohne Passwortspeicherung, unabhängiger Browserprüfer prüft anschließend echte veröffentlichte Anmeldung/Chat/Verlauf/Vorlagen in beiden Themes. Nutzer meldet sich einmal selbst an; kein Passwort im Chat. Höchstens drei Arbeitsagenten, keine überschneidenden Dateiänderungen.

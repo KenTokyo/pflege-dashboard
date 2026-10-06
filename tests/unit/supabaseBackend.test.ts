@@ -263,3 +263,54 @@ describe('Supabase-Adapter: Sitzungswechsel und Abbruch beim seitenweisen Laden'
     expect(net.seen).toHaveLength(1);
   });
 });
+
+function browserStorage() {
+  const make = () => {
+    const values = new Map<string, string>();
+    return {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+      removeItem: (key: string) => { values.delete(key); },
+      clear: () => values.clear(),
+      values,
+    };
+  };
+  const localStorage = make();
+  const sessionStorage = make();
+  vi.stubGlobal('window', { localStorage, sessionStorage });
+  return { localStorage, sessionStorage };
+}
+
+describe('Supabase-Adapter: Wiederaufnahme der gespeicherten Anmeldung', () => {
+  it('neuer Client übernimmt gültige gemerkte Anmeldung ohne Passwortaufruf; Logout löscht sie sofort', async () => {
+    const browser = browserStorage();
+    const net = stubFetch();
+    const original = createSupabaseBackend(config);
+    const pending = original.auth.signIn('pruefung@beispiel.invalid', 'nur-synthetisch', true);
+    await vi.waitFor(() => expect(net.pending).toHaveLength(1));
+    net.answer('/auth/v1/token', fakeSession());
+    await pending;
+    browser.sessionStorage.clear();
+    const reopened = createSupabaseBackend(config);
+    expect(await reopened.auth.getSession()).toMatchObject({ accessToken: 'synthetisch-access', rememberSession: true });
+    expect(net.calls).toHaveLength(1);
+    expect([...browser.localStorage.values.values()].join(' ')).not.toContain('nur-synthetisch');
+    reopened.auth.detach();
+    expect(await createSupabaseBackend(config).auth.getSession()).toBeNull();
+  });
+
+  it('ungültiges Refresh-Token wird beim Wiederöffnen verworfen', async () => {
+    const browser = browserStorage();
+    const net = stubFetch();
+    const stored = fakeSession();
+    stored.expires_at = Math.floor(Date.now() / 1000) - 10;
+    browser.localStorage.setItem('pflege-auth-beispiel.invalid:remember', 'true');
+    browser.localStorage.setItem('pflege-auth-beispiel.invalid:session', JSON.stringify(stored));
+    const reopened = createSupabaseBackend(config);
+    const pending = reopened.auth.getSession();
+    await vi.waitFor(() => expect(net.pending).toHaveLength(1));
+    net.answer('/auth/v1/token', { code: 'refresh_token_not_found', message: 'Invalid Refresh Token' }, 400);
+    expect(await pending).toBeNull();
+    expect(browser.localStorage.getItem('pflege-auth-beispiel.invalid:session')).toBeNull();
+  });
+});

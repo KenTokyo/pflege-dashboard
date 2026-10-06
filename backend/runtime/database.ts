@@ -51,7 +51,17 @@ const specs: Record<string, [string, string, Validator][]> = Object.freeze({
 });
 export function rpcQuery(name: string, args: Record<string, unknown>) {
   if (!Object.hasOwn(specs, name)) throw new AppError("VALIDATION_FAILED", 400);
-  const spec = specs[name];
+  const spec =
+    name === "edge_session" && Object.hasOwn(args, "p_remember_session")
+      ? [
+          ...specs[name],
+          [
+            "p_remember_session",
+            "boolean",
+            (v: unknown) => typeof v === "boolean",
+          ] as [string, string, Validator],
+        ]
+      : specs[name];
   if (
     Object.keys(args).length !== spec.length ||
     spec.some(
@@ -148,6 +158,7 @@ export function createDatabase(
       await client.query("SET LOCAL ROLE pflege_backend");
       const result = await client.query(`SELECT current_user AS role,
         has_function_privilege(current_user,'public.edge_session(uuid,uuid,uuid,text)','EXECUTE') AS session,
+        has_function_privilege(current_user,'public.edge_session(uuid,uuid,uuid,text,boolean)','EXECUTE') AS remembered,
         has_function_privilege(current_user,'public.edge_chat_prepare(uuid,uuid,uuid,uuid,uuid,text)','EXECUTE') AS chat,
         NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=current_user AND (rolcanlogin OR rolsuper OR rolinherit OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication)) AS limited,
         NOT has_schema_privilege(current_user,'private','USAGE') AND NOT has_schema_privilege(current_user,'auth','USAGE') AND NOT has_schema_privilege(current_user,'storage','USAGE') AS private_denied,
@@ -156,6 +167,7 @@ export function createDatabase(
       if (
         proof?.role !== "pflege_backend" ||
         !proof.session ||
+        !proof.remembered ||
         !proof.chat ||
         !proof.limited ||
         !proof.private_denied ||

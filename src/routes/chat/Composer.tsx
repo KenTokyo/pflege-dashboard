@@ -1,10 +1,14 @@
-import { ArrowUp, ShieldCheck, Square } from 'lucide-react';
-import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type RefObject } from 'react';
+import { ArrowUp, MessageSquareText, ShieldCheck, Square } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
+
+import { QuestionExamplesDialog } from './QuestionExamplesDialog';
+import { appendQuestion } from './questionExamples';
 
 export const MAX_MESSAGE = 8000;
 
 type Props = {
   value: string;
+  personName?: string | null;
   onChange: (value: string) => void;
   onSend: () => void;
   onStop: () => void;
@@ -14,7 +18,8 @@ type Props = {
   inputRef?: RefObject<HTMLTextAreaElement | null>;
 };
 
-export function Composer({ value, onChange, onSend, onStop, streaming, blockedReason, inputRef }: Props) {
+export function Composer({ value, onChange, onSend, onStop, streaming, blockedReason, inputRef, personName = null }: Props) {
+  const [examplesOpen, setExamplesOpen] = useState(false);
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = inputRef ?? localRef;
   const tooLong = value.length > MAX_MESSAGE;
@@ -47,6 +52,24 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
 
   return (
     <div className="composer">
+      <div className="composer-examples">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setExamplesOpen(true)}>
+          <MessageSquareText className="i" size={16} aria-hidden="true" />
+          Was kann ich fragen?
+        </button>
+      </div>
+      {examplesOpen ? (
+        <QuestionExamplesDialog
+          personName={personName}
+          hasDraft={Boolean(value.trim())}
+          onClose={() => setExamplesOpen(false)}
+          onChoose={(question) => {
+            onChange(appendQuestion(value, question));
+            setExamplesOpen(false);
+            ref.current?.focus();
+          }}
+        />
+      ) : null}
       {blockedReason ? (
         <p className="note mx-auto mb-2 max-w-[860px]" role="status">
           <ShieldCheck className="i" size={15} aria-hidden="true" />

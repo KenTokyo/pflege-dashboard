@@ -199,3 +199,11 @@ Der Nutzer beauftragt nach dem technischen Node-Abschluss einen vollständigen A
 ## Fortsetzung: Vercel und DeepSeek, 06.10.2026
 
 Der Nutzer verlangt für die Vorführung am 07.10.2026 Login und echten Chat auf seiner bereits veröffentlichten Vercel-Anwendung. Normale Vercel Node Functions übernehmen den bisherigen Node-Weg; Supabase bleibt Auth/DB/Storage, keine Edge Functions. Standardmodell: DeepSeek V4.1 Flash (`deepseek-flash`). Die zunächst gewählten 5 USD sind ausdrücklich durch „ersmtal keine limits bei deepseek“ ersetzt: kein App-Ausgabenlimit. Der Nutzer hat den Demo-Zugang selbst angelegt und den DeepSeek-Key geschützt bei Vercel hinterlegt. Technischer Stand und verbleibendes Online-Gate: `docs/gates/2026-10-06-vercel-demo.md`. Keine vorgezogene Behauptung der Erstellungs-/Export-/Upload-Funktionen aus Phase 2.
+
+## Vorrangige Fortsetzung: gespeicherte Anmeldung und Alltagshilfen
+
+Der Nutzer verlangt am 06.10.2026 autonomes Beheben aller Fehler des Vorführablaufs und die abschließende Prüfung auf dem Live-System mit seinem bestehenden Konto. Höchstens drei Arbeitsagenten gleichzeitig; der Orchestrator führt die Lieferungen zusammen.
+
+Die bisherige Vorgabe ohne Remember-me wird ausdrücklich ersetzt: Anmeldung auf dem eigenen Gerät bewusst speichern und nach Neuladen/erneutem Öffnen wiederaufnehmen, ohne Passwortspeicherung. Normale Sitzung bleibt kurz; die gespeicherte Sitzung wird serverseitig auf höchstens 30 Tage begrenzt und bei Wiederaufnahme geprüft. Abmelden beendet auch diese Sitzung. Ein klarer Demo-Einstieg verwendet den bestehenden Zugang; kein Auth-Bypass und keine neue Kontoanlage.
+
+Im Chat einen Dialog mit nach Alltagsthemen sortierten, natürlich formulierten Beispielanfragen bereitstellen. Auswahl wird als bearbeitbarer Entwurf übernommen, vorhandener Entwurf bleibt erhalten, nichts automatisch senden. Beispiele sollen die tatsächlich vorhandenen Fähigkeiten erklären: vorhandene Personendaten und Aufgaben verstehen/ordnen, Fragen vorbereiten und Texte im Chat formulieren. Keine automatischen Datenänderungen, Exporte oder Versendungen behaupten, solange diese Funktionen nicht implementiert sind.

@@ -171,6 +171,18 @@ describe('Chat-Transport', () => {
 });
 
 describe('Session-Transport', () => {
+  it('sendet bewusste Merken-Auswahl und übernimmt bestätigte Ablaufwerte', async () => {
+    const result = { workspaceId: 'ws', sessionPolicy: 'remembered', expiresAt: '2026-11-05T10:00:00Z', idleExpiresAt: '2026-11-05T10:00:00Z', inactivitySeconds: 2592000, timeboxSeconds: 2592000 };
+    const fetchImpl = vi.fn(() => Promise.resolve(new Response(JSON.stringify(result), { status: 200 })));
+    expect(await createSessionTransport(() => Promise.resolve('jwt'), fetchImpl).touch('ws', true)).toEqual(result);
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(JSON.parse(init.body as string)).toEqual({ workspaceId: 'ws', action: 'touch', rememberSession: true });
+  });
+  it('fremder Workspace oder ungültiger Ablauf wird nicht als aktive Sitzung angezeigt', async () => {
+    const result = { workspaceId: 'fremd', sessionPolicy: 'remembered', expiresAt: 'kein Datum', idleExpiresAt: '2026-11-05T10:00:00Z', inactivitySeconds: 2592000, timeboxSeconds: 2592000 };
+    const fetchImpl = () => Promise.resolve(new Response(JSON.stringify(result), { status: 200 }));
+    await expect(createSessionTransport(() => Promise.resolve('jwt'), fetchImpl).touch('ws', true)).rejects.toMatchObject({ code: 'PROTOCOL' });
+  });
   it('touch prüft die Antwortform', async () => {
     const t = createSessionTransport(() => Promise.resolve('jwt'), () => Promise.resolve(new Response('{}', { status: 200 })));
     await expect(t.touch('ws')).rejects.toMatchObject({ code: 'PROTOCOL' });

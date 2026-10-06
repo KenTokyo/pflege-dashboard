@@ -13,10 +13,8 @@ const reset: UpdateAgentSettingsArgs = {
   p_persona: null,
   p_system_prompt: null,
 };
-const preferences:
-  BackendDatabase["public"]["Functions"]["set_conversation_preferences"][
-    "Args"
-  ] = {
+const preferences: BackendDatabase["public"]["Functions"]["set_conversation_preferences"]["Args"] =
+  {
     p_conversation_id: "fixture",
     p_mode: null,
     p_model_id: null,
@@ -39,8 +37,8 @@ const invalidMode: typeof preferences = {
 };
 void [reset, preferences, invalidCustom, unimplemented, invalidMode];
 
-const create:
-  BackendDatabase["public"]["Functions"]["create_conversation"]["Args"] = {
+const create: BackendDatabase["public"]["Functions"]["create_conversation"]["Args"] =
+  {
     p_workspace_id: "fixture",
     p_title: "Gespräch",
     p_care_recipient_id: null,
@@ -48,8 +46,28 @@ const create:
   };
 void create;
 
-const scalarReturn:
-  BackendDatabase["public"]["Functions"]["create_conversation"]["SetofOptions"][
-    "isSetofReturn"
-  ] = false;
+const scalarReturn: BackendDatabase["public"]["Functions"]["create_conversation"]["SetofOptions"]["isSetofReturn"] = false;
 void scalarReturn;
+
+import type { SessionRequest, SessionResult } from "../../types/phase1.js";
+const rememberRequest: SessionRequest = {
+  workspaceId: "fixture",
+  action: "touch",
+  rememberSession: true,
+};
+// @ts-expect-error end does not change persistence policy
+const invalidEnd: SessionRequest = {
+  workspaceId: "fixture",
+  action: "end",
+  rememberSession: true,
+};
+// @ts-expect-error remembered deadlines must have the actual 30-day values
+const invalidPolicy: SessionResult = {
+  workspaceId: "fixture",
+  expiresAt: "",
+  idleExpiresAt: "",
+  sessionPolicy: "remembered",
+  inactivitySeconds: 900,
+  timeboxSeconds: 28800,
+};
+void [rememberRequest, invalidEnd, invalidPolicy];

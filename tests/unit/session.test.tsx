@@ -42,7 +42,7 @@ describe('Anmeldung und Sitzung', () => {
     await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
     expect(queryClient.getQueryCache().getAll().length).toBeGreaterThan(0);
     act(() => advance(IDLE_MS));
-    expect(await screen.findByText('Sie wurden nach 15 Minuten ohne Aktivität abgemeldet.')).toBeTruthy();
+    expect(await screen.findByText('Ihre Anmeldung ist wegen längerer Inaktivität abgelaufen. Bitte melden Sie sich erneut an.')).toBeTruthy();
     expect(fake.calls.end).toBe(1);
     expect(fake.calls.signOut).toBe(1);
     expect(queryClient.getQueryCache().getAll()).toHaveLength(0);
@@ -97,8 +97,24 @@ describe('Anmeldung und Sitzung', () => {
     await user.keyboard('{Enter}');
     expect(await screen.findByText('Teil')).toBeTruthy();
     act(() => advance(IDLE_MS));
-    expect(await screen.findByText('Sie wurden nach 15 Minuten ohne Aktivität abgemeldet.')).toBeTruthy();
+    expect(await screen.findByText('Ihre Anmeldung ist wegen längerer Inaktivität abgelaufen. Bitte melden Sie sich erneut an.')).toBeTruthy();
     expect(fake.calls.chat).toHaveLength(1);
     expect(screen.queryByText('Teil')).toBeNull();
+  });
+});
+
+
+describe('Bewusst gespeicherte Anmeldung', () => {
+  it('bestätigte lange Sitzung bleibt nach 16 Minuten offen und meldet sich nach manueller Abmeldung ab', async () => {
+    const { fake, user, advance } = await signedInApp({ rememberSession: true });
+    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await waitFor(() => expect(fake.calls.touch).toBe(1));
+    expect((await fake.auth.getSession())?.rememberSession).toBe(true);
+    act(() => advance(16 * 60 * 1000));
+    expect(screen.queryByRole('heading', { name: 'Anmelden' })).toBeNull();
+    await user.click(screen.getAllByRole('button', { name: /Konto/ })[0] as HTMLElement);
+    await user.click(await screen.findByRole('menuitem', { name: 'Abmelden' }));
+    expect(await screen.findByText('Sie wurden abgemeldet.')).toBeTruthy();
+    expect(await fake.auth.getSession()).toBeNull();
   });
 });

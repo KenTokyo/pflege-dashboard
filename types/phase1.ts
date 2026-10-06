@@ -1,4 +1,4 @@
-/** Verbindlicher Anschluss v1.3; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
+/** Verbindlicher Anschluss v1.4; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
 import type { Database } from "./database.types.js";
 export const PHASE1_API = {
   session: "/api/session",
@@ -23,11 +23,18 @@ export type SessionResult = {
   workspaceId: string;
   expiresAt: string;
   idleExpiresAt: string;
-  inactivitySeconds: 900;
-  timeboxSeconds: 28800;
-};
+} & (
+  | { sessionPolicy: "standard"; inactivitySeconds: 900; timeboxSeconds: 28800 }
+  | {
+      sessionPolicy: "remembered";
+      inactivitySeconds: 2592000;
+      timeboxSeconds: 2592000;
+    }
+);
 export type SessionEndResult = { ended: true };
-export type SessionRequest = { workspaceId: string; action: "touch" | "end" };
+export type SessionRequest =
+  | { workspaceId: string; action: "touch"; rememberSession?: boolean }
+  | { workspaceId: string; action: "end"; rememberSession?: never };
 export type ChatRequestV1 = {
   workspaceId: string;
   conversationId: string;

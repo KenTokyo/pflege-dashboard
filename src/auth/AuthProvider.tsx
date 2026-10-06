@@ -16,7 +16,7 @@ export type SignOutReason = 'manual' | 'idle' | 'expired' | 'timebox' | 'forbidd
 
 export type ServerSession =
   | { state: 'pending' }
-  | { state: 'active'; expiresAt: string; idleExpiresAt: string }
+  | { state: 'active'; expiresAt: string; idleExpiresAt: string; sessionPolicy: 'standard' | 'remembered' }
   | { state: 'unavailable'; error: AppError };
 
 /**
@@ -33,7 +33,7 @@ export type AuthState =
 type AuthContextValue = {
   state: AuthState;
   serverSession: ServerSession;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string, remember?: boolean) => Promise<void>;
   /** Lokal sofort und vollständig. Mit `epoch` nur, wenn diese Generation noch aktuell ist. */
   signOut: (reason?: SignOutReason, epoch?: number) => void;
   retryWorkspace: () => void;
@@ -136,7 +136,7 @@ export function AuthProvider({ children, clock = browserClock }: { children: Rea
     [backend, queryClient],
   );
 
-  // Start: Sitzung liegt nur im Speicher, nach einem Neuladen also normalerweise keine.
+  // Gespeicherte Anmeldung wiederaufnehmen; Workspace und Server-Sitzung erneut prüfen.
   useEffect(() => {
     const e = epoch.current;
     void backend.auth.getSession().then(
@@ -165,6 +165,7 @@ export function AuthProvider({ children, clock = browserClock }: { children: Rea
   // Aktivität und Server-Sitzung nur im angemeldeten Zustand und nur für diese Generation.
   const signedInEpoch = state.status === 'signedIn' ? state.epoch : null;
   const workspaceId = state.status === 'signedIn' ? state.workspace.workspace.id : null;
+  const rememberSession = state.status === 'signedIn' && state.session.rememberSession === true;
   useEffect(() => {
     if (!workspaceId || signedInEpoch === null) return;
     const e = signedInEpoch;
@@ -174,9 +175,11 @@ export function AuthProvider({ children, clock = browserClock }: { children: Rea
       clock,
       touch: async () => {
         try {
-          const result = await backend.session.touch(workspaceId);
+          const result = await backend.session.touch(workspaceId, rememberSession);
           if (!isCurrentSession(e)) return null;
-          setServerSession({ state: 'active', expiresAt: result.expiresAt, idleExpiresAt: result.idleExpiresAt });
+          tracker.setIdleTimeout(result.inactivitySeconds * 1000, Date.parse(result.idleExpiresAt));
+          if (!isCurrentSession(e)) return null;
+          setServerSession({ state: 'active', expiresAt: result.expiresAt, idleExpiresAt: result.idleExpiresAt, sessionPolicy: result.sessionPolicy });
           const timebox = Date.parse(result.expiresAt);
           return Number.isFinite(timebox) ? timebox : null;
         } catch (error) {
@@ -202,13 +205,13 @@ export function AuthProvider({ children, clock = browserClock }: { children: Rea
       for (const name of ACTIVITY_EVENTS) document.removeEventListener(name, onActivity, { capture: true });
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [workspaceId, signedInEpoch, backend, clock, endSession, isCurrentSession]);
+  }, [workspaceId, signedInEpoch, backend, clock, endSession, isCurrentSession, rememberSession]);
 
   const signIn = useCallback(
-    async (email: string, password: string) => {
+    async (email: string, password: string, remember = false) => {
       // Neue Generation: ältere, noch laufende Anmelde-/Ladevorgänge zählen nicht mehr.
       const e = ++epoch.current;
-      const session = await backend.auth.signIn(email, password);
+      const session = await backend.auth.signIn(email, password, remember);
       if (!isCurrentSession(e)) throw new AppError('AUTH_REQUIRED');
       await loadWorkspace(session, e);
     },

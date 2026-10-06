@@ -478,10 +478,10 @@
   }
   .dialog::backdrop { background: rgba(10, 8, 6, 0.55); }
   .dialog-inner { display: flex; flex-direction: column; max-height: inherit; }
-  .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .dialog-head { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
   .dialog-head h2 { font-size: 18px; font-weight: 750; }
   .dialog-body { display: flex; flex-direction: column; gap: 14px; padding: 16px 18px; overflow-y: auto; }
-  .dialog-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+  .dialog-foot { flex-shrink: 0; display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
 }
 
 /* ---------- Desktop: feste Arbeitsfläche ---------- */
@@ -597,4 +597,42 @@
 @media (prefers-reduced-motion: reduce) {
   .draw-once .draw-path { stroke-dashoffset: 0; animation: fade-once 150ms ease-out 1 both; opacity: 0; }
   .draw-once .draw-tip { animation: fade-once 150ms ease-out 1 both; }
+}
+
+/* Beispielfragen: gleiche Dialogfläche und Theme-Werte wie das übrige Tagwerk. */
+@layer components {
+  .composer-examples { max-width: 860px; margin: 0 auto 4px; }
+  .composer-examples .btn { min-height: 44px; }
+  .question-dialog { width: min(680px, calc(100vw - 32px)); }
+  .question-dialog .icon-btn { width: 44px; height: 44px; }
+  .question-body { gap: 16px; }
+  .question-context { overflow-wrap: anywhere; }
+  .question-categories { display: flex; flex-wrap: wrap; gap: 6px; }
+  .question-category { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-muted); text-align: left; font-size: 14px; }
+  .question-category:hover { background: var(--surface2); color: var(--text); }
+  .question-category[aria-pressed='true'] { color: var(--accent-text); background: var(--accent-soft); border-color: var(--accent); }
+  .question-list { border: 0; padding: 0; margin: 0; min-width: 0; }
+  .question-option { display: flex; gap: 12px; padding: 14px 12px; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .question-option:first-of-type { border-top: 1px solid var(--border); }
+  .question-option:hover { background: var(--surface2); }
+  .question-option.is-selected { background: var(--accent-soft); }
+  .question-option input { flex-shrink: 0; width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+  .question-option strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .question-option span span { display: block; color: var(--text-muted); font-size: 14px; line-height: 1.5; white-space: pre-line; }
+  .question-foot { align-items: center; justify-content: space-between; }
+  .question-foot .note { flex: 1 1 200px; }
+  .question-foot .btn { min-height: 44px; white-space: normal; }
+}
+@media (max-width: 767px) {
+  .dialog { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0; border: 0; }
+  .dialog-inner { height: 100%; }
+  .dialog-head { padding: max(12px, env(safe-area-inset-top)) 16px 12px; }
+  .dialog-body { flex: 1; min-height: 0; padding: 16px; }
+  .dialog-foot { padding: 12px 16px max(12px, env(safe-area-inset-bottom)); }
+  .question-foot .note, .question-foot .btn { flex-basis: 100%; }
+}
+
+@layer components {
+  .login-remember { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 14px; }
+  .login-remember input { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--accent); }
 }

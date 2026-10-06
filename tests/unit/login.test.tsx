@@ -65,6 +65,6 @@ describe('Anmeldung: Randfälle', () => {
     await user.type(await screen.findByLabelText('E-Mail-Adresse'), `  ${TEST_EMAIL}  `);
     await user.type(screen.getByLabelText('Passwort'), 'falsch');
     await user.keyboard('{Enter}');
-    await waitFor(() => expect(signIn).toHaveBeenCalledWith(TEST_EMAIL, 'falsch'));
+    await waitFor(() => expect(signIn).toHaveBeenCalledWith(TEST_EMAIL, 'falsch', true));
   });
 });

@@ -117,14 +117,24 @@ export function createChatTransport(getToken: TokenSource, fetchImpl: FetchLike 
 
 export function createSessionTransport(getToken: TokenSource, fetchImpl: FetchLike = fetch, base: string = API_BASE): SessionPort {
   return {
-    async touch(workspaceId) {
-      const response = await post(fetchImpl, base, getToken, 'session', { workspaceId, action: 'touch' });
+    async touch(workspaceId, rememberSession) {
+      const response = await post(fetchImpl, base, getToken, 'session', { workspaceId, action: 'touch', ...(rememberSession === undefined ? {} : { rememberSession }) });
       const data: unknown = await response.json().catch(() => null);
+      const result = typeof data === 'object' && data !== null ? data as Record<string, unknown> : null;
       if (
-        typeof data !== 'object' ||
-        data === null ||
-        typeof (data as SessionResult).expiresAt !== 'string' ||
-        typeof (data as SessionResult).idleExpiresAt !== 'string'
+        !result ||
+        result.workspaceId !== workspaceId ||
+        typeof result.expiresAt !== 'string' ||
+        typeof result.idleExpiresAt !== 'string' ||
+        !Number.isFinite(Date.parse(result.expiresAt)) ||
+        !Number.isFinite(Date.parse(result.idleExpiresAt)) ||
+        typeof result.inactivitySeconds !== 'number' ||
+        !Number.isFinite(result.inactivitySeconds) ||
+        result.inactivitySeconds <= 0 ||
+        typeof result.timeboxSeconds !== 'number' ||
+        !Number.isFinite(result.timeboxSeconds) ||
+        result.timeboxSeconds <= 0 ||
+        (result.sessionPolicy !== 'standard' && result.sessionPolicy !== 'remembered')
       ) {
         throw new AppError('PROTOCOL');
       }

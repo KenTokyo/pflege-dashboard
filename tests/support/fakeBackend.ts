@@ -20,6 +20,7 @@ export type ChatScript =
   | { kind: 'cut'; afterChunks: string[] };
 
 export type FakeOptions = SeedOptions & {
+  rememberSession?: boolean;
   /** Verzögerung zwischen synthetischen Stream-Ereignissen (ms). */
   tickMs?: number;
   chat?: (request: ChatRequestV1) => ChatScript;
@@ -134,19 +135,20 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
     touchError: null,
     release: () => releaseHold?.(),
     auth: {
+      getRememberPreference: () => options.rememberSession ?? true,
       getSession: () => Promise.resolve(session),
       onChange(listener) {
         listeners.add(listener);
         return () => listeners.delete(listener);
       },
-      async signIn(email, password) {
+      async signIn(email, password, rememberSession = false) {
         const generation = authGeneration;
         await gate('signIn');
         if (email !== TEST_EMAIL || password !== TEST_PASSWORD) throw new AppError('INVALID_CREDENTIALS');
         // Wie supabaseBackend: während der Anmeldung abgetrennt → Ergebnis verwerfen.
         if (generation !== authGeneration) throw new AppError('AUTH_REQUIRED');
         tokenSerial += 1;
-        session = { userId: TEST_USER_ID, email, accessToken: `synthetisch-${tokenSerial}` };
+        session = { userId: TEST_USER_ID, email, accessToken: `synthetisch-${tokenSerial}`, rememberSession };
         return session;
       },
       detach() {
@@ -164,17 +166,19 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
       },
     },
     session: {
-      async touch(workspaceId) {
+      async touch(workspaceId, rememberSession = false) {
         fake.calls.touch += 1;
         await gate('touch');
         if (fake.touchError) throw new AppError(fake.touchError);
         const t = Date.now();
+        const policy = rememberSession
+          ? { sessionPolicy: 'remembered' as const, inactivitySeconds: 2592000 as const, timeboxSeconds: 2592000 as const }
+          : { sessionPolicy: 'standard' as const, inactivitySeconds: 900 as const, timeboxSeconds: 28800 as const };
         return {
           workspaceId,
-          expiresAt: new Date(t + 28_800_000).toISOString(),
-          idleExpiresAt: new Date(t + 900_000).toISOString(),
-          inactivitySeconds: 900 as const,
-          timeboxSeconds: 28800 as const,
+          ...policy,
+          expiresAt: new Date(t + policy.timeboxSeconds * 1000).toISOString(),
+          idleExpiresAt: new Date(t + policy.inactivitySeconds * 1000).toISOString(),
         };
       },
       async end(_workspaceId, options = {}) {

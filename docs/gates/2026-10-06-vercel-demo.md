@@ -79,3 +79,23 @@ Noch offen: Abnahme der neuen Vercel-Veröffentlichung, nutzerseitiger Login und
 ## Git-Freigabe und Veröffentlichung
 
 Nutzer hat den Upload ausdrücklich bestätigt und anschließend die generelle Push-Sperre aufgehoben. Commit `c94ed1c` erfolgreich nach `origin/main` hochgeladen. Aktive Projektvorgaben und Aufgaben entsprechend bereinigt; Vercel-Abnahme läuft.
+
+## Erster Livefehler und Paketkorrektur
+
+Deployment `v2RynY6GaEdJNyavtzc8sbHrq5mA` aus `c94ed1c` war Vercel Ready, aber alle API-Einstiege lieferten HTTP500. Vercel-Log konkret: ERR_MODULE_NOT_FOUND für backend/runtime/cloud.ts aus api/session.js (ebenso übrige Einstiege). Ready/Build wurde deshalb ausdrücklich nicht als Funktionsnachweis gewertet.
+
+Korrektur `2601b4a`: relative Serverimporte referenzieren ausgelieferte .js-Dateien, API-Compiler konfiguriert. Unabhängig Backend-Typecheck/Build/121Tests und tatsächlicher @vercel/node-Artefaktbau bestanden: 20 Paket-/Antwortprüfungen, alle vier gebauten Einstiege ohne tsx tatsächlich geladen, erwartete HTTP200/401/401/404, keine Env-Dateien verpackt. Prüfspeicher geschlossen/entfernt. Fix getrennt von laufender Frontend-/Remember-Nacharbeit committed und nach main gepusht.
+
+Nach Veröffentlichung von `2601b4a` unabhängig gegen die echte Hauptdomain geprüft: `/api/health` 200 JSON; Session/Chat ohne Bearer401JSON; unbekannteAPI404JSON; fremdeOrigin403JSON; `/anmelden`200HTML. Ein absichtlich ungültiger Bearer erreicht nach Cloud-/DB-Initialisierung die erwartete401AUTH_REQUIRED. Der Paketfehler ist damit tatsächlich live behoben; dies ersetzt weiterhin keinen positiven Nutzer-/KI-Test.
+
+Die gespeicherte Anmeldung und Beispielanfragen sind zusätzliche ausdrückliche Nutzeraufträge. Supabase-Sitzungsdokumentation am06.10.2026 geprüft: https://supabase.com/docs/guides/auth/sessions ; Changelog-Index abgerufen, keine relevante neue Session-API-Brechstufe für diesen Anschluss. Normale und gespeicherte App-Sitzung bleiben voneinander unterschieden; Providerbudget bleibt unbegrenzt gemäß Nutzerwahl.
+
+## Zusätzliche Alltagshilfen und gespeicherte Anmeldung
+
+Frontend liefert fünf Themen mit insgesamt 15 bearbeitbaren Beispielanfragen, ohne automatischen Versand und mit Erhalt vorhandener Entwürfe. Die sichtbare Auswahl zum Speichern der Anmeldung ist auf ausdrücklichen Nutzerwunsch aktiviert. Passwort wird nicht gespeichert. Der neue v1.4-Vertrag unterscheidet normale Sitzung (15 Minuten Inaktivität/8 Stunden) und bewusst gespeicherte Sitzung (höchstens 30 Tage). Ungültige Supabase-Sitzungen und Abmelden bleiben wirksam. Der tatsächliche Serverzeitpunkt und das Datum in Europe/Berlin werden im Gesprächskontext gesichert.
+
+Unabhängig gesamter Root-Check bestanden: 146 Tests, Typen/Lint/Build, 29 Bundle-Dateien ohne Geheimnisse, 53 Quelldateien/46 Kontrastpaare, 21 Proxy- und 14 Prozessprüfungen. Backend-Typen/Build/134 Tests und 20 tatsächliche Vercel-Paketprüfungen ebenfalls unabhängig bestanden.
+
+Ein unabhängiger nativer Zwischenlauf fand eine instabile Testannahme: zeitbedingt variierende Reservierung 6236 statt 6237 Mikro-USD, kein Produkt-Budgetdurchbruch. Der Test vergleicht jetzt den wirklichen ersten Snapshotbetrag; der echte Budget-Zeilensperrennachweis bleibt erhalten. Nach Korrektur neuer unabhängiger Endlauf vollständig grün: 579 SQL-Prüfungen, 134 Backendtests, 31 HTTP-/19 PG-Prüfungen, 8+15 Parallelprüfungen, 8 Setupprüfungen, echte Typgenerierung und Schema-Baseline. Anschließend 12 echte Zehn-zu-elf-Upgradeprüfungen mit Bestandserhalt und negativer Rechtekontrolle bestanden. Alle eigenen Prozesse beendet, Prüfports geschlossen.
+
+Hosted hat ausschließlich die additive Migration `20261006162000_remember_session_clock.sql` übernommen; vorhandenes Konto und Daten erhalten, Seed nicht erneut angewendet. Vollschema entspricht der unabhängigen lokalen Baseline. Danach 33 Hosted-Node- und 11 Cloud-/Hosted-Prüfungen bestanden, alle eigenen Verbindungen/Ports geschlossen. Sicherheitsadvisor unverändert: drei bewusst browsergesperrte interne Tabellen und der bereits dokumentierte Passwortschutzhinweis.

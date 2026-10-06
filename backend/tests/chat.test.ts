@@ -339,6 +339,7 @@ describe("actual Node handler with MOCK provider, no live Auth account", () => {
         p_user_id: u,
         p_session_id: s,
         p_action: "touch",
+        p_remember_session: false,
       },
       expect.any(AbortSignal),
     ]);

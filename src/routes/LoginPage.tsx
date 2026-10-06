@@ -7,21 +7,24 @@ import { DemoBanner } from '../components/DemoBanner';
 import { BrandMark, Spray, TagLine } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { useBackend } from '../services/BackendContext';
 import { AppError, toAppError } from '../services/errors';
 
 const REASON: Record<SignOutReason, string> = {
   manual: 'Sie wurden abgemeldet.',
-  idle: 'Sie wurden nach 15 Minuten ohne Aktivität abgemeldet.',
+  idle: 'Ihre Anmeldung ist wegen längerer Inaktivität abgelaufen. Bitte melden Sie sich erneut an.',
   expired: 'Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.',
-  timebox: 'Nach 8 Stunden endet jede Sitzung. Bitte melden Sie sich erneut an.',
+  timebox: 'Ihre gespeicherte Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.',
   forbidden: 'Ihr Zugang zu diesem Arbeitsbereich ist nicht mehr aktiv.',
 };
 
 export function LoginPage() {
   useDocumentTitle('Anmelden');
   const { state, signIn } = useAuth();
+  const backend = useBackend();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(() => backend.auth.getRememberPreference());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
   const errorId = useId();
@@ -53,7 +56,7 @@ export function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      await signIn(address, password);
+      await signIn(address, password, remember);
     } catch (err) {
       setError(toAppError(err));
     } finally {
@@ -138,6 +141,10 @@ export function LoginPage() {
                 </div>
               ) : null}
 
+              <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => {
+                setEmail('test@test.de');
+                passwordRef.current?.focus();
+              }}>Demo-Zugang verwenden</button>
               <div className="field">
                 <label htmlFor="email">E-Mail-Adresse</label>
                 <div className={`input ${error?.code === 'INVALID_CREDENTIALS' || error?.code === 'INVALID_EMAIL' ? 'is-invalid' : ''}`}>
@@ -174,6 +181,10 @@ export function LoginPage() {
                   />
                 </div>
               </div>
+              <label className="login-remember">
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} disabled={busy} />
+                <span>Anmeldung auf diesem Gerät speichern</span>
+              </label>
               <button type="submit" className="btn btn-primary btn-block" disabled={busy || !email.trim() || !password}>
                 {busy ? 'Wird angemeldet …' : 'Anmelden'}
                 {busy ? null : <ArrowRight className="i" size={18} aria-hidden="true" />}
@@ -184,7 +195,7 @@ export function LoginPage() {
               </p>
               <p className="note">
                 <Clock className="i" size={15} aria-hidden="true" />
-                <span>Nach 15 Minuten ohne Aktivität werden Sie abgemeldet. Die Anmeldung wird nicht gespeichert.</span>
+                <span>{remember ? 'Mit dieser Auswahl bleiben Sie bis zu 30 Tage angemeldet. Beim Öffnen wird Ihr Zugang geprüft. Ihr Passwort wird nicht gespeichert.' : 'Ohne gespeicherte Anmeldung werden Sie nach 15 Minuten ohne Aktivität abgemeldet. Ihr Passwort wird nicht gespeichert.'}</span>
               </p>
             </form>
           </div>

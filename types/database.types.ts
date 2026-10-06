@@ -632,13 +632,13 @@ isOneToOne: false
                   ]
                 },"session_activity": {
                   Row: {
-                    "created_at": string,"created_by": string,"expires_at": string,"id": string,"last_interaction_at": string,"revoked_at": string | null,"session_id": string,"workspace_id": string
+                    "created_at": string,"created_by": string,"expires_at": string,"id": string,"last_interaction_at": string,"remember_session": boolean,"revoked_at": string | null,"session_id": string,"workspace_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"created_by": string,"expires_at": string,"id"?: string,"last_interaction_at": string,"revoked_at"?: string | null,"session_id": string,"workspace_id": string
+                    "created_at"?: string,"created_by": string,"expires_at": string,"id"?: string,"last_interaction_at": string,"remember_session"?: boolean,"revoked_at"?: string | null,"session_id": string,"workspace_id": string
                   }
                   Update: {
-                    "created_at"?: string,"created_by"?: string,"expires_at"?: string,"id"?: string,"last_interaction_at"?: string,"revoked_at"?: string | null,"session_id"?: string,"workspace_id"?: string
+                    "created_at"?: string,"created_by"?: string,"expires_at"?: string,"id"?: string,"last_interaction_at"?: string,"remember_session"?: boolean,"revoked_at"?: string | null,"session_id"?: string,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -905,6 +905,8 @@ isOneToOne: false
                            },
 "edge_session":
 { Args: { "p_action": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           } |
+{ Args: { "p_action": string,"p_remember_session": boolean,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
                            },
 "mark_document_status":
 { Args: { "p_document_id": string,"p_expected_revision": number,"p_status": Database["public"]['Enums']["document_status"] }; Returns: {

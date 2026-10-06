@@ -1,5 +1,5 @@
-/** Actual historical eight -> additive ten. Only own native DB; existing rows retained. */
-import {readFile,writeFile} from 'node:fs/promises';
+/** Actual historical eight -> all current additive migrations. Only own native DB; existing rows retained. */
+import {readFile,writeFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {localClient,backend} from './local-db.mjs';
 import {fingerprint} from './schema-fingerprint.mjs';
@@ -16,7 +16,8 @@ try {
   (select count(*) from public.care_recipients) as recipients,(select count(*) from public.tasks) as tasks,
   (select count(*) from public.messages) as messages,(select monthly_cap_microusd from public.workspace_budgets) as budget`)).rows[0]);
  const seedBefore=await rows();
- for(const file of ['20261006160000_deepseek_provider.sql','20261006161000_deepseek_demo_cap.sql']) {
+ const additions=(await readdir(path.resolve(backend,'../supabase/migrations'))).filter(f=>f.endsWith('.sql')&&f>='20261006160000').sort();
+ for(const file of additions) {
   const sql=await readFile(path.resolve(backend,'../supabase/migrations',file),'utf8');
   await db.query(sql); // Separate committed enum migration before enum label is used.
   await db.query('insert into supabase_migrations.schema_migrations(version,name,statements) values($1,$2,$3)',[file.slice(0,14),file.slice(15,-4),[sql]]);
@@ -24,7 +25,7 @@ try {
  const after=await fingerprint(db,true),fullAfter=await fingerprint(db,false);
  check(before===after,'Historical Phase-0 fingerprint stays equal across the additive upgrade');
  check(fullBefore!==fullAfter,'Full Phase-1 fingerprint detects actual new schema');
- check(fullAfter===baseline.phase1,'Upgraded schema exactly equals the independently fresh full ten-migration baseline');
+ check(fullAfter===baseline.phase1,'Upgraded schema exactly equals the independently fresh full current-migration baseline');
  check(await rows()===seedBefore,'Existing rows, messages and zero budget remain unchanged');
  const constraints=JSON.parse(fullAfter).constraints;
  check(constraints.some(c=>c.table_name==='workspace_budgets'&&c.definition==='CHECK (total_cap_microusd >= 0)'), 'Full fingerprint retains total-cap CHECK');
@@ -44,7 +45,7 @@ try {
  }finally{await db.query('ROLLBACK');}
  check(await fingerprint(db,false)===fullAfter,'Negative drift fixtures rolled back; full schema restored');
  const final=(await db.query('select version from supabase_migrations.schema_migrations order by version')).rows;
- check(final.length===10,'Ends with ten actual journalled migrations');
+ check(final.length===8+additions.length,'Ends with all current actual journalled migrations');
  await writeFile(path.join(backend,'.local/upgrade-result.json'),JSON.stringify({passed:true,checks,hostedWrites:0},null,2)+'\n',{mode:0o600});
- console.log(`${checks.length} echte Acht-zu-zehn-Upgradeprüfungen bestanden; voller Driftvergleich erhalten.`);
+ console.log(`${checks.length} echte historische Upgradeprüfungen bestanden; voller Driftvergleich erhalten.`);
 }finally{await db.end();}
