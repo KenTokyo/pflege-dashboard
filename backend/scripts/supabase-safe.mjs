@@ -16,7 +16,7 @@ const cli = path.join(backend, 'node_modules', '.bin', 'supabase');
 const action = process.argv[2];
 const runtimeOnly = process.argv.includes('--runtime-only');
 const actions = {
-  start: ['start', '--runtime', 'native', '--exclude', 'realtime,functions,studio,mail,analytics,pooler'],
+  start: ['start', '--runtime', 'native', '--exclude', 'realtime,studio,mail,analytics,pooler'],
   status: ['status', '--output-format', 'json'],
   reset: ['db', 'reset', '--local', '--yes'],
   test: ['test', 'db', '--local'],
@@ -31,10 +31,12 @@ await mkdir(mirror, { recursive: true, mode: 0o700 });
 await mkdir(runtimeHome, { recursive: true, mode: 0o700 });
 // Supabase executes in an owned mirror with NO root .env. Only our SQL/config/test files are copied.
 await mkdir(path.join(mirror, 'supabase'), { recursive: true });
-for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests']) {
+for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests', 'functions']) {
   await rm(path.join(mirror, 'supabase', entry), { recursive: true, force: true });
   await cp(path.join(root, 'supabase', entry), path.join(mirror, 'supabase', entry), { recursive: true });
 }
+// Only harmless local origins; provider keys are never loaded from root or another project.
+await writeFile(path.join(mirror,'supabase/functions/.env'),'ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173\n',{mode:0o600});
 const config = await readFile(path.join(mirror, 'supabase', 'config.toml'), 'utf8');
 if (!config.includes('project_id = "pflege-dashboard-phase0"')) throw new Error('Falsche lokale Projektidentität.');
 if (runtimeOnly) {
@@ -54,13 +56,18 @@ const safeEnv = {
 let stdout = '';
 let stderr = '';
 let child;
-const abort = () => { child?.kill('SIGTERM'); };
+let forceStop;
+const abort = () => {
+  if(!child||forceStop)return;
+  try{process.kill(-child.pid,'SIGTERM');}catch{child.kill('SIGTERM');}
+  forceStop=setTimeout(()=>{try{process.kill(-child.pid,'SIGKILL');}catch{}},5000);
+};
 process.once('SIGINT', abort);
 process.once('SIGTERM', abort);
 const timeout = setTimeout(abort, action === 'start' ? 600_000 : 180_000);
 try {
   const result = await new Promise((resolve, reject) => {
-    child = spawn(cli, actions[action], { cwd: mirror, env: safeEnv, stdio: ['ignore', 'pipe', 'pipe'] });
+    child = spawn(cli, actions[action], { detached:true, cwd: mirror, env: safeEnv, stdio: ['ignore', 'pipe', 'pipe'] });
     child.stdout.on('data', data => { stdout += data; });
     child.stderr.on('data', data => { stderr += data; });
     child.once('error', reject);
@@ -93,6 +100,7 @@ try {
   }
 } finally {
   clearTimeout(timeout);
+  clearTimeout(forceStop);
   process.removeListener('SIGINT', abort);
   process.removeListener('SIGTERM', abort);
 }

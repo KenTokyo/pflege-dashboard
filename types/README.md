@@ -1,9 +1,9 @@
-# Backend-Typen
+# Backend-Typen v1.0
 
-`api.ts`: Vertrag v0.2 für den Orchestrator. HTTP, Streams und die neuen Gespräch-/Personenzuordnungs-RPCs sind ausdrücklich geplant.
+`database.types.ts` stammt tatsächlich aus der frisch migrierten lokalen Supabase-App-DB: Supabase CLI 2.119.0, sechs Migrationen, 25 Tabellen. Keine handgeschriebene Schemaersatzdatei. Wiederholung: `node backend/scripts/phase1-check.mjs`; darin `supabase gen types --local --lang typescript --schema public` im eigenen Spiegel und SUPABASE_HOME.
 
-`database.types.ts` wurde mit **Supabase CLI 2.119.0** aus der tatsächlichen lokalen App-Datenbank nach Migration/Seed erzeugt. Keine schemaabgeleitete Ersatzdatei. Exakter Generieraufruf ist im sicheren Wrapper `backend/scripts/supabase-safe.mjs types`: `supabase gen types --local --lang typescript --schema public` im eigenen Supabase-Ausführungsspiegel, mit eigenem SUPABASE_HOME. Die rohe CLI-Datei wird nicht per Hand korrigiert.
+Frontend nutzt **BackendDatabase aus rpc.ts**: sechs Browser-RPCs samt echter Nullbarkeit, insbesondere null-Overrides, Personenzuordnung und `p_reset_to_default`. Server-only RPCs aus den rohen generierten Typen sind absichtlich nicht Teil dieses Browservertrags. Insert-/Update-Typen sind Schemaformen, keine Schreibrechte.
 
-`rpc.ts` ergänzt die echte SQL-Nullbarkeit: Die CLI kann nullable RPC-Parameter nicht aus der Funktionssignatur ableiten. Für den späteren Supabase-JS-Client `BackendDatabase` verwenden; Tabellen/Enums/Beziehungen bleiben unverändert aus der CLI-Datei. `UpdateAgentSettingsArgs` unterscheidet den Reset (Texte dürfen null sein) vom eigenen Prompt (Texte erforderlich). Das ist kein zusätzlicher Endpoint.
+**phase1.ts**: tatsächlich implementierter HTTP-/SSE-Vertrag für `session` und `chat-stream`. `api.ts` exportiert diese Phase-1-Typen und enthält zusätzlich ausdrücklich geplante Phase-2-Vorschläge/Bestätigung. Diese geplanten Typen sind keine erreichbaren Functions.
 
-Strikte Prüfung: `cd backend && npm run typecheck`. Typbeispiele prüfen zulässige null-Overrides, Reset-Parameter, unzulässigen Mode und dass geplante RPCs noch nicht in den generierten Funktionen stehen. Generierte Insert-/Update-Typen sind Schemaformen und **keine Schreibfreigabe**; die Browserrolle besitzt weiterhin nur SELECT + vier geprüfte RPCs.
+`cd backend && npm run typecheck` prüft gültige und unzulässige Null-/Mode-/RPC-Formen strikt. Deno prüft zusätzlich die tatsächlichen Edge-Einstiegspunkte. Details und Grenzen in `docs/api-contract.md` und `docs/backend-phase1-pruefung.md`.

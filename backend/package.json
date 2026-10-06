@@ -11,9 +11,13 @@
     "supabase:reset": "node scripts/supabase-safe.mjs reset",
     "supabase:test": "node scripts/supabase-safe.mjs test",
     "supabase:types": "node scripts/supabase-safe.mjs types",
-    "supabase:stop": "node scripts/supabase-safe.mjs stop"
+    "supabase:stop": "node scripts/supabase-safe.mjs stop",
+    "check:phase1": "node scripts/phase1-check.mjs",
+    "hosted:inspect": "node scripts/hosted-schema.mjs inspect",
+    "hosted:apply": "node scripts/hosted-schema.mjs apply"
   },
   "devDependencies": {
+    "deno": "2.9.6",
     "pg": "8.23.1",
     "supabase": "2.119.0",
     "typescript": "7.0.2",

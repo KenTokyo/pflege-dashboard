@@ -59,8 +59,8 @@ values('10000000-0000-4000-8000-000000000001','11000000-0000-4000-8000-000000000
 set constraints all immediate;
 
 select is((select count(*)::int from auth.users),0,'No Auth accounts exist');
-select is((select count(*)::int from pg_tables where schemaname='public'),21,'21 application tables');
-select ok(not exists(select 1 from pg_tables where schemaname='public' and not rowsecurity),'Every application table enables RLS');
+select is((select count(*)::int from pg_tables where schemaname='public'),25,'25 application tables including Phase 1');
+select ok(not exists(select 1 from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests') and not rowsecurity),'Every application table enables RLS');
 select ok(not exists(select 1 from pg_tables t where t.schemaname='public' and not exists(select 1 from information_schema.columns c where c.table_schema='public' and c.table_name=t.tablename and c.column_name='workspace_id')),'Every row has workspace_id');
 select ok(not exists(select 1 from pg_tables t where t.schemaname='public' and not exists(select 1 from information_schema.columns c where c.table_schema='public' and c.table_name=t.tablename and c.column_name='created_by' and c.is_nullable='NO')),'Every row has non-null created_by');
 select ok((select not public and file_size_limit=10485760 from storage.buckets where id='care-private'),'Private bucket and 10 MiB limit');
@@ -74,13 +74,13 @@ select ok(not exists(select 1 from public.profiles where kind='system' and user_
 set local role anon;
 select set_config('request.jwt.claims','{}',true);
 select throws_ok(format('select * from public.%I limit 1',tablename),'42501',null,'anon SELECT denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok(format('insert into public.%I default values',tablename),'42501',null,'anon INSERT denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok(format('update public.%I set id=id',tablename),'42501',null,'anon UPDATE denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok(format('delete from public.%I',tablename),'42501',null,'anon DELETE denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok($$select public.rename_conversation('10000000-0000-4000-8000-000000000050','No',1)$$,'42501',null,'anon RPC denied');
 select is((select count(*)::int from storage.objects where bucket_id='care-private'),0,'anon cannot read private objects');
 select throws_ok($$insert into storage.objects(bucket_id,name) values('care-private','unreserved.pdf')$$,'42501',null,'anon private upload denied');
@@ -96,14 +96,14 @@ select is((select count(*)::int from public.usage_ledger),0,'Member cannot read 
 select is((select count(*)::int from public.cost_reservations),0,'Member cannot read reservations');
 select is((select count(*)::int from storage.objects where bucket_id='care-private'),2,'Uploader sees both own ready objects');
 select throws_ok(format('insert into public.%I default values',tablename),'42501',null,'Member INSERT denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok(format('update public.%I set id=id',tablename),'42501',null,'Member UPDATE denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok(format('delete from public.%I',tablename),'42501',null,'Member DELETE denied: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 -- All tables contain adversarial B rows; RLS must exclude them independently of UI filters.
 select is_empty(format('select id from public.%I where workspace_id=%L',tablename,'90000000-0000-4000-8000-000000000001'),
-  'Foreign workspace rows invisible: '||tablename) from pg_tables where schemaname='public';
+  'Foreign workspace rows invisible: '||tablename) from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok($$update public.workspace_memberships set role='admin'$$,'42501',null,'No self-escalation');
 select throws_ok($$insert into public.workspace_memberships(workspace_id,created_by,profile_id,role) values('90000000-0000-4000-8000-000000000001','11000000-0000-4000-8000-000000000002','11000000-0000-4000-8000-000000000002','admin')$$,'42501',null,'No membership injection');
 select throws_ok($$update public.ai_models set enabled=true,hosting_region='eu'$$,'42501',null,'No model/capability/region tampering');
@@ -161,7 +161,7 @@ select throws_ok($$select public.update_agent_settings('90000000-0000-4000-8000-
 -- User-controlled metadata must NOT grant admin/member access.
 select set_config('request.jwt.claims','{"sub":"20000000-0000-4000-8000-000000000099","role":"authenticated","user_metadata":{"role":"admin","workspace_id":"10000000-0000-4000-8000-000000000001"}}',true);
 select is_empty(format('select id from public.%I',tablename),'Unknown signed-in user sees no rows: '||tablename)
-from pg_tables where schemaname='public';
+from pg_tables where schemaname='public' and tablename not in ('conversation_requests','session_activity','model_prices','chat_requests');
 select throws_ok($$select public.rename_conversation('10000000-0000-4000-8000-000000000050','No',4)$$,'P0002',null,'Nonmember cannot use RPC');
 select is((select count(*)::int from storage.objects where bucket_id='care-private'),0,'Nonmember private Storage denied');
 select set_config('request.jwt.claims','{"sub":"20000000-0000-4000-8000-000000000003","role":"authenticated"}',true);

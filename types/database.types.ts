@@ -216,6 +216,67 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"chat_requests": {
+                  Row: {
+                    "assistant_message_id": string,"client_request_id": string,"context_snapshot": NonNullable<Json>,"conversation_id": string,"created_at": string,"created_by": string,"id": string,"lease_expires_at": string,"model_id": string,"payload_sha256": string,"prompt_version_id": string,"reservation_id": string,"session_id": string,"status": string,"user_message_id": string,"workspace_id": string
+                  }
+                  Insert: {
+                    "assistant_message_id": string,"client_request_id": string,"context_snapshot": NonNullable<Json>,"conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"lease_expires_at": string,"model_id": string,"payload_sha256": string,"prompt_version_id": string,"reservation_id": string,"session_id": string,"status": string,"user_message_id": string,"workspace_id": string
+                  }
+                  Update: {
+                    "assistant_message_id"?: string,"client_request_id"?: string,"context_snapshot"?: NonNullable<Json>,"conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"lease_expires_at"?: string,"model_id"?: string,"payload_sha256"?: string,"prompt_version_id"?: string,"reservation_id"?: string,"session_id"?: string,"status"?: string,"user_message_id"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_requests_assistant_message_id_conversation_id_workspa_fkey"
+      columns: ["assistant_message_id","conversation_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "messages"
+      referencedColumns: ["id","conversation_id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_conversation_id_workspace_id_fkey"
+      columns: ["conversation_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "conversations"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_created_by_workspace_id_fkey"
+      columns: ["created_by","workspace_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_model_id_workspace_id_fkey"
+      columns: ["model_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "ai_models"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_prompt_version_id_workspace_id_fkey"
+      columns: ["prompt_version_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "prompt_versions"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_reservation_id_workspace_id_fkey"
+      columns: ["reservation_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "cost_reservations"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_user_message_id_conversation_id_workspace_id_fkey"
+      columns: ["user_message_id","conversation_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "messages"
+      referencedColumns: ["id","conversation_id","workspace_id"]
+    },{
+      foreignKeyName: "chat_requests_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"contacts": {
                   Row: {
                     "address": NonNullable<Json>,"created_at": string,"created_by": string,"email": string | null,"id": string,"kind": string,"name": string,"phone": string | null,"reference": string | null,"workspace_id": string
@@ -235,6 +296,37 @@ isOneToOne: false
       referencedColumns: ["id","workspace_id"]
     },{
       foreignKeyName: "contacts_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"conversation_requests": {
+                  Row: {
+                    "conversation_id": string,"created_at": string,"created_by": string,"id": string,"idempotency_key": string,"payload_sha256": string,"workspace_id": string
+                  }
+                  Insert: {
+                    "conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"idempotency_key": string,"payload_sha256": string,"workspace_id": string
+                  }
+                  Update: {
+                    "conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"idempotency_key"?: string,"payload_sha256"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "conversation_requests_conversation_id_workspace_id_fkey"
+      columns: ["conversation_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "conversations"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "conversation_requests_created_by_workspace_id_fkey"
+      columns: ["created_by","workspace_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "conversation_requests_workspace_id_fkey"
       columns: ["workspace_id"]
 isOneToOne: false
       referencedRelation: "workspaces"
@@ -379,13 +471,13 @@ isOneToOne: false
                   ]
                 },"messages": {
                   Row: {
-                    "client_request_id": string | null,"content": string,"conversation_id": string,"created_at": string,"created_by": string,"id": string,"input_tokens": number | null,"model_id": string | null,"model_snapshot": Json | null,"output_tokens": number | null,"prompt_version_id": string | null,"role": Database["public"]['Enums']["message_role"],"sources": NonNullable<Json>,"status": Database["public"]['Enums']["message_status"],"tool_calls": NonNullable<Json>,"workspace_id": string
+                    "client_request_id": string | null,"content": string,"conversation_id": string,"created_at": string,"created_by": string,"id": string,"input_tokens": number | null,"model_id": string | null,"model_snapshot": Json | null,"output_tokens": number | null,"prompt_version_id": string | null,"provider_response_model": string | null,"role": Database["public"]['Enums']["message_role"],"sources": NonNullable<Json>,"status": Database["public"]['Enums']["message_status"],"tool_calls": NonNullable<Json>,"workspace_id": string
                   }
                   Insert: {
-                    "client_request_id"?: string | null,"content"?: string,"conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"role": Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id": string
+                    "client_request_id"?: string | null,"content"?: string,"conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role": Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id": string
                   }
                   Update: {
-                    "client_request_id"?: string | null,"content"?: string,"conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"role"?: Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id"?: string
+                    "client_request_id"?: string | null,"content"?: string,"conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role"?: Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -414,6 +506,37 @@ isOneToOne: false
       referencedColumns: ["id","workspace_id"]
     },{
       foreignKeyName: "messages_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"model_prices": {
+                  Row: {
+                    "created_at": string,"created_by": string,"currency": string,"evidence_url": string,"expires_at": string,"id": string,"input_microusd_per_million": number,"model_id": string,"output_microusd_per_million": number,"text_only": boolean,"verified_at": string,"workspace_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by": string,"currency"?: string,"evidence_url": string,"expires_at": string,"id"?: string,"input_microusd_per_million": number,"model_id": string,"output_microusd_per_million": number,"text_only"?: boolean,"verified_at": string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"currency"?: string,"evidence_url"?: string,"expires_at"?: string,"id"?: string,"input_microusd_per_million"?: number,"model_id"?: string,"output_microusd_per_million"?: number,"text_only"?: boolean,"verified_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "model_prices_created_by_workspace_id_fkey"
+      columns: ["created_by","workspace_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "model_prices_model_id_workspace_id_fkey"
+      columns: ["model_id","workspace_id"]
+isOneToOne: false
+      referencedRelation: "ai_models"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "model_prices_workspace_id_fkey"
       columns: ["workspace_id"]
 isOneToOne: false
       referencedRelation: "workspaces"
@@ -501,6 +624,31 @@ isOneToOne: false
       referencedColumns: ["id","workspace_id"]
     },{
       foreignKeyName: "prompt_versions_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"session_activity": {
+                  Row: {
+                    "created_at": string,"created_by": string,"expires_at": string,"id": string,"last_interaction_at": string,"revoked_at": string | null,"session_id": string,"workspace_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"created_by": string,"expires_at": string,"id"?: string,"last_interaction_at": string,"revoked_at"?: string | null,"session_id": string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string,"expires_at"?: string,"id"?: string,"last_interaction_at"?: string,"revoked_at"?: string | null,"session_id"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "session_activity_created_by_workspace_id_fkey"
+      columns: ["created_by","workspace_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id","workspace_id"]
+    },{
+      foreignKeyName: "session_activity_workspace_id_fkey"
       columns: ["workspace_id"]
 isOneToOne: false
       referencedRelation: "workspaces"
@@ -699,7 +847,66 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "mark_document_status":
+            "assign_conversation_recipient":
+{ Args: { "p_care_recipient_id": string,"p_conversation_id": string,"p_expected_revision": number }; Returns: {
+              "archived_at": string | null,
+"care_recipient_id": string | null,
+"created_at": string,
+"created_by": string,
+"id": string,
+"mode_override": Database["public"]['Enums']["agent_mode"] | null,
+"model_override_id": string | null,
+"revision": number,
+"title": string,
+"workspace_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "conversations"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"create_conversation":
+{ Args: { "p_care_recipient_id": string,"p_idempotency_key": string,"p_title": string,"p_workspace_id": string }; Returns: {
+              "archived_at": string | null,
+"care_recipient_id": string | null,
+"created_at": string,
+"created_by": string,
+"id": string,
+"mode_override": Database["public"]['Enums']["agent_mode"] | null,
+"model_override_id": string | null,
+"revision": number,
+"title": string,
+"workspace_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "conversations"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"edge_chat_check":
+{ Args: { "p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: boolean
+                           },
+"edge_chat_checkpoint":
+{ Args: { "p_content": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: boolean
+                           },
+"edge_chat_finish":
+{ Args: { "p_content": string,"p_input_tokens": number,"p_output_tokens": number,"p_request_id": string,"p_response_model": string,"p_status": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           },
+"edge_chat_prepare":
+{ Args: { "p_content": string,"p_conversation_id": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           },
+"edge_chat_reap":
+{ Args: { "p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: number
+                           },
+"edge_chat_replay":
+{ Args: { "p_content": string,"p_conversation_id": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           },
+"edge_session":
+{ Args: { "p_action": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           },
+"mark_document_status":
 { Args: { "p_document_id": string,"p_expected_revision": number,"p_status": Database["public"]['Enums']["document_status"] }; Returns: {
               "care_recipient_id": string | null,
 "content": NonNullable<Json>,

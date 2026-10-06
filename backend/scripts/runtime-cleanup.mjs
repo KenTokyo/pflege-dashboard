@@ -21,7 +21,7 @@ const {stdout:processList}=await run('/bin/ps',['-axo','pid=,args='],{timeout:10
 const ownedProcesses=processList.split('\n').filter(line=>line.includes(ownHome)||line.includes(oldHome))
   .map(line=>Number(line.trim().split(/\s+/)[0]));
 // Native status forgets live endpoint details after stop; include our explicit config ports.
-const ports=[...new Set([56421,56422,...Object.values(state.endpoints??{}).map(e=>e.port).filter(Number.isInteger)])];
+const ports=[...new Set([56421,56422,56428,...Object.values(state.endpoints??{}).map(e=>e.port).filter(Number.isInteger)])];
 const checks=await Promise.all(ports.map(port=>new Promise(resolve=>{
   const socket=createConnection({host:'127.0.0.1',port});
   let done=false;

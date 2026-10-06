@@ -1,0 +1,160 @@
+import { AppError } from "./errors.ts";
+export type Context = {
+  model: {
+    registryId: string;
+    provider: "openai";
+    providerModelId: string;
+    displayName: string;
+    region: string;
+  };
+  promptVersionId: string;
+  instructions: string;
+  input: { role: "user" | "assistant"; content: string }[];
+  maxOutputTokens: number;
+  inputTokenBound: number;
+  maximumCostMicrousd: number;
+};
+export type ProviderPart = { text: string } | {
+  usage: { inputTokens: number; outputTokens: number; model: string };
+};
+export interface Provider {
+  stream(context: Context, signal: AbortSignal): AsyncIterable<ProviderPart>;
+}
+/** Bounded, CRLF-safe SSE framing for split UTF-8 chunks. Used for actual provider transport. */
+export async function* sseData(
+  body: ReadableStream<Uint8Array>,
+  signal: AbortSignal,
+): AsyncGenerator<string> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  const abort = () => {
+    void reader.cancel().catch(() => {});
+  };
+  signal.addEventListener("abort", abort, { once: true });
+  try {
+    while (true) {
+      if (signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
+      const part = await reader.read();
+      if (part.done) break;
+      buffer += decoder.decode(part.value, { stream: true });
+      if (buffer.length > 1000000) throw new AppError("PROVIDER_FAILED", 502);
+      let match: RegExpExecArray | null;
+      while ((match = /\r?\n\r?\n/.exec(buffer))) {
+        const block = buffer.slice(0, match.index);
+        buffer = buffer.slice(match.index + match[0].length);
+        const data = block.split(/\r?\n/).filter((l) => l.startsWith("data:"))
+          .map((l) => l.slice(5).replace(/^ /, "")).join("\n");
+        if (data) yield data;
+      }
+    }
+    if (buffer.trim()) throw new AppError("PROVIDER_FAILED", 502);
+  } finally {
+    signal.removeEventListener("abort", abort);
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
+}
+export class OpenAIProvider implements Provider {
+  constructor(private key: string, private fetcher: typeof fetch = fetch) {}
+  async *stream(
+    context: Context,
+    signal: AbortSignal,
+  ): AsyncGenerator<ProviderPart> {
+    const input = {
+      model: context.model.providerModelId,
+      instructions: context.instructions,
+      input: context.input,
+    };
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${this.key}`,
+    };
+    const count = await this.fetcher(
+      "https://api.openai.com/v1/responses/input_tokens",
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify(input),
+        signal,
+        redirect: "error",
+      },
+    );
+    if (!count.ok) throw new AppError("PROVIDER_FAILED", 502);
+    const counted = await count.json();
+    if (
+      !Number.isSafeInteger(counted.input_tokens) || counted.input_tokens < 0 ||
+      counted.input_tokens > context.inputTokenBound
+    ) {
+      throw new AppError("PRICING_UNVERIFIED", 503);
+    }
+    // Phase 1 never sends tools or tool_choice, even for create mode. No provider retries.
+    const response = await this.fetcher("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        ...input,
+        store: false,
+        stream: true,
+        max_output_tokens: context.maxOutputTokens,
+      }),
+      signal,
+      redirect: "error",
+    });
+    if (
+      !response.ok || !response.body ||
+      !response.headers.get("content-type")?.includes("text/event-stream")
+    ) throw new AppError("PROVIDER_FAILED", 502);
+    let finished = false;
+    for await (const data of sseData(response.body, signal)) {
+      if (data === "[DONE]") continue;
+      let event: any;
+      try {
+        event = JSON.parse(data);
+      } catch {
+        throw new AppError("PROVIDER_FAILED", 502);
+      }
+      if (
+        event.type === "response.output_text.delta" ||
+        event.type === "response.refusal.delta"
+      ) {
+        if (typeof event.delta !== "string") {
+          throw new AppError("PROVIDER_FAILED", 502);
+        }
+        yield { text: event.delta };
+      } else if (
+        event.type === "response.completed" ||
+        event.type === "response.incomplete"
+      ) {
+        const r = event.response;
+        const usage = r?.usage;
+        if (
+          !Number.isSafeInteger(usage?.input_tokens) ||
+          !Number.isSafeInteger(usage?.output_tokens) ||
+          usage.input_tokens < 0 || usage.output_tokens < 0 ||
+          usage.input_tokens > context.inputTokenBound ||
+          usage.output_tokens > context.maxOutputTokens ||
+          r?.model !== context.model.providerModelId
+        ) {
+          throw new AppError("PROVIDER_FAILED", 502);
+        }
+        yield {
+          usage: {
+            inputTokens: usage.input_tokens,
+            outputTokens: usage.output_tokens,
+            model: r.model,
+          },
+        };
+        if (event.type === "response.incomplete") {
+          throw new AppError("PROVIDER_FAILED", 502);
+        }
+        finished = true;
+        break;
+      } else if (
+        event.type === "error" || event.type === "response.failed" ||
+        event.type?.includes("function_call")
+      ) throw new AppError("PROVIDER_FAILED", 502);
+    }
+    if (!finished) throw new AppError("PROVIDER_FAILED", 502);
+  }
+}
