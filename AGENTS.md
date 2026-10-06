@@ -4,20 +4,21 @@ Lies vollständig `docs/anforderungen.md`, dann `/Users/kentoky/Documents/React 
 
 ## Auftrag und aktuelles Gate
 
-Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwendungsteile aus NoteTree übernehmen. Phase 0 ist aktiv: nur statische HTML-Designmocks und Backend-Grundlagen. Keine App-Oberfläche in `src/` bauen, bevor der Nutzer eine Richtung gewählt hat. Drei Richtungen, jeweils Login, Dashboard, Chat samt Bestätigungskarte und erstelltem Dokument sowie Einstellungen, je dunkel und hell: 24 PNGs, maximal 1280×720. Eine kurze Bewegungssequenz oder Bildfolge pro Richtung.
+Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwendungsteile aus NoteTree übernehmen. Phase 0 ist abgeschlossen und lokal mit `689e735` gesichert. Der Nutzer hat am 06.10.2026 ausdrücklich gewählt: „tagwerk sieht am besten aus damit weitermachen“. Phase 1 ist jetzt aktiv: Tagwerk als echte Anwendung mit Anmeldung, Sitzung, beiden Themes, Dashboard aus Supabase und Streaming-Chat auf einem Modell. Die 24 Designbilder und drei Bewegungsfolgen bleiben als Referenz erhalten. Phase 2 beginnt erst nach dem Phase-1-Gate.
 
 ## Arbeitsteilung
 
 - Orchestrator: Aufgaben verteilen, Verträge prüfen, Ergebnisse unabhängig prüfen, bewerten und dokumentieren. Keine App-Implementierung; höchstens kleine Verbindungsänderungen. Er besitzt diese Regeln, `docs/anforderungen.md`, `docs/tasks/` und Gate-Berichte.
-- Derselbe Frontend-Unterchat besitzt `docs/mocks/`, später `src/` außer ausdrücklich vom Backend verwalteten generierten Typen, Designwerte, Bewegung und UI-Tests. In Phase 0 liegen etwaige Mock-Abhängigkeiten und Aufnahmeskripte ausschließlich in `docs/mocks/`.
+- Derselbe Frontend-Unterchat besitzt `docs/mocks/`, `src/`, Root-Paketdateien und Frontend-Konfiguration, Designwerte, Bewegung und UI-Tests. Backend-Typen unter `types/` liest er nur. Mock-Werkzeuge bleiben unter `docs/mocks/`.
 - Derselbe Backend-Unterchat besitzt `supabase/`, `types/`, `backend/`, `docs/api-contract.md` und Backend-Einrichtungs-/Testdokumentation. Er baut keine UI. Paket-/Testscripts in Phase 0 unter `backend/`, um Dateikollisionen zu vermeiden.
-- Nutzerkorrektur vom 06.10.2026: höchstens vier aktive TreeChat-Unterchats, davon höchstens ein Opus 5.5 mit `high` und bis zu drei GPT-6.1-Sol mit `xhigh`; Bildarbeit darf `high` verwenden. Für Phase 0 sind genau zwei aktiv. Ohne Auftrag des Orchestrators keine weiteren Chats, Provider-Subagenten oder Bildgenerierungs-Unterchats starten. Nacharbeit geht an den ursprünglichen Unterchat. Änderungen am API-Vertrag müssen zum Orchestrator.
+- Nutzerkorrektur vom 06.10.2026: höchstens vier aktive TreeChat-Unterchats, davon höchstens ein Opus 5.5 mit `high` und bis zu drei GPT-6.1-Sol mit `xhigh`; Bildarbeit darf `high` verwenden. Für Phase 1 werden dieselben zwei Unterchats fortgesetzt. Ohne Auftrag des Orchestrators keine weiteren Chats, Provider-Subagenten oder Bildgenerierungs-Unterchats starten. Nacharbeit geht an den ursprünglichen Unterchat. Änderungen am API-Vertrag müssen zum Orchestrator.
+- Jüngste Nutzerkorrektur: Die Agenten erledigen ihre Bereiche samt Prüfung und Nacharbeit selbst. Der Orchestrator verbindet die Lieferungen und gibt keine kleinteiligen Feedbackrunden. Er übernimmt keine App-Implementierung.
 
 ## Grenzen
 
 Keine Konten erstellen, auch keine lokalen Auth-Testkonten. Keine Zugangsdaten eingeben oder aus anderen Projekten lesen. Keine Schlüssel ausgeben, loggen oder committen. Lokale Supabase-Status-/Startausgaben vor Anzeige redigieren oder zunächst ausschließlich in ignorierte `.local/`-Dateien schreiben. RLS-Prüfungen mit synthetischen SQL-Claims sind keine angelegten Login-Konten. Noch nicht ausführbare angemeldete Nutzertests ehrlich benennen.
 
-Nur fiktive Daten. Ein eigener lokaler Supabase-Stack darf gestartet werden, wenn eine vorhandene Container-Laufzeit verfügbar ist; keine sichtbaren Apps öffnen. Keine entfernten Projekte, Provideraufrufe, Deployment oder Veröffentlichung. Hosting und Schlüssel setzt später der Nutzer selbst auf. Anforderungen und Setup-Dokumente dürfen keine tatsächlichen Geheimnisse enthalten.
+Nur fiktive Daten. Echter nativer Supabase-Start, beide Migrationen, Seed und Zugriffsprüfungen sind inzwischen bestanden; die ursprüngliche Container-Voraussetzung ist damit überholt. Eigene isolierte native Supabase-Läufe sind erlaubt, kein eigenständiger PostgreSQL-Ersatz. Keine sichtbaren Apps öffnen. Phase 1 implementiert KI-Aufrufe ausschließlich über Supabase Edge Functions. Keine tatsächlichen kostenpflichtigen Provideraufrufe ohne nutzerseitig bereitgestellte Secrets und bewusst freigegebenes Budget; keine Erhöhung des bisherigen Nullbudgets. Keine Veröffentlichung der Anwendung. Anforderungen und Setup-Dokumente dürfen keine tatsächlichen Geheimnisse enthalten.
 
 ### Konkrete Hosting-Freigabe vom 06.10.2026
 
@@ -25,9 +26,11 @@ Der Nutzer hat anschließend die Anlage des eigenen Supabase-Projekts im bereits
 
 Die Freigabe ersetzt keine fehlende Werkzeugfunktion: aktuell ist der TreeChat-Browser im Orchestrator-Scope nicht verbunden und kein ChatGPT-Browser-Plugin-Connector verfügbar. Keine Umgehung über persönlichen Chrome/OS-Automation. Keine Geheimnisse in Toolausgaben, Chat, Doku oder Git; echte Werte nur über einen tatsächlich verfügbaren geschützten Secret-to-file-Weg nach `.env`, sonst bleibt dieser Schritt ehrlich blockiert. Vorhandene Nutzerwerte und Browsertabs erhalten. Hosted-Migrationen erst nach geprüftem Backend-Gate.
 
-### Letzte Nutzergrenze vom 06.10.2026
+### Supabase-Grenze und aktueller Fortsetzungsstand vom 06.10.2026
 
-„nein nur wenn es geht mit supabase oder garnicht“: Kein eigenständiger PostgreSQL-Ersatz und keine Einrichtungsanleitung als Ersatzlieferung. Supabase muss tatsächlich verfügbar sein. Backend- und Hosting-Unterchat sind deshalb unterbrochen; vorhandene Entwürfe werden erhalten, aber nicht als eingerichtetes/geprüftes Supabase ausgegeben. Ob unabhängige Designmocks weiterlaufen, wurde zur Klärung gestellt. Nach erneuter Bestätigung fehlender ChatGPT-Browser-/Computer-Use-Werkzeuge wurde auch der Frontend-Unterchat vorsorglich unterbrochen. Alle drei aktuellen Unterchats bleiben gestoppt, bis ein tatsächlicher Anschluss oder eine klare Fortsetzungsanweisung vorliegt. Keine neue Ersatzarbeit.
+„nein nur wenn es geht mit supabase oder garnicht“ gilt weiter. Die zwischenzeitlichen Unterbrechungen sind historisch: Beide ursprünglichen Agenten wurden ausdrücklich fortgesetzt und haben Phase 0 abgeschlossen. Der echte lokale Supabase-Gesamtlauf ist in `docs/backend-pruefung.md` belegt. Ein separater nutzerautorisierter Codex-Chat hat das eigene Hosted-Projekt und geschützte `.env` eingerichtet (`docs/supabase-provisioning.md`); daraus folgt kein bereits geprüftes Hosted-App-Schema. Mit der Tagwerk-Wahl dürfen genau der ursprüngliche Frontend- und Backend-Unterchat Phase 1 beginnen. Der Hosting-Unterchat bleibt gestoppt.
+
+Die vorhandene geschützte Projektkonfiguration darf für die autorisierte Anbindung dieses eigenen Pflege-Dashboard-Projekts verwendet werden, ohne Werte auszugeben. Geprüfte App-Migrationen dürfen nach bestandenem lokalem Backend-Gate auf genau dieses eigene neue Projekt übertragen werden; keine fremden Projekte, Konten, Tarifwechsel oder Datenlöschungen. Frontend verwendet ausschließlich öffentliche `VITE_SUPABASE_*`-Werte; Provider- und Datenbankgeheimnisse bleiben serverseitig. Fehlende Auth-Konten und Provider-Secrets bleiben eine echte Grenze für den angemeldeten KI-Nutzertest, keine Einladung zur Kontoanlage oder einem simulierten Produktchat.
 
 Der konkrete Projektauftrag `docs/anforderungen.md` hat Vorrang vor allgemeinen Git-Defaults: lokal pro Meilenstein committen, **niemals pushen**. Der Orchestrator führt die Meilenstein-Commits nach Prüfung aus. Unterchats stage/committen keine parallelen Dateien und verändern keine Git-Historie.
 

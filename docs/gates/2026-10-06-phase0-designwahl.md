@@ -1,6 +1,12 @@
 # Phase 0: gemeinsame Übergabe zur Designwahl
 
-Frontend und Backend haben ihre ursprünglichen Aufgaben im selben jeweiligen TreeChat-Unterchat abgeschlossen. Beide warten jetzt. Keine Phase 1 vor der Nutzerwahl.
+Frontend und Backend haben ihre ursprünglichen Aufgaben im selben jeweiligen TreeChat-Unterchat abgeschlossen. Phase-0-Meilenstein: `689e735`. Die nachfolgende Übergabe dokumentiert den Stand vor der Nutzerwahl.
+
+## Nutzerentscheidung und Anschluss
+
+Am 06.10.2026 hat der Nutzer entschieden: **„tagwerk sieht am besten aus damit weitermachen“**. Damit ist die Designwahl abgeschlossen und Phase 1 freigegeben. Dieselben ursprünglichen Unterchats erhalten jeweils einen vollständigen Phase-1-Auftrag; Frontend Opus 5.5/high, Backend Sol 6.1/xhigh. Sie erledigen Implementierung, eigene Prüfungen und Nacharbeit selbst. Der Orchestrator verbindet Vertrag und Lieferungen. Kein neuer Agent und kein Neustart des Hosting-Unterchats.
+
+Tagwerk-Mocks bleiben die Designreferenz. Die tatsächliche App muss Supabase-Seed-Daten anzeigen; die bisher getrennten fiktiven Mock-/Seed-Familien werden bei der Datenanbindung zusammengeführt. Ein angemeldeter KI-Nutzertest bleibt abhängig von nutzerseitigem Auth-Konto, Provider-Secrets und freigegebenem Budget. Die Designentscheidung hebt Konto-, Geheimnis- und Kostenregeln nicht auf.
 
 Die jüngste Nutzerkorrektur lautet: „bitte keine feedbacks geben sondern nur orchestrierer spielen und die sachen zusammenknüpfen nur wenn es sein muss, besser wenn die agenten alles selbst machen“. Nach dieser Korrektur haben die Agenten ihre eigene Nacharbeit und Abschlussprüfungen selbstständig beendet. Der Orchestrator übernimmt die gemeinsame Übergabe und den lokalen Meilenstein-Commit, keine App-Implementierung und keine weiteren kleinteiligen Designreviews.
 
@@ -36,4 +42,4 @@ Agenten-Selbstbewertungen und ihre Grenzen stehen in den verlinkten Lieferberich
 
 Backend-Ergebnis: null eigene Prozesse, Ports 56421/56422 geschlossen. Frontend-Agent hat seine Browser und Wächter beendet. Der Orchestrator hat die gemeldete Browser-PID und alle Chrome-for-Testing-Arbeitsordner nachgeprüft: gemeldeter Browser beendet, keine Browser-PID mit diesem Projektordner. Fremde Browser blieben erhalten. Kein eigener Browser wurde vom Orchestrator gestartet.
 
-Gemeinsamer Stand wird lokal als Phase-0-Meilenstein committed, niemals gepusht. Die einzige Entscheidung für die Oberfläche ist jetzt **Linie, Klartext oder Tagwerk**. Bis zur Wahl bleiben beide ursprünglichen Agenten ohne Folgeauftrag.
+Gemeinsamer Stand wurde lokal als Phase-0-Meilenstein committed, niemals gepusht. Die damalige Entscheidung **Linie, Klartext oder Tagwerk** ist inzwischen zugunsten **Tagwerk** gefallen; der aktuelle Anschluss steht am Anfang dieses Berichts.

@@ -19,9 +19,9 @@
 - [x] Frontend: 24 vollständige PNGs aus statischen HTML-Mocks, drei Bewegungsfolgen, kurze Vorstellung je Richtung.
 - [x] Nach jüngster Nutzerkorrektur erledigen und prüfen die Agenten ihre Bereiche selbstständig; Orchestrator führt Lieferungen, Vertrag und Ergebnisbelege zusammen. Erste unabhängige Prüfungen und frühere Nacharbeit sind im Verlauf erhalten.
 - [x] Gemeinsamen Phase-0-Meilenstein zur lokalen Sicherung zusammenführen; Gate-Bericht `docs/gates/2026-10-06-phase0-designwahl.md`. Commit erfolgt vor der Übergabe im Hauptchat, kein Push.
-- [ ] Nutzer wählt Designrichtung. Bis dahin bleibt die App-UI ungebaut.
+- [x] Nutzer wählt am 06.10.2026 **Tagwerk**: „tagwerk sieht am besten aus damit weitermachen“. Phase 1 ist freigegeben.
 
-Ergebnis: Vorbereitung lokal committed (`02c7ad8`); aktueller Entwurfsstand wird als unfertiger Zwischenstand gesichert. API-Vertrag v0.1 und geplante API-Typen wurden früh gelesen, Schema/Seed sind unvollständig geprüfte Entwürfe. Alle Agenten nach letzter Nutzergrenze gestoppt, echtes Supabase mangels Anschluss/Runtime nicht eingerichtet. Keine fertigen 24 Mock-PNGs, keine Phase-0-Abnahme, keine App-UI. Pfade: `docs/mocks/`, `docs/api-contract.md`, `supabase/`.
+Historischer Zwischenstand vor ausdrücklicher Fortsetzung: Vorbereitung lokal committed (`02c7ad8`); damaliger Entwurfsstand wurde als unfertiger Zwischenstand gesichert. API-Vertrag v0.1 und geplante API-Typen wurden früh gelesen, Schema/Seed sind unvollständig geprüfte Entwürfe. Alle Agenten nach letzter Nutzergrenze gestoppt, echtes Supabase mangels Anschluss/Runtime nicht eingerichtet. Keine fertigen 24 Mock-PNGs, keine Phase-0-Abnahme, keine App-UI. Pfade: `docs/mocks/`, `docs/api-contract.md`, `supabase/`.
 
 ## Supabase-Fortsetzung in Codex am 06.10.2026
 
@@ -43,7 +43,7 @@ Fortsetzung nach direkter Nutzerfreigabe: Werte aus `env.md` geschützt in `.env
 - [x] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen. Supabase-Sicherheitsprüfung nach Korrektur des RLS-Trigger-EXECUTE-Rechts ohne Meldungen.
 - [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
 
-Ergebnis: Hosted-Projekt, `.env`, Auth-Grundeinstellungen und MCP funktionieren und wurden real geprüft. Anwendungstabellen noch nicht übernommen: paralleler Backend-Bericht nennt Storage-Migrationsfehler `must be owner of table objects`; Schema-/Seed-/RLS-Gate offen. Geheimnisse ausschließlich lokal gespeichert, nicht ausgegeben oder committed. Keine eigenen Browser-/Serverprozesse; DB-Verbindungen geschlossen, Nutzer-Tab erhalten. Browser-Finding: zwei Playwright-Linkklicks meldeten Timeouts trotz sichtbarem Link; frischer AX-Zustand und Klick auf dessen aktuelle Elementnummer funktionierten. Pfade: `docs/supabase-provisioning.md`, `docs/backend-runtime-pruefung.md`, `.env.example`.
+Historischer Hosted-Bericht vor lokalem Schema-Gate: Hosted-Projekt, `.env`, Auth-Grundeinstellungen und MCP funktionieren und wurden real geprüft. Anwendungstabellen noch nicht übernommen: paralleler Backend-Bericht nennt Storage-Migrationsfehler `must be owner of table objects`; Schema-/Seed-/RLS-Gate offen. Geheimnisse ausschließlich lokal gespeichert, nicht ausgegeben oder committed. Keine eigenen Browser-/Serverprozesse; DB-Verbindungen geschlossen, Nutzer-Tab erhalten. Browser-Finding: zwei Playwright-Linkklicks meldeten Timeouts trotz sichtbarem Link; frischer AX-Zustand und Klick auf dessen aktuelle Elementnummer funktionierten. Pfade: `docs/supabase-provisioning.md`, `docs/backend-runtime-pruefung.md`, `.env.example`.
 
 ## Orchestrator-Fortsetzung: echtes lokales Supabase und Design-Nacharbeit
 
@@ -57,13 +57,16 @@ Die direkte Nutzer-Nachricht „Bitte mach mit deiner Aufgabe weiter.“ wurde i
 
 Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoanlage, Browser- oder Env-Arbeit. Ein separat dokumentierter Hosting-Fortsetzungsstand ist kein Nachweis des lokalen Schema-Gates. Keine App-Oberfläche vor der Designwahl.
 
-## Phase 1 – Fundament (nach Designwahl)
+## Phase 1 – Fundament (Tagwerk gewählt, aktiv)
 
+- [x] Designwahl und jüngste Arbeitsteilung im selben Arbeitsauftrag und in den Projektregeln festhalten; Phase-0-Meilenstein `689e735` erhalten.
+- [x] Dieselben ursprünglichen Frontend-/Backend-Unterchats mit je einem vollständigen Phase-1-Auftrag fortgesetzt; Modelle und Optionenschlüssel live bestätigt, Modelle erhalten. Hosting-Unterchat nicht neu gestartet.
+- [ ] Backend veröffentlicht umgesetzten Phase-1-Vertrag und Typen vor Frontend-Datenanbindung; Agenten übernehmen eigene Prüfung und Nacharbeit.
 - [ ] Login, Sitzung/Timeout, App-Hülle, beide Themes, Dashboard mit Seed, Streaming-Chat auf einem Modell, Audit-Schreiben.
 - [ ] Vertrag vor Datenanbindung prüfen; Typen, Lint, Tests, RLS und Node-Smoke sowie beide Themes prüfen.
 - [ ] Gate: Nutzer kann sich selbst anmelden und in beiden Themes eine echte Unterhaltung führen.
 
-Ergebnis: Nicht begonnen. Pfade: `src/`, `supabase/functions/`, `docs/api-contract.md`.
+Ergebnis: Phase 1 durch Nutzerwahl freigegeben. Tagwerk-Mocks sind Designreferenz; echter lokaler Supabase-Phase-0-Prüflauf bestanden. Anmeldung und KI-Nutzertest brauchen nutzerseitiges Konto, Provider-Secrets und freigegebenes Budget. Keine Agenten-Kontoanlage, kein vorgetäuschter Chat. Pfade: `src/`, `supabase/functions/`, `docs/api-contract.md`.
 
 ## Phase 2 – Sachbearbeiter
 
