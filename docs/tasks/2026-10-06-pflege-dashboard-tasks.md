@@ -25,18 +25,25 @@ Ergebnis: Vorbereitung lokal committed (`02c7ad8`); aktueller Entwurfsstand wird
 
 ## Supabase-Fortsetzung in Codex am 06.10.2026
 
+Fortsetzung nach direkter Nutzerfreigabe: Werte aus `env.md` geschützt in `.env` übernehmen und autonom weiterarbeiten. Projekt `ttbfpqveexmlqxkzwlmz` (`pflegedashboard`) ist jetzt `ACTIVE_HEALTHY` in Frankfurt. MCP-SQL-Abfrage erfolgreich; noch keine Tabellen oder Migrationen. Parallele Backend-/Designänderungen gehören anderen Arbeiten und werden erhalten.
+
+- [x] `env.md` zusätzlich ignorieren; Passwort und Verbindungsadresse ohne Ausgabe übernehmen. Beide Geheimnisdateien unversioniert und Rechte 0600.
+- [x] Lokale `.env` per echter TLS-Datenbankverbindung prüfen; öffentliche API-Konfiguration vervollständigen. TLS-Socket verschlüsselt und mit offizieller CA verifiziert; Auth-API HTTP 200.
+- [x] Auth-Grundeinstellungen prüfen und öffentliche Registrierung abschalten. Site URL 5173, Access-Token 300s. Automatische Inaktivitätsabmeldung auf Free nicht verfügbar.
+- [ ] Aktuellen Backend-Abnahmestand prüfen; nur freigegebene, geprüfte Migrationen übertragen.
+
 - [x] Direkten Folgeauftrag erfassen; vorhandene Anforderungen, Einrichtung und Migrationen lesen.
 - [x] Browser-Erweiterung erfolgreich mit vorhandenem Supabase-Projektanlage-Tab verbinden. Dies ersetzt für diesen Chat den früheren Werkzeugblock.
 - [x] Formular prüfen: vorhandener Name `pflegedashboard`, Organisation `kens projects` im Free-Tarif. Frankfurt auswählen; automatische Tabellenfreigabe deaktivieren und automatische RLS aktivieren.
 - [x] Supabase-Erweiterung finden und zur nutzerseitigen Verbindung anbieten; aktuellen OAuth-/MCP-Weg in offiziellen Quellen prüfen.
-- [ ] Nutzer schließt Passwort-Eingabe und Projektanlage ab; Werkzeugregel verlangt Übergabe bei neuen Zugangsdaten.
-- [ ] Projektkennung, Region und Tarif nach Anlage prüfen; öffentliche Registrierung ausschalten.
-- [x] Supabase-Erweiterung installiert und autorisiert; MCP durch erfolgreiche Aufrufe von `list_organizations` und `list_projects` geprüft. Nur bestehendes `service-oalab` sichtbar, neues Pflege-Projekt fehlt noch.
-- [ ] Projektspezifischen Datenbankzugriff nach Anlage prüfen; gegebenenfalls manuelle Verbindung projektspezifisch begrenzen.
-- [ ] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen.
+- [x] Nutzer hat Projekt angelegt und Passwort lokal bereitgestellt; keine Passworteingabe durch den Agenten.
+- [x] Projektkennung, Region und Free-Tarif nach Anlage prüfen; öffentliche Registrierung ausschalten und über API bestätigen.
+- [x] Supabase-Erweiterung installiert und autorisiert; MCP durch erfolgreiche Aufrufe von `list_organizations` und `list_projects` geprüft. Inzwischen ist auch `pflegedashboard` sichtbar und per SQL erreichbar.
+- [x] Projektspezifischen Datenbankzugriff nach Anlage per MCP-SQL geprüft. Keine zusätzliche globale MCP-Verbindung angelegt.
+- [x] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen. Supabase-Sicherheitsprüfung nach Korrektur des RLS-Trigger-EXECUTE-Rechts ohne Meldungen.
 - [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
 
-Ergebnis: Browserzugriff und MCP-Verbindung funktionieren; Formular vorbereitet. Neues Projekt laut MCP-Projektliste noch nicht angelegt; Datenbankeinrichtung und `.env` ausstehend. Keine Geheimnisse gelesen oder gespeichert. Kein eigener Browser-/Serverprozess gestartet. Vorhandenen Nutzer-Tab erhalten. Pfade: `docs/supabase-provisioning.md`, `supabase/`, `.env.example`.
+Ergebnis: Hosted-Projekt, `.env`, Auth-Grundeinstellungen und MCP funktionieren und wurden real geprüft. Anwendungstabellen noch nicht übernommen: paralleler Backend-Bericht nennt Storage-Migrationsfehler `must be owner of table objects`; Schema-/Seed-/RLS-Gate offen. Geheimnisse ausschließlich lokal gespeichert, nicht ausgegeben oder committed. Keine eigenen Browser-/Serverprozesse; DB-Verbindungen geschlossen, Nutzer-Tab erhalten. Browser-Finding: zwei Playwright-Linkklicks meldeten Timeouts trotz sichtbarem Link; frischer AX-Zustand und Klick auf dessen aktuelle Elementnummer funktionierten. Pfade: `docs/supabase-provisioning.md`, `docs/backend-runtime-pruefung.md`, `.env.example`.
 
 ## Phase 1 – Fundament (nach Designwahl)
 

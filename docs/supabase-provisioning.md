@@ -2,7 +2,54 @@
 
 Stand: 06.10.2026. Implementierungsordner: `/Users/kentoky/Documents/React Projects/pflege-dashboard`.
 
-## Aktualisierung: Browseranschluss in Codex bestätigt
+## Aktueller Stand: echte lokale Verbindung geprüft
+
+Die neue Datenbank `pflegedashboard`, Kennung `ttbfpqveexmlqxkzwlmz`, ist in `eu-central-1` (Frankfurt) aktiv und gesund. Der bestehende Free-Tarif wurde beibehalten. Nur dieses neue Projekt wurde eingerichtet; kein anderes Projekt geändert.
+
+### Lokale Werte und Schutz
+
+Auf direkte Nutzeranweisung wurden das vorhandene Datenbankpasswort und die Verbindungsangaben aus `env.md` in `.env` übernommen. Der Passwortplatzhalter in der gelieferten Verbindung wurde ersetzt; Sonderzeichen werden URL-kodiert. `env.md` und `.env` sind ignoriert, unversioniert und haben Rechte `0600`. `env.md` blieb inhaltlich erhalten.
+
+Befüllt sind `PROJECT_REF`, `SUPABASE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `DATABASE_URL`, `SUPABASE_DB_PASSWORD`, `PGSSLROOTCERT` und `PGSSLMODE`. Der öffentliche Publishable-Key wurde über den sichtbaren Dashboard-Eintrag direkt in die lokale Datei geschrieben, ohne ihn auszugeben. Keine Admin-/Service-Role-/Provider-Schlüssel vorsorglich ausgelesen; kein persönlicher Verwaltungstoken nötig, da MCP über die autorisierte Erweiterung funktioniert.
+
+Das offizielle CA-Zertifikat liegt lokal in `.local/supabase-ca.crt`. Der erste Node-Verbindungsversuch ohne diese CA schlug mit `SELF_SIGNED_CERT_IN_CHAIN` fehl. Mit der offiziellen CA gelang die Verbindung bei aktivierter Zertifikatsprüfung. Keine TLS-Prüfung abgeschaltet. `DATABASE_URL` verwendet den vom Nutzer gelieferten Transaction-Pooler auf Port 6543. Bei späteren persistenten Clients bzw. Migrationswerkzeugen den dokumentierten Direkt-/Session-Weg passend prüfen; keine benannten Prepared Statements über den Transaction-Pooler.
+
+### Ausgeführte Nachweise und Einstellungen
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Projekt über MCP | `ACTIVE_HEALTHY`, Frankfurt, PostgreSQL 17.11 |
+| Echte lokale Datenbankverbindung aus `.env` | `current_database() = postgres`, Rolle `postgres`; Verbindung danach geschlossen |
+| TLS vom lokalen Client zum Pooler | `encrypted = true`, `authorized = true` mit offizieller CA |
+| Auth-API mit lokalem Publishable-Key | HTTP 200 |
+| Öffentliche Registrierung | Dashboard gespeichert; Auth-API bestätigt `disable_signup = true` |
+| Anonyme Anmeldung | ausgeschaltet; E-Mail-Anmeldung eingeschaltet |
+| Site URL | gespeichert: `http://localhost:5173`, passend zur lokalen Projektkonfiguration |
+| Access-Token-Gültigkeit | im Dashboard gespeichert: 300 Sekunden |
+| Refresh-Token-Schutz | aktiv, Wiederverwendungsintervall 10 Sekunden erhalten |
+| Sitzungsdauer/Inaktivität | auf Free im Dashboard gesperrt; keine 8h-/15min-Wirkung behauptet, kein Upgrade gebucht |
+| Sicherheitsprüfung nach Korrektur | Supabase Security Advisors: `lints: []` |
+| Aktuelles Anwendungsschema | 0 Tabellen, 0 Storage-Buckets, 0 Auth-Nutzer; keine App-Migration übertragen |
+
+Hinweis zum TLS-Nachweis: `pg_stat_ssl` zeigt hinter dem Pooler dessen interne Datenbankverbindung und meldete hier `false`. Dies wurde nicht als Aussage über die geprüfte lokale TLS-Verbindung verwendet. Der Node-TLS-Socket bestätigte Verschlüsselung und Zertifikatsprüfung. Eine durchgängige TLS-Verbindung aller internen Supabase-Strecken wurde nicht nachgewiesen.
+
+Der bei der Projektanlage erzeugte RLS-Eventtrigger war vom Supabase-Prüfer als öffentlich ausführbare privilegierte Funktion gemeldet worden. Zielgenau korrigiert, ohne den automatischen Schutz auszuschalten:
+
+```sql
+revoke execute on function public.rls_auto_enable() from public, anon, authenticated;
+```
+
+Danach `has_function_privilege` für beide Browserrollen `false`; Eventtrigger `ensure_rls` weiterhin aktiv. Kein Anwendungs-DDL, keine fremden Objekte geändert.
+
+### Offene Backend-Abnahme
+
+Die Umgebung und Verbindung sind eingerichtet. Die Anwendungstabellen sind bewusst noch nicht übernommen: Der parallel entstandene [Backend-Laufzeitbericht](backend-runtime-pruefung.md) bestätigt einen echten Migrationsfehler (`must be owner of table objects`) und noch kein bestandenes Schema-/Seed-/RLS-Gate. Nach Projektregeln erst diesen Fehler im zuständigen Backend beheben und prüfen, dann geprüfte Migrationen auf das verifizierte Projekt übertragen. Generierte Datenbanktypen, privater Anhangsspeicher und echter Login-/Nutzerablauf stehen damit noch aus. Keine neuen Login-Konten angelegt.
+
+Keine eigenen Browser-, Server- oder Datenbankprozesse gestartet. Nur den vorhandenen Nutzer-Tab verwendet und erhalten. Eigene direkte Datenbankverbindungen geschlossen. Parallele Backend-/Designarbeit nicht verändert oder in den Setup-Commit aufgenommen.
+
+Quellen: [Supabase-Verbindungen und TLS](https://supabase.com/docs/guides/database/connecting-to-postgres), [Supabase MCP](https://supabase.com/docs/guides/ai-tools/mcp). Browsernachweise liegen außerhalb des Repositorys im Codex-Artefaktordner (`supabase-anmeldung.png`, `supabase-sitzungen.png`).
+
+## Vorheriger Zwischenstand: Browseranschluss in Codex bestätigt
 
 Am 06.10.2026 konnte Codex den bereits geöffneten Supabase-Tab über die Browser-Erweiterung tatsächlich lesen und bedienen. Die weiter unten dokumentierte Anschlussblockade betrifft den früheren TreeChat-Lauf und gilt nicht für diesen Codex-Chat.
 

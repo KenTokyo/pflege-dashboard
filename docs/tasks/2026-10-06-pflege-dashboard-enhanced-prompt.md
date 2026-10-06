@@ -37,6 +37,10 @@ Fortsetzung: Den verfügbaren Browseranschluss für die tatsächliche Supabase-E
 
 ## Improved prompt
 
+### Weitere direkte Nutzeranweisung 2026-10-06 (Original)
+
+sehr gut, bitte inmal die env nehmen und echte eintragen: /Users/kentoky/Documents/React Projects/pflege-dashboard/env.md setze fort und arbiete bitte autonom
+
 Setze die vollständigen [Anforderungen](../anforderungen.md) als eigenständiges Projekt in `/Users/kentoky/Documents/React Projects/pflege-dashboard` um. Der aktuelle TreeChat liegt in `/Users/kentoky/Documents/React Projects/ki-pflegedashboard`; beide lokalen Unterchats erhalten den tatsächlichen Zielordner ausdrücklich. Der Orchestrator erstellt Arbeitsdokumentation, verteilt die Arbeit, prüft und bewertet sie; die Anwendung bauen ausschließlich die zwei beauftragten Unterchats.
 
 Prüfe die konkreten Modelle und Parameter mit `treechat_capabilities`. Die Liste enthält nur Favoriten; fehlende Einträge beweisen keine fehlende Startfähigkeit. Nutzerkorrektur: GPT-6.1 Sol über `provider: codex`, `model: gpt-6.1-sol`, `reasoningEffort: xhigh`; Opus 5.5 über `claudeAgent`, `claude-opus-5-5`, `effort: high`. Die Opus-Kennung ist zusätzlich im aktuellen lokalen TreeChat-Modellregister verifiziert; beide konkreten Startwerte wurden vom Tool akzeptiert. Höchstens vier aktive Unterchats, davon ein Opus und drei Sol; für Phase 0 weiterhin nur zwei. Lokale Umgebung, voller Zugriff, Rückmeldung nach Abschluss. Keine neuen Agenten für Nacharbeit.
