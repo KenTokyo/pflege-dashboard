@@ -1,0 +1,22 @@
+{
+  "name": "pflege-dashboard-mocks",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Phase-0-Designmocks: statisches HTML, Renderer und Prüfungen. Kein App-Code.",
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/check-source.mjs",
+    "render": "node tools/render.mjs",
+    "check:png": "node tools/check-png.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "1.63.0",
+    "lucide-static": "1.52.0",
+    "@fontsource-variable/inter": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource/atkinson-hyperlegible-next": "5.3.0"
+  }
+}

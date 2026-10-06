@@ -11,13 +11,23 @@ Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwe
 - Orchestrator: Aufgaben verteilen, Verträge prüfen, Ergebnisse unabhängig prüfen, bewerten und dokumentieren. Keine App-Implementierung; höchstens kleine Verbindungsänderungen. Er besitzt diese Regeln, `docs/anforderungen.md`, `docs/tasks/` und Gate-Berichte.
 - Derselbe Frontend-Unterchat besitzt `docs/mocks/`, später `src/` außer ausdrücklich vom Backend verwalteten generierten Typen, Designwerte, Bewegung und UI-Tests. In Phase 0 liegen etwaige Mock-Abhängigkeiten und Aufnahmeskripte ausschließlich in `docs/mocks/`.
 - Derselbe Backend-Unterchat besitzt `supabase/`, `types/`, `backend/`, `docs/api-contract.md` und Backend-Einrichtungs-/Testdokumentation. Er baut keine UI. Paket-/Testscripts in Phase 0 unter `backend/`, um Dateikollisionen zu vermeiden.
-- Höchstens zwei aktive TreeChat-Unterchats. Keine weiteren Chats, Provider-Subagenten oder Bildgenerierungs-Unterchats starten. Nacharbeit geht an den ursprünglichen Unterchat. Änderungen am API-Vertrag müssen zum Orchestrator.
+- Nutzerkorrektur vom 06.10.2026: höchstens vier aktive TreeChat-Unterchats, davon höchstens ein Opus 5.5 mit `high` und bis zu drei GPT-6.1-Sol mit `xhigh`; Bildarbeit darf `high` verwenden. Für Phase 0 sind genau zwei aktiv. Ohne Auftrag des Orchestrators keine weiteren Chats, Provider-Subagenten oder Bildgenerierungs-Unterchats starten. Nacharbeit geht an den ursprünglichen Unterchat. Änderungen am API-Vertrag müssen zum Orchestrator.
 
 ## Grenzen
 
 Keine Konten erstellen, auch keine lokalen Auth-Testkonten. Keine Zugangsdaten eingeben oder aus anderen Projekten lesen. Keine Schlüssel ausgeben, loggen oder committen. Lokale Supabase-Status-/Startausgaben vor Anzeige redigieren oder zunächst ausschließlich in ignorierte `.local/`-Dateien schreiben. RLS-Prüfungen mit synthetischen SQL-Claims sind keine angelegten Login-Konten. Noch nicht ausführbare angemeldete Nutzertests ehrlich benennen.
 
 Nur fiktive Daten. Ein eigener lokaler Supabase-Stack darf gestartet werden, wenn eine vorhandene Container-Laufzeit verfügbar ist; keine sichtbaren Apps öffnen. Keine entfernten Projekte, Provideraufrufe, Deployment oder Veröffentlichung. Hosting und Schlüssel setzt später der Nutzer selbst auf. Anforderungen und Setup-Dokumente dürfen keine tatsächlichen Geheimnisse enthalten.
+
+### Konkrete Hosting-Freigabe vom 06.10.2026
+
+Der Nutzer hat anschließend die Anlage des eigenen Supabase-Projekts im bereits geöffneten Browser über das ChatGPT-Browser-Plugin autorisiert, einschließlich Database-Passwort und geschützter lokaler `.env`. Das überschreibt das ältere Projektanlageverbot nur für dieses neue Pflege-Dashboard-Projekt (EU Frankfurt). Kein neues Nutzerkonto, keine Login-Eingabe, kein kostenpflichtiger Plan und keine Änderung fremder Projekte. Ein dritter Sol-6.1-xhigh-Unterchat besitzt dafür ausschließlich `docs/supabase-provisioning.md`, `.env.example` und gegebenenfalls die echte ignorierte `.env`.
+
+Die Freigabe ersetzt keine fehlende Werkzeugfunktion: aktuell ist der TreeChat-Browser im Orchestrator-Scope nicht verbunden und kein ChatGPT-Browser-Plugin-Connector verfügbar. Keine Umgehung über persönlichen Chrome/OS-Automation. Keine Geheimnisse in Toolausgaben, Chat, Doku oder Git; echte Werte nur über einen tatsächlich verfügbaren geschützten Secret-to-file-Weg nach `.env`, sonst bleibt dieser Schritt ehrlich blockiert. Vorhandene Nutzerwerte und Browsertabs erhalten. Hosted-Migrationen erst nach geprüftem Backend-Gate.
+
+### Letzte Nutzergrenze vom 06.10.2026
+
+„nein nur wenn es geht mit supabase oder garnicht“: Kein eigenständiger PostgreSQL-Ersatz und keine Einrichtungsanleitung als Ersatzlieferung. Supabase muss tatsächlich verfügbar sein. Backend- und Hosting-Unterchat sind deshalb unterbrochen; vorhandene Entwürfe werden erhalten, aber nicht als eingerichtetes/geprüftes Supabase ausgegeben. Ob unabhängige Designmocks weiterlaufen, wurde zur Klärung gestellt. Nach erneuter Bestätigung fehlender ChatGPT-Browser-/Computer-Use-Werkzeuge wurde auch der Frontend-Unterchat vorsorglich unterbrochen. Alle drei aktuellen Unterchats bleiben gestoppt, bis ein tatsächlicher Anschluss oder eine klare Fortsetzungsanweisung vorliegt. Keine neue Ersatzarbeit.
 
 Der konkrete Projektauftrag `docs/anforderungen.md` hat Vorrang vor allgemeinen Git-Defaults: lokal pro Meilenstein committen, **niemals pushen**. Der Orchestrator führt die Meilenstein-Commits nach Prüfung aus. Unterchats stage/committen keine parallelen Dateien und verändern keine Git-Historie.
 
