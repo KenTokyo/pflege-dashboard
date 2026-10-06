@@ -472,6 +472,8 @@
 /* ---------- Dialog ---------- */
 @layer components {
   .dialog {
+    /* Tailwinds Grundregel setzt margin: 0; native modale Zentrierung ausdrücklich erhalten. */
+    margin: auto;
     width: min(480px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); padding: 0;
     border: 1px solid var(--border-strong); border-radius: var(--radius);
     background: var(--surface); color: var(--text); box-shadow: var(--shadow);

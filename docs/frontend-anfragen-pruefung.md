@@ -37,3 +37,9 @@ Interaktionsumfang vorher: Beispielfragen fehlten; Neuladen verlor Anmeldung. Na
 Die Proxy-Fixture wurde nach ausdrücklicher Besitzfreigabe lediglich um die vollständige gültige v1.4-Sessionantwort ergänzt; der Produktparser wurde nicht abgeschwächt. Der Quell-Gate erlaubt Browser-Speicher gezielt nur für den autorisierten Anmeldespeicher und die bestehende Theme-Einstellung. Automatischer Hintergrund-Refresh bleibt verboten.
 
 Der gemeinsame Backend-Vertrag v1.4 wurde konsumiert. Die zugehörige Hosted-Migration, Bereitstellung und Prüfung des echten bereits angelegten Kontos gehören zum Orchestrator-/Backend-/Browser-Gate. Kein Commit, Push oder Hosted-Schreibzugriff durch diesen Frontend-Agenten.
+
+## Nacharbeit aus der Live-Sichtprüfung: Dialog zentrieren
+
+Der Orchestrator belegte nach Bereitstellung den geöffneten Beispieldialog bei 1920 × 821 px an Position (0, 0) statt in der Mitte. Ursache im Quelltext: Tailwind Preflight setzt global `margin: 0`, während die gemeinsame `.dialog`-Hülle die native automatische Dialogmarge nicht ausdrücklich wiederherstellte. Die Hülle setzt nun `margin: auto`. Die bestehenden Vollbildregeln unter 768 px setzen weiterhin gezielt `margin: 0`.
+
+Nach Änderung: Produktionsbuild inklusive TypeScript, Quellprüfung mit 46 Kontrastpaaren und `git diff --check` bestanden. Keine Verhaltensänderung an Auswahl, Entwurfübernahme oder Anmeldung. Tatsächliche Zentrierung nach neuem Deployment sowie die kleine Ansicht prüft der Orchestrator im vorhandenen Browser. Kein eigener Browser oder Server gestartet.
