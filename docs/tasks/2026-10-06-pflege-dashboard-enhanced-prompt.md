@@ -131,3 +131,11 @@ Original: „ja bitte!“ und „nein die regal niemals pushen soll raus“. Die
 „ja soll ich dir das pw geben, du musst dich ja eingloggen oder ich logge mich ein aber bitte. abspeichern das login, damit ich mich nicht einloggen muss jedes mal“
 
 Arbeitsauftrag: Backend behebt Vercel-Paketfehler, Frontend liefert Alltagshilfen und bewusst gespeicherte Supabase-Sitzung ohne Passwortspeicherung, unabhängiger Browserprüfer prüft anschließend echte veröffentlichte Anmeldung/Chat/Verlauf/Vorlagen in beiden Themes. Nutzer meldet sich einmal selbst an; kein Passwort im Chat. Höchstens drei Arbeitsagenten, keine überschneidenden Dateiänderungen.
+
+## Nutzerkorrektur 06.10.2026: OpenCode-Schlüssel
+
+Unverändert: „der ist gültig“; „das ist der depeseek key aus opencode“; „ja dumm, selbst schuld, das war klar“. Der Nutzer liefert die OpenCode-Konsole seines Servicekontos als Beleg. Kein Schlüsselwert gehört in diese Dokumentation.
+
+Auftrag: Die falsche direkte DeepSeek-Zuordnung korrigieren. OpenCode Zen stellt DeepSeek V4.1 Flash unter `deepseek-v4.1-flash` über `https://opencode.ai/zen/v1/chat/completions` bereit. Bestehenden geschützten Schlüssel für seinen tatsächlichen Anbieter verwenden; keine neue Nutzereingabe erzwingen. Normale Zugriffskontrolle, Verlauf und Verbrauchserfassung erhalten. Danach echte Liveantwort und Folgefrage samt Neuladen prüfen.
+
+Konkrete Anschlussentscheidung nach Kontoprüfung: Vorhandenes Go-Abo aktiv, separates Guthaben 0 USD, Zusatznutzung deaktiviert. Gewählt ist daher `https://opencode.ai/zen/go/v1/chat/completions` aus https://opencode.ai/docs/go/ für dasselbe Modell. Kein Pay-as-you-go-Fallback, keine zusätzlichen Zahlungen oder Änderung von Kontolimits.

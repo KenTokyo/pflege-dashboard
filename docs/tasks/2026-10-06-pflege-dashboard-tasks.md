@@ -147,3 +147,15 @@ Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .giti
 - [x] Vorlagen live: 5×3 Auswahlmöglichkeiten, Entwurf erhalten, kein automatisches Senden.
 - [x] Echten Providerfehler eingegrenzt: DeepSeek weist Vercel-Schlüssel mit HTTP401 ab. Sichere Diagnose veröffentlicht (`f489365`).
 - [ ] Gültigen Schlüssel durch Nutzer geschützt in Vercel ersetzen, danach reale Antwort/Folgefrage/Verlauf abnehmen.
+
+## Korrektur: tatsächlicher Anbieter OpenCode
+
+- [x] Nutzerherkunft geklärt: bestehender Schlüssel gehört OpenCode, nicht der direkten DeepSeek-API. Vorige pauschale Ungültigkeitsbehauptung zurückgenommen.
+- [x] Offizielle OpenCode-Dokumentation und öffentliche Modellliste bestätigen DeepSeek V4.1 Flash; im eigenen OpenCode-Konto ist dieses Modell bereits aktiviert. Keine Kontoeinstellung geändert.
+- [ ] Backend/Registry auf OpenCode Go im bestehenden Abo samt passender Modellkennung und Streamingformat korrigieren.
+- [ ] Frontend-Anzeigen/Vertrag prüfen, lokal unabhängig abnehmen und veröffentlichen.
+- [ ] Echte Vercel-Antwort, Folgefrage und gespeicherten Verlauf abnehmen.
+
+Die vorherige offene Aufforderung zum Schlüsselersatz ist überholt. Kein erneuter Key erforderlich allein wegen des früheren401 am falschen Anbieter.
+
+- [x] OpenCode-Overview live geprüft: aktives Go-Abo, verbleibendes Kontingent; separates Guthaben0USD, Zusatznutzung ausgeschaltet. Deshalb dokumentierten Go-Anschluss verwenden, keine Guthaben-/Tarifänderung.

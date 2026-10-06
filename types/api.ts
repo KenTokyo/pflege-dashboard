@@ -9,7 +9,7 @@ export type {
 export type ProposalKind = "document" | "task" | "note" | "handover";
 export type ModelSnapshot = {
   registryId: UUID;
-  provider: "openai" | "anthropic" | "mistral";
+  provider: "openai" | "anthropic" | "mistral" | "deepseek" | "opencode";
   providerModelId: string;
   displayName: string;
   region: "eu" | "us" | "unverified";

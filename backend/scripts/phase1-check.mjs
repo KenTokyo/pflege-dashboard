@@ -95,6 +95,7 @@ try {
     await step("scripts/supabase-safe.mjs", ["test"]);
     await step("scripts/context-historical-repro.mjs");
     await step("scripts/demo-setup-check.mjs");
+    await step("scripts/opencode-setup-check.mjs");
     await step("scripts/concurrency.mjs");
     await step("scripts/phase1-concurrency.mjs");
     await step("node_modules/typescript/bin/tsc", ["-p", "tsconfig.build.json"]);

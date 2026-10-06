@@ -1,6 +1,7 @@
 import { CircleAlert, PencilLine, RefreshCw, RotateCcw, Send, X } from 'lucide-react';
 import { SafeMarkdown } from '../../chat/Markdown';
 import { recoveryFor, type PendingTurn } from '../../chat/streamStore';
+import { modelDisplayName } from '../../data/model';
 import { AgentMeta } from './MessageView';
 
 type Props = {
@@ -23,7 +24,7 @@ const FAILED_TITLE: Record<string, string> = {
 export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss }: Props) {
   const live = turn.phase === 'sending' || turn.phase === 'streaming';
   const recovery = recoveryFor(turn);
-  const model = turn.model ? { displayName: turn.model.displayName, region: turn.model.region } : null;
+  const model = turn.model ? { displayName: modelDisplayName(turn.model.displayName, turn.model.provider), region: turn.model.region } : null;
 
   return (
     <>

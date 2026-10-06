@@ -6,11 +6,12 @@ export type Context = {
   serverTimeZone?: "Europe/Berlin";
   model: {
     registryId: string;
-    provider: "openai" | "deepseek";
+    provider: "openai" | "deepseek" | "opencode";
     providerModelId: string;
     displayName: string;
     region: string;
   };
+  acceptedResponseModelIds?: string[];
   promptVersionId: string;
   instructions: string;
   input: { role: "user" | "assistant"; content: string }[];
@@ -210,6 +211,7 @@ export type DeepSeekDiagnostic = {
   contentType?: "sse" | "json" | "other" | "missing";
   observedModel?:
     | "deepseek-flash"
+    | "deepseek-v4.1-flash"
     | "deepseek-v4-flash"
     | "deepseek-v4-flash-vision-exp"
     | "deepseek-v4-pro"
@@ -233,6 +235,7 @@ function classifiedDeepSeekModel(
 ): DeepSeekDiagnostic["observedModel"] {
   const known = [
     "deepseek-flash",
+    "deepseek-v4.1-flash",
     "deepseek-v4-flash",
     "deepseek-v4-flash-vision-exp",
     "deepseek-v4-pro",
@@ -272,6 +275,8 @@ export class DeepSeekProvider implements Provider {
     private key: string,
     private fetcher: typeof fetch = fetch,
     private report: (diagnostic: DeepSeekDiagnostic) => void = () => {},
+    private provider: "deepseek" | "opencode" = "deepseek",
+    private conversationId?: string,
   ) {}
   private fail(
     reason: DeepSeekDiagnostic["reason"],
@@ -289,12 +294,14 @@ export class DeepSeekProvider implements Provider {
     context: Context,
     signal: AbortSignal,
   ): AsyncGenerator<ProviderPart> {
-    if (context.model.provider !== "deepseek" || !this.key)
+    if (context.model.provider !== this.provider || !this.key)
       throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
     let response: Response;
     try {
       response = await this.fetcher(
-        "https://api.deepseek.com/chat/completions",
+        this.provider === "opencode"
+          ? "https://opencode.ai/zen/go/v1/chat/completions"
+          : "https://api.deepseek.com/chat/completions",
         {
           method: "POST",
           redirect: "error",
@@ -302,6 +309,14 @@ export class DeepSeekProvider implements Provider {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.key}`,
+            ...(this.provider === "opencode"
+              ? {
+                  "User-Agent": "pflege-dashboard/1.5",
+                  ...(this.conversationId
+                    ? { "x-opencode-session": this.conversationId }
+                    : {}),
+                }
+              : {}),
           },
           body: JSON.stringify({
             model: context.model.providerModelId,
@@ -344,9 +359,18 @@ export class DeepSeekProvider implements Provider {
       done = false,
       observed: string | undefined,
       consistent = true;
+    let finishReason: string | undefined;
+    let invalidTerminalDelta = false,
+      invalidFinishReason = false;
+    const accepted =
+      this.provider === "opencode"
+        ? (context.acceptedResponseModelIds ?? [context.model.providerModelId])
+        : [context.model.providerModelId];
     for await (const data of sseData(response.body, signal)) {
       if (data === "[DONE]") {
+        if (done) this.fail("EVENT_ENVELOPE");
         done = true;
+        if (this.provider === "opencode") continue;
         break;
       }
       let event: any;
@@ -362,29 +386,98 @@ export class DeepSeekProvider implements Provider {
         errorCode: classifiedDeepSeekError(event?.error),
       };
       if (
+        this.provider === "opencode" &&
+        event &&
+        typeof event === "object" &&
+        Array.isArray(event.choices) &&
+        event.choices.length === 0
+      ) {
+        // Actual gateway source appends this exact subscription-cost trailer after DONE.
+        if (
+          done &&
+          terminal &&
+          Object.keys(event).every((k) => ["choices", "cost"].includes(k)) &&
+          typeof event.cost === "string" &&
+          /^\d{1,16}(?:\.\d{1,16})?$/.test(event.cost)
+        )
+          continue;
+        // Content-free gateway metadata never establishes usage or successful completion.
+        if (
+          !done &&
+          !terminal &&
+          !event.usage &&
+          Object.keys(event).every((k) =>
+            ["id", "object", "created", "model", "choices", "usage"].includes(
+              k,
+            ),
+          )
+        ) {
+          if (
+            typeof event.model === "string" &&
+            event.model.length > 0 &&
+            event.model.length <= 300
+          ) {
+            if (!accepted.includes(event.model))
+              this.fail("MODEL_MISMATCH", metadata);
+            observed ??= event.model;
+          } else if (event.model !== "" && event.model !== undefined)
+            this.fail("EVENT_ENVELOPE", metadata);
+          continue;
+        }
+      }
+      // Blank intermediate fields may inherit observed metadata; usage must name its actual model.
+      const currentModel =
+        this.provider === "opencode" && event?.model === "" && !event.usage
+          ? observed
+          : event?.model;
+      if (
         terminal ||
+        done ||
         !event ||
         typeof event !== "object" ||
         event.error ||
-        typeof event.model !== "string" ||
-        event.model.length < 1 ||
-        event.model.length > 300
+        typeof currentModel !== "string" ||
+        currentModel.length < 1 ||
+        currentModel.length > 300
       )
         this.fail("EVENT_ENVELOPE", metadata);
-      observed ??= event.model;
-      consistent &&= observed === event.model;
-      if (
-        !Array.isArray(event.choices) ||
-        event.choices.length !== 1 ||
-        event.choices[0]?.index !== 0
-      )
+      observed ??= currentModel;
+      consistent &&=
+        observed === currentModel ||
+        (this.provider === "opencode" &&
+          accepted.includes(observed) &&
+          accepted.includes(currentModel));
+      if (!Array.isArray(event.choices)) this.fail("CHOICE_SHAPE", metadata);
+      const usageOnly =
+        this.provider === "opencode" &&
+        event.choices.length === 0 &&
+        finishReason !== undefined;
+      const choice = event.choices[0];
+      if (!usageOnly && (event.choices.length !== 1 || choice?.index !== 0))
         this.fail("CHOICE_SHAPE", metadata);
-      const choice = event.choices[0],
-        delta = choice.delta;
+      const delta = choice?.delta;
       const ending =
-        choice.finish_reason !== null && choice.finish_reason !== undefined;
+        usageOnly ||
+        (choice.finish_reason !== null && choice.finish_reason !== undefined);
       if (ending) {
+        if (!usageOnly) {
+          invalidFinishReason ||=
+            typeof choice.finish_reason !== "string" ||
+            (finishReason !== undefined &&
+              finishReason !== choice.finish_reason);
+          finishReason =
+            typeof choice.finish_reason === "string"
+              ? choice.finish_reason
+              : "invalid";
+          invalidTerminalDelta ||= Boolean(
+            delta?.content ||
+            delta?.tool_calls?.length ||
+            delta?.reasoning_content,
+          );
+        }
         const usage = event.usage;
+        // OpenAI-compatible gateways may put usage in a following choices:[] chunk.
+        if (!usage && this.provider === "opencode" && !usageOnly) continue;
         if (
           !Number.isSafeInteger(usage?.prompt_tokens) ||
           usage.prompt_tokens < 0 ||
@@ -392,7 +485,6 @@ export class DeepSeekProvider implements Provider {
           usage.completion_tokens < 0
         )
           this.fail("USAGE_SHAPE", metadata);
-        // Even failed/mismatched terminals carry known usage to conservative SQL finalization.
         yield {
           usage: {
             inputTokens: usage.prompt_tokens,
@@ -401,29 +493,26 @@ export class DeepSeekProvider implements Provider {
           },
         };
         if (
-          choice.finish_reason !== "stop" ||
+          finishReason !== "stop" ||
+          invalidFinishReason ||
+          invalidTerminalDelta ||
           !consistent ||
-          event.model !== context.model.providerModelId ||
+          !accepted.includes(event.model) ||
           usage.prompt_tokens > context.inputTokenBound ||
-          usage.completion_tokens > context.maxOutputTokens ||
-          delta?.content ||
-          delta?.tool_calls?.length ||
-          delta?.reasoning_content
+          usage.completion_tokens > context.maxOutputTokens
         )
           this.fail(
-            !consistent || event.model !== context.model.providerModelId
+            !consistent || !accepted.includes(event.model)
               ? "MODEL_MISMATCH"
-              : choice.finish_reason !== "stop"
+              : finishReason !== "stop"
                 ? "FINISH_REASON"
-                : usage.prompt_tokens > context.inputTokenBound ||
-                    usage.completion_tokens > context.maxOutputTokens
-                  ? "TOKEN_BOUND"
-                  : "TERMINAL_DELTA",
+                : "TOKEN_BOUND",
             metadata,
           );
         terminal = true;
       } else {
         if (
+          finishReason !== undefined ||
           !delta ||
           typeof delta !== "object" ||
           delta.tool_calls?.length ||
@@ -452,5 +541,17 @@ export class DeepSeekProvider implements Provider {
         httpStatus: response.status,
         contentType,
       });
+  }
+}
+
+/** Explicit OpenCode Go route. No endpoint override or cross-provider key fallback. */
+export class OpenCodeProvider extends DeepSeekProvider {
+  constructor(
+    key: string,
+    fetcher: typeof fetch = fetch,
+    report: (diagnostic: DeepSeekDiagnostic) => void = () => {},
+    conversationId?: string,
+  ) {
+    super(key, fetcher, report, "opencode", conversationId);
   }
 }

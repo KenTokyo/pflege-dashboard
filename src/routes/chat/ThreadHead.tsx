@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { Archive, ArchiveRestore, ArrowLeft, Check, Cpu, Pencil, X } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { ErrorState } from '../../components/States';
-import { MODE_LABEL, REGION_LABEL, type EffectiveModel } from '../../data/model';
+import { MODE_LABEL, REGION_LABEL, modelDisplayName, type EffectiveModel } from '../../data/model';
 import { useArchiveConversation, useAssignRecipient, useRenameConversation } from '../../data/queries';
 import { baseName } from '../../lib/format';
 import type { CareRecipient, ConversationRow, Enums } from '../../services/types';
@@ -134,7 +134,7 @@ export function ThreadHead({ conversation, people, mode, model, busy }: Props) {
           <Cpu className="i" size={15} aria-hidden="true" />
           {model?.model ? (
             <>
-              {model.model.display_name}
+              {modelDisplayName(model.model.display_name, model.model.provider)}
               <span className={`region ${model.model.hosting_region === 'eu' ? 'region-eu' : ''}`}>{REGION_LABEL[model.model.hosting_region]}</span>
             </>
           ) : (

@@ -111,3 +111,29 @@ Erste echte KI-Anfrage 19:11 schlug ohne Inhalt/Usage fehl. Die ursprüngliche g
 Die anschließende echte Anfrage 19:18:13 (ccfa9992-cef4-4ba8-9f47-89771a53ba9f) liefert den eindeutigen Serverbefund HTTP_REJECTED, httpStatus401, contentTypejson von DeepSeek. Das ist ein Provider-Authentifizierungsblock; kein erfolgreiches Modellgespräch und kein Guthabenbefund. Keine weitere gleichartige Anfrage ohne korrigierte Zugangskonfiguration. Der Nutzer muss den gültigen DeepSeek-Schlüssel geschützt in Vercel ersetzen. Weiterhin offen: erfolgreiche echte Antwort, korrekter Datenbezug, Folgefrage und gespeicherte erfolgreiche Antwort.
 
 Dialogfix `60eb994` ist in Vercel-Deployment 47XfCzDhxEU7GS8jeKwoLk7L1mfo Ready und nach Neuladen tatsächlich geprüft: helles und dunkles Theme, zentrierter Dialog bei x620/y45, etwa 680×732 in 1920×821, alle Bereiche lesbar. Bewertung Position zuvor6/10, nachher9/10. Keine eigenen Browserprozesse gestartet; bestehende Nutzertabs erhalten, temporäre Viewporteinstellung zurückgesetzt. Backend-Quellprüfung bestätigt unveränderte Durchgabe von DEEPSEEK_API_KEY an den Authorization-Header; kein nachgewiesener Codefehler bei der Schlüsselübermittlung. Der tatsächliche Schlüsselwert blieb ungelesen.
+
+## Providerkorrektur nach Nutzerbeleg
+
+Der Nutzer bestätigt den Schlüssel als OpenCode-Schlüssel und liefert seine OpenCode-Servicekontoansicht. Der bisherige direkte DeepSeek-Anschluss war falsch. HTTP401 belegt die Ablehnung beim falschen Ziel, nicht die generelle Ungültigkeit des Schlüssels. Die Aufforderung zum Ersetzen des Schlüssels ist überholt.
+
+Unabhängig geprüft: OpenCode-Zen-Dokumentation nennt `deepseek-v4.1-flash` über `https://opencode.ai/zen/v1/chat/completions`; der öffentliche Modellkatalog enthält diese Kennung. Im vorhandenen OpenCode-Konto ist DeepSeek V4.1 Flash bereits aktiviert; der benannte Schlüssel ist aktiv. Keine Konto-, Schlüssel- oder Modelleinstellung geändert, kein voller Schlüssel gelesen. Offizielle Quellen: https://opencode.ai/docs/zen/ und https://opencode.ai/zen/v1/models . Backend und Modellregister werden darauf angepasst; positiver Live-Nachweis folgt erst nach Bereitstellung.
+
+### Kurzer Ablauf für die Vorführung (erst nach erfolgreichem Livegate)
+
+1. Übersicht öffnen: fiktive Martha und ihre offenen Aufgaben zeigen.
+2. Frage: „Welche Angaben hast du zu Martha gespeichert? Was sollte ich zuerst erledigen? Bitte nenne die hinterlegten Termine.“
+3. Folgefrage: „Sortiere das bitte in drei einfache nächste Schritte. Was fehlt noch, damit ich weitermachen kann?“
+4. „Was kann ich fragen?“ öffnen, Thema „Ein Gespräch vorbereiten“ wählen und die Telefonat-Vorlage in den Entwurf übernehmen. Vor dem Senden kurz anpassen.
+5. Gespräch neu laden: Anmeldung und Antworten bleiben erhalten.
+
+Der Chat liefert Auskunft und Textentwürfe. Aufgabenänderungen, Versand und PDF-/DOCX-Export sind damit noch nicht umgesetzt und werden in der Vorführung nicht behauptet.
+
+Weitere Kontoprüfung vor Umsetzung: OpenCode-Overview zeigt aktives Go-Abo, 0% rollierende/0% wöchentliche und12% monatliche Nutzung, separates Guthaben0USD, Zusatznutzung und automatische Aufladung aus. Deshalb wird ausschließlich der dokumentierte Go-Anschluss `https://opencode.ai/zen/go/v1/chat/completions` genutzt; der oben genannte Zen-Katalog diente zunächst der Modellidentifizierung. https://opencode.ai/docs/go/ bestätigt V4.1 und externen API-Zugriff. Keine Kontoeinstellungen verändert. Angezeigte interne Kosten bleiben konservative Verbrauchsschätzungen, kein Nachweis zusätzlicher Geldabbuchungen.
+
+## OpenCode-Go-Anschluss: unabhängige technische Abnahme
+
+Root hat den vollständigen aktuellen Frontendcheck (Typen/Lint/Tests/Build/Bundle/Quelle/Proxy/Prozesscleanup) bestanden. Nach endgültigen Backendtypen erneut Typen/Build/29-Bundle-Dateien ohne vier private Projektwerte sowie172 Backendtests bestanden. Tatsächliches Vercel-Paket:20 Prüfungen, alle vier gebauten Einstiege in plainNode ausgeführt.
+
+Unabhängiger Fresh-13-Supabase-Gesamtlauf:611 SQL-Prüfungen,172 Backendtests,31HTTP/19PG,13 neue und8 vorhandene Operator-Setupprüfungen,8+15 Parallelprüfungen, tatsächliche CLI-Typgenerierung und Schema-Baseline. Historische Fehlerreproduktion17 mit genau2 erwarteten alten Fehlern separat zurückgerollt. Eigener Stack beendet,0 eigene Prozesse, Ports56421/56422/56428 geschlossen. Backendowner zusätzlich12 echte11→13-Upgradeprüfungen bestanden; als Bereichsinhabernachweis gekennzeichnet.
+
+Hosted ausschließlich zwei additive Migrationen20261006183011/20261006183021 angewendet, volle Struktur entspricht der unabhängigen lokalen Baseline. Danach geprüftes Operator-Setup ausgeführt: einzig aktives Modell `opencode/deepseek-v4.1-flash`, NameDeepSeekV4.1Flash·OpenCodeGo, Monats-/GesamtausgabenlimitNULL,blockedfalse. Bestand unverändert:1Authkonto,2Gespräche,5Nachrichten,2Aufgaben,1Dokument. Anschließend33HostedNode- und11CloudHosted-Prüfungen bestanden, eigeneVerbindungen/Portgeschlossen. Sicherheitsadvisor unverändert mit3absichtlich browsergesperrten internenTabellen und bestehendemPasswortschutzhinweis. RealeVercel-Antwort erst nachDeployment prüfen.

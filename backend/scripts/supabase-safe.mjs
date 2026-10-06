@@ -17,6 +17,8 @@ const action = process.argv[2];
 const runtimeOnly = process.argv.includes('--runtime-only');
 const phase1Base = process.argv.includes('--phase1-base');
 const sessionBase = process.argv.includes('--session-base');
+const openCodeBase = process.argv.includes('--opencode-base');
+if(openCodeBase && !['start','reset'].includes(action)) throw new Error('--opencode-base gilt nur für den eigenen Elf-zu-dreizehn-Upgradeprüflauf.');
 if(sessionBase && !['start','reset'].includes(action)) throw new Error('--session-base gilt nur für den gezielten Zehn-zu-elf-Upgradeprüflauf.');
 if (phase1Base && !['start','reset'].includes(action)) throw new Error('--phase1-base gilt nur für den gezielten Acht-zu-zehn-Upgradeprüflauf.');
 const actions = {
@@ -44,7 +46,10 @@ if (phase1Base) for (const name of await readdir(path.join(mirror,'supabase/migr
   if (name >= '20261006160000')
     await rm(path.join(mirror,'supabase/migrations',name));
 }
-if (sessionBase) await rm(path.join(mirror,'supabase/migrations/20261006162000_remember_session_clock.sql'));
+if (sessionBase || openCodeBase) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
+  if (name >= (sessionBase ? '20261006162000' : '20261006183000'))
+    await rm(path.join(mirror,'supabase/migrations',name));
+}
 // Retire only the owned old mirror; no Edge runtime participates in the Node product.
 await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});
 const config = await readFile(path.join(mirror, 'supabase', 'config.toml'), 'utf8');

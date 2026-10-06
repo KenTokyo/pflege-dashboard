@@ -3,7 +3,7 @@ import { cors, type Environment, type Platform } from "./platform.js";
 import {
   type Context,
   OpenAIProvider,
-  DeepSeekProvider,
+  OpenCodeProvider,
   type Provider,
 } from "./provider.js";
 export type Dependencies = {
@@ -121,8 +121,9 @@ export function chatHandler(deps: Dependencies) {
         request.signal,
       );
       const key = deps.env("OPENAI_API_KEY");
-      const deepseekKey = deps.env("DEEPSEEK_API_KEY");
-      if (!replay && !key && !deepseekKey && !deps.provider) {
+      const openCodeKey =
+        deps.env("OPENCODE_API_KEY") ?? deps.env("DEEPSEEK_API_KEY");
+      if (!replay && !key && !openCodeKey && !deps.provider) {
         throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
       }
       const prepared =
@@ -131,17 +132,24 @@ export function chatHandler(deps: Dependencies) {
       const context = prepared.context as Context;
       const provider =
         deps.provider ??
-        (context.model.provider === "deepseek"
-          ? new DeepSeekProvider(deepseekKey ?? "", fetch, (diagnostic) => {
-              console.warn(
-                JSON.stringify({
-                  component: "deepseek_provider",
-                  requestId: id,
-                  ...diagnostic,
-                }),
-              );
-            })
-          : new OpenAIProvider(key ?? ""));
+        (context.model.provider === "opencode"
+          ? new OpenCodeProvider(
+              openCodeKey ?? "",
+              fetch,
+              (diagnostic) => {
+                console.warn(
+                  JSON.stringify({
+                    component: "opencode_provider",
+                    requestId: id,
+                    ...diagnostic,
+                  }),
+                );
+              },
+              data.conversationId,
+            )
+          : context.model.provider === "openai"
+            ? new OpenAIProvider(key ?? "")
+            : undefined);
       const controller = new AbortController();
       let cancelled = false;
       let output = "";
@@ -282,6 +290,8 @@ export function chatHandler(deps: Dependencies) {
               } else {
                 if (controller.signal.aborted) throw abortedError();
                 await liveCheck();
+                if (!provider)
+                  throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
                 for await (const part of provider.stream(
                   context,
                   controller.signal,

@@ -51,6 +51,24 @@ export function effectiveModel(
   return { usable: true, model };
 }
 
+/** Anbieter nicht aus dem Modellnamen raten; unbekannte Kennungen bleiben sichtbar. */
+export function providerLabel(provider: string): string {
+  const labels: Record<string, string> = {
+    openai: 'OpenAI',
+    anthropic: 'Anthropic',
+    mistral: 'Mistral AI',
+    deepseek: 'DeepSeek',
+    opencode: 'OpenCode',
+  };
+  return labels[provider] ?? provider;
+}
+
+/** Der Weiterleitungsanbieter bleibt auch dann erkennbar, wenn im Modellnamen nur DeepSeek steht. */
+export function modelDisplayName(displayName: string, provider?: string): string {
+  const viaOpenCode = provider === 'opencode';
+  return viaOpenCode && !/opencode/i.test(displayName) ? `${displayName} · über OpenCode` : displayName;
+}
+
 export type MessageModel = {
   displayName: string;
   region: 'eu' | 'us' | 'unverified';
@@ -70,7 +88,7 @@ export function messageModel(message: Pick<MessageRow, 'model_snapshot' | 'provi
   if (typeof name !== 'string' || !name) return null;
   const responseModel = message.provider_response_model?.trim();
   return {
-    displayName: name,
+    displayName: modelDisplayName(name, typeof snap.provider === 'string' ? snap.provider : undefined),
     region: region === 'eu' || region === 'us' ? region : 'unverified',
     ...(responseModel ? { responseModel } : {}),
   };

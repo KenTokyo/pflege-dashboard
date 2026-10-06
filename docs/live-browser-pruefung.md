@@ -21,7 +21,7 @@ Stand: 06.10.2026. Ziel: den veröffentlichten Ablauf mit dem vom Nutzer angeleg
 | Fragenvorlagen | Dialog mit Themen und Beispielsätzen in Alltagssprache; Satz übernimmt sich als bearbeitbare Eingabe | Bestanden laut Root: fünf Kategorien mit je drei Optionen tatsächlich geöffnet und gezählt |
 | Entwurf erhalten | Vorhandene ungesendete Eingabe wird durch Vorlage nicht still überschrieben | Bestanden laut Root-DOM: Prefix, Leerzeile, vollständige Telefonatvorlage erhalten; nicht automatisch gesendet |
 | Personenbezug | Neues Gespräch ist sichtbar Martha zugeordnet | Offen |
-| Echte KI-Antwort | DeepSeek antwortet auf die gespeicherten Angaben und benennt das antwortende Modell | Blockiert: zweiter echter Versuch auf f489365 mit Anbieter-HTTP 401; gültiger geschützter API-Schlüssel erforderlich |
+| Echte KI-Antwort | DeepSeek antwortet auf die gespeicherten Angaben und benennt das antwortende Modell | Noch offen: HTTP 401 durch falschen Anbieterweg erklärt; Umstellung auf OpenCode läuft, kein Schlüsseltausch mehr verlangt |
 | Folgefrage | Einfache Nachfrage bezieht sich auf die vorherige Antwort | Offen |
 | Neuladen | Anmeldung und abgeschlossene Unterhaltung bleiben im selben Tab erhalten | Anmeldung, derselbe Chat, Nutzernachricht und helles Design nach echtem Reload erhalten; abgeschlossene KI-Antwort noch nicht vorhanden |
 | Erneutes Öffnen | Soweit ohne Fokuswechsel unterstützt: neuer eigener Tab derselben Website übernimmt die gültige gespeicherte Sitzung; Test-Tab danach schließen | Offen |
@@ -90,16 +90,36 @@ Einordnung: Die Anfrage ist kein Beleg für eine erfolgreiche Antwort des Provid
 
 Einordnung: Die alltäglichen Vorlagen sind zugänglich, nach Themen geordnet und zerstören den vorhandenen Entwurf nicht. Auswahl und Versand sind getrennt. Das erfolgreiche Einfügen ist unabhängig vom weiterhin fehlerhaften KI-Antwortweg belegt.
 
-### Zweiter echter Chatversuch – Ursache eingegrenzt
+### Zweiter echter Chatversuch – damaliger Zwischenstand
 
 Herkunft: tatsächliche Root-Liveanfrage auf Vercel-Version `f489365` (Ready), zugehöriger bereinigter Serverbefund.
 
 - Anfrage `ccfa9992-cef4-4ba8-9f47-89771a53ba9f`, Logzeit 19:18:13.
 - Anbieterantwort: `reason=HTTP_REJECTED`, `httpStatus=401`, `contentType=json`.
 - Das bedeutet eine zurückgewiesene Authentifizierung beim Anbieter. Eine erfolgreiche KI-Antwort ist weiter nicht vorhanden.
-- Kein erneuter Versuch bis zur Korrektur der Zugangskonfiguration. Der Nutzer muss einen gültigen API-Schlüssel geschützt in Vercel ersetzen. Kein Schlüssel wurde für diese Diagnose ausgelesen oder ausgegeben.
+- Damals wurde ein geschützter Schlüsseltausch als nächster Schritt angenommen. Diese Aufforderung ist durch den nachfolgenden Anbieterbeleg überholt: Kein Schlüsseltausch wird mehr verlangt. Kein Schlüssel wurde für diese Diagnose ausgelesen oder ausgegeben.
 
-Einordnung: Die Verbindung erreicht den Anbieter, der die verwendete Authentifizierung ablehnt. Der konkrete Credential-Inhalt ist unbekannt; weder ein Tippfehler noch Ablauf oder falscher Anbieter werden ohne Beleg behauptet. Nach geschützter Korrektur und Bereitstellung bleiben echte Antwort, Datenbezug, Folgefrage und erneutes Laden der vollständigen Unterhaltung verpflichtende Abschlussprüfungen.
+Einordnung des damaligen Belegs: Die Verbindung erreichte den direkt angesprochenen Anbieter, der die Authentifizierung ablehnte. HTTP 401 allein bewies keinen ungültigen Schlüssel. Der inzwischen belegte Anbieterunterschied wird im nächsten Abschnitt korrigiert. Echte Antwort, Datenbezug, Folgefrage und erneutes Laden der vollständigen Unterhaltung bleiben verpflichtende Abschlussprüfungen.
+
+### Korrigierte Ursache: OpenCode-Schlüssel am falschen Endpunkt
+
+Herkunft: Nutzer-Screenshot und Link zur OpenCode-Konsole; Root-Abgleich mit `https://opencode.ai/docs/zen/` und `https://opencode.ai/zen/v1/models`. Dieser Prüfchat hat keine Schlüsselwerte gesehen und keine eigene Anbieterabfrage ausgeführt.
+
+- Nutzerbeleg zeigt den Schlüssel bei OpenCode als aktiv. Das gewünschte V4.1-Modell ist in der OpenCode-Konsole aktiviert.
+- Offizielle Modellkennung laut Root-Abgleich: `deepseek-v4.1-flash` über OpenCode Zen.
+- Der bisherige Server schickte den vorhandenen Schlüssel an den direkten DeepSeek-Endpunkt. Diese falsche Anbieterzuordnung war ein Fehler unserer Einrichtung; sie ist kein belegter Fehler des vom Nutzer hinterlegten Schlüssels.
+- Backend-Bereichsinhaber stellt den Provider auf `opencode` und den passenden Endpunkt um. Der bereits geschützte Wert soll über einen ausdrücklich dafür vorgesehenen Rückgriff auf den bisherigen Variablennamen nutzbar bleiben. Kein zusätzliches Eingeben oder Auslesen des Schlüssels nötig.
+
+#### Unabhängige Prüfung des laufenden Diff-Stands
+
+Nur Quellprüfung, keine neuen Tests oder Browseraktionen dieses Prüfchats:
+
+- Die fertigen Frontendänderungen ergänzen „über OpenCode“ ausschließlich für den Provider `opencode` im Gesprächskopf, bei laufenden Antworten und in gespeicherten Modell-Snapshots. Ein vorhandener Zusatz wird nicht verdoppelt.
+- Historische direkte DeepSeek-Antworten behalten ihre historische Anbieterzuordnung. Die Einstellungen zeigen unbekannte Anbieter unverfälscht statt eines irreführenden Mistral-Fallbacks.
+- Der bestehende Stream-Leser akzeptiert die Providerkennung bereits als Zeichenkette. Der neue Name wird daher nicht durch eine veraltete Laufzeitliste verworfen.
+- Zum Zeitpunkt dieser Quellprüfung ist der Backendumbau noch nicht geliefert: Handler, Verfügbarkeitsermittlung und gemeinsame Context-/Modelltypen enthalten noch den bisherigen Direktanbieter. Das ist als laufende Arbeit dokumentiert, nicht als abgeschlossener Integrationsfehler gewertet.
+
+Vor der nächsten Liveabnahme zusammen prüfen: neue Providerkennung durch DB-Enum, Kontextvorbereitung, Verfügbarkeit und gemeinsame Typen; richtige Paarung von geschütztem Schlüssel und OpenCode-Endpunkt; aktuelle OpenCode-Modellkennung, Preisgrundlage und tatsächliche Stream-/Nutzungsdaten; Gesprächsstandard ohne versehentlich weiterwirkende Direktanbieter-Auswahl. Alte Antwort-Snapshots erhalten und keinen weiteren direkten DeepSeek-Versuch mit dem OpenCode-Schlüssel auslösen.
 
 ### Dialoglage, Tastatur und Bildschirmgröße
 
@@ -113,9 +133,9 @@ Einordnung: Die Verbindung erreicht den Anbieter, der die verwendete Authentifiz
 
 ## Abschlussstand dieser unabhängigen Belegauswertung
 
-Die tatsächliche Anmeldung mit dem vom Nutzer selbst angelegten Konto, unmittelbare Sitzungserhaltung bei Reload, gespeicherte 30-Tage-Regel und die kategorisierten Vorlagen samt Erhaltung des vorhandenen Textes sind anhand der ausdrücklich benannten Root-Belege bestätigt. Zwei tatsächlich gesendete Chatversuche liefern keine erfolgreiche Modellantwort; der zweite grenzt die aktuelle Blockade auf Anbieter-Authentifizierung (HTTP 401) ein. Das Gesamtgate für einen funktionierenden Live-Chat bleibt deshalb offen.
+Die tatsächliche Anmeldung mit dem vom Nutzer selbst angelegten Konto, unmittelbare Sitzungserhaltung bei Reload, gespeicherte 30-Tage-Regel und die kategorisierten Vorlagen samt Erhaltung des vorhandenen Textes sind anhand der ausdrücklich benannten Root-Belege bestätigt. Zwei tatsächlich gesendete Chatversuche liefern keine erfolgreiche Modellantwort. Der inzwischen belegte Fehler war die Verwendung des direkten DeepSeek-Endpunkts für einen OpenCode-Schlüssel. Die passende Anbieteranbindung wird repariert; das Gesamtgate für einen funktionierenden Live-Chat bleibt bis zur echten Antwort offen.
 
-Der tatsächliche Nachtest der Dialogkorrektur ist in beiden Designs abgeschlossen. Nach dem geschützten Schlüsseltausch muss derselbe vollständige KI-Ablauf weitergeführt werden. Zusätzlich offen: übrige Ansichten in beiden Designs vollständig, schmale Ansicht, Wiederöffnung in neuem Tab sowie echter Sitzungsende-/Abmeldetest innerhalb der vereinbarten Zugangsgrenzen. Vorhandene automatisierte Prüfungen ersetzen diese Livebelege nicht.
+Der tatsächliche Nachtest der Dialogkorrektur ist in beiden Designs abgeschlossen. Nach Bereitstellung des OpenCode-Anschlusses muss derselbe vollständige KI-Ablauf weitergeführt werden; die frühere Aufforderung zum Schlüsseltausch entfällt. Zusätzlich offen: übrige Ansichten in beiden Designs vollständig, schmale Ansicht, Wiederöffnung in neuem Tab sowie echter Sitzungsende-/Abmeldetest innerhalb der vereinbarten Zugangsgrenzen. Vorhandene automatisierte Prüfungen ersetzen diese Livebelege nicht.
 
 ## Bereinigung
 

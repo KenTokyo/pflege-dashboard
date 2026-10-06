@@ -5,7 +5,7 @@ import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { Underline } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
 import { ErrorState, Loading } from '../components/States';
-import { MODE_LABEL, REGION_LABEL } from '../data/model';
+import { MODE_LABEL, REGION_LABEL, modelDisplayName, providerLabel } from '../data/model';
 import { useAgentSettings, useDefaultPrompt, useModels, useUpdateAgentSettings } from '../data/queries';
 import { formatDate, formatTime } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
@@ -127,11 +127,11 @@ function ModelList({ models, defaultId }: { models: ModelRow[]; defaultId: strin
           <li key={m.id} className="model-row">
             <div className="min-w-0">
               <p className="model-name">
-                {m.display_name}
+                {modelDisplayName(m.display_name, m.provider)}
                 {m.id === defaultId ? <span className="std">Standard</span> : null}
               </p>
               <p className="small muted">
-                {m.provider === 'openai' ? 'OpenAI' : m.provider === 'anthropic' ? 'Anthropic' : m.provider === 'deepseek' ? 'DeepSeek' : 'Mistral AI'}
+                {providerLabel(m.provider)}
                 {m.supports_tools === true ? ' · Werkzeuge' : ''}
                 {m.supports_vision === true ? ' · Bilder' : ''}
               </p>

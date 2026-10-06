@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { safeHref, SafeMarkdown } from '../../src/chat/Markdown';
-import { effectiveModel, messageModel, messageSources, sortTasks, titleFromQuestion } from '../../src/data/model';
+import { effectiveModel, messageModel, messageSources, modelDisplayName, providerLabel, sortTasks, titleFromQuestion } from '../../src/data/model';
 import { fromDbError } from '../../src/services/errors';
 import { createSeed, MODEL_OPENAI } from '../support/seed';
 
@@ -77,5 +77,26 @@ describe('Sicheres Markdown', () => {
     expect(links.map((a) => a.getAttribute('href'))).toEqual(['https://ok.example']);
     expect(links[0]?.getAttribute('rel')).toBe('noopener noreferrer nofollow');
     expect(container.textContent).toContain('[Bild: Logo]');
+  });
+});
+
+
+describe('DeepSeek über OpenCode sichtbar zuordnen', () => {
+  it('nennt den tatsächlichen Anbieter und verwendet keinen falschen Mistral-Fallback', () => {
+    expect(providerLabel('opencode')).toBe('OpenCode');
+    expect(providerLabel('deepseek')).toBe('DeepSeek');
+    expect(providerLabel('anderer-anbieter')).toBe('anderer-anbieter');
+  });
+  it('ergänzt die Weiterleitung im Modellnamen genau einmal', () => {
+    expect(modelDisplayName('DeepSeek V4.1 Flash', 'opencode')).toBe('DeepSeek V4.1 Flash · über OpenCode');
+    expect(modelDisplayName('DeepSeek V4.1 Flash über OpenCode', 'opencode')).toBe('DeepSeek V4.1 Flash über OpenCode');
+    expect(modelDisplayName('DeepSeek V4.1 Flash', 'deepseek')).toBe('DeepSeek V4.1 Flash');
+  });
+  it('gespeicherte Antworten zeigen ihren historischen Anbieter, nicht den heutigen Standard', () => {
+    const snapshot = { displayName: 'DeepSeek V4.1 Flash', region: 'unverified', provider: 'opencode' };
+    expect(messageModel({ model_snapshot: snapshot, provider_response_model: 'deepseek-v4.1-flash' })).toEqual({
+      displayName: 'DeepSeek V4.1 Flash · über OpenCode', region: 'unverified', responseModel: 'deepseek-v4.1-flash',
+    });
+    expect(messageModel({ model_snapshot: { ...snapshot, provider: 'deepseek' }, provider_response_model: 'deepseek-flash' })?.displayName).toBe('DeepSeek V4.1 Flash');
   });
 });

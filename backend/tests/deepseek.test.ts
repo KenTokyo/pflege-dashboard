@@ -1,6 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
-import { DeepSeekProvider, type Context } from "../runtime/provider.ts";
+import {
+  DeepSeekProvider,
+  OpenCodeProvider,
+  type Context,
+} from "../runtime/provider.ts";
 import { chatHandler } from "../runtime/handler.ts";
+import {
+  cloudEnvironment,
+  createCloudHandler,
+  DEMO_ORIGIN,
+} from "../runtime/cloud.ts";
+import { cloudConfiguration, PROJECT_REF } from "../runtime/config.ts";
 const id = "81000000-0000-4000-8000-000000000001";
 const context: Context = {
   model: {
@@ -24,7 +34,7 @@ const chunk = (
   usage: unknown = null,
 ) => ({ model, choices: [{ index: 0, delta, finish_reason: reason }], usage });
 const usage = { prompt_tokens: 10, completion_tokens: 5 };
-function mock(events: unknown[], done = true) {
+function mock(events: unknown[], done = true, trailers: unknown[] = []) {
   let cancelled = false;
   const fetcher = vi.fn(
     async () =>
@@ -39,6 +49,12 @@ function mock(events: unknown[], done = true) {
               );
             if (done)
               sink.enqueue(new TextEncoder().encode("data: [DONE]\n\n"));
+            for (const trailer of trailers)
+              sink.enqueue(
+                new TextEncoder().encode(
+                  `data: ${JSON.stringify(trailer)}\n\n`,
+                ),
+              );
             sink.close();
           },
           cancel() {
@@ -346,4 +362,383 @@ describe("safe real-adapter diagnostics without provider response content", () =
     ).rejects.toMatchObject({ code: "REQUEST_ABORTED" });
     expect(report).not.toHaveBeenCalled();
   });
+});
+
+describe("synthetic cloud key path; no real credentials or network", () => {
+  it("preserves the provider-specific value through both cloud configuration layers", () => {
+    const synthetic = "sk-Synthetic.Mixed_12+/==";
+    const config = cloudConfiguration({
+      SUPABASE_URL: `https://${PROJECT_REF}.supabase.co`,
+      SUPABASE_PUBLISHABLE_KEY: "synthetic-public",
+      DATABASE_URL: `postgresql://postgres.${PROJECT_REF}:synthetic@aws-0-eu-central-1.pooler.supabase.com:6543/postgres`,
+      DEEPSEEK_API_KEY: synthetic,
+      OPENAI_API_KEY: "other-provider-value",
+    });
+    expect(config.env("DEEPSEEK_API_KEY")).toBe(synthetic);
+    expect(
+      cloudEnvironment({
+        DEEPSEEK_API_KEY: config.env("DEEPSEEK_API_KEY"),
+        OPENAI_API_KEY: config.env("OPENAI_API_KEY"),
+      })("DEEPSEEK_API_KEY"),
+    ).toBe(synthetic);
+  });
+  it("actual cloud handler chooses the DeepSeek key and transmits its exact Bearer header", async () => {
+    const synthetic = "sk-Synthetic.Mixed_12+/==";
+    const x = mock([
+      chunk({ content: "Test" }),
+      chunk({}, "stop", undefined, usage),
+    ]);
+    vi.stubGlobal("fetch", x.fetcher);
+    try {
+      const env = cloudEnvironment({
+        DEEPSEEK_API_KEY: synthetic,
+        OPENAI_API_KEY: "must-not-be-used",
+        SUPABASE_PUBLISHABLE_KEY: "not-a-provider-key",
+      });
+      const rpc = vi.fn(async (name: string) =>
+        name === "edge_chat_prepare"
+          ? {
+              messageId: id,
+              context: {
+                ...context,
+                model: {
+                  ...context.model,
+                  provider: "opencode",
+                  providerModelId: "deepseek-v4.1-flash",
+                },
+                acceptedResponseModelIds: [
+                  "deepseek-v4.1-flash",
+                  "deepseek-flash",
+                ],
+              },
+              replayed: false,
+            }
+          : name === "edge_chat_replay"
+            ? null
+            : name === "edge_chat_finish"
+              ? { status: "completed", costMicrousd: 9 }
+              : true,
+      );
+      const handler = createCloudHandler({}, async () => ({
+        env,
+        platform: {
+          rpc,
+          authenticate: async () => ({ userId: id, sessionId: id }),
+        },
+      }));
+      const response = await handler(
+        new Request(DEMO_ORIGIN + "/api/chat-stream", {
+          method: "POST",
+          headers: {
+            Origin: DEMO_ORIGIN,
+            Authorization: "Bearer synthetic-user-token",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            workspaceId: id,
+            conversationId: id,
+            clientRequestId: id,
+            content: "Frage",
+            attachmentIds: [],
+          }),
+        }),
+      );
+      expect(await response.text()).toContain("event: message.completed");
+      expect(x.fetcher).toHaveBeenCalledOnce();
+      const [url, options] = x.fetcher.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ];
+      expect(url).toBe("https://opencode.ai/zen/go/v1/chat/completions");
+      expect(new Request(url, options).headers.get("Authorization")).toBe(
+        `Bearer ${synthetic}`,
+      );
+      expect(new Request(url, options).headers.has("apikey")).toBe(false);
+      expect(new Headers(options.headers).get("User-Agent")).toBe(
+        "pflege-dashboard/1.5",
+      );
+      expect(new Headers(options.headers).get("x-opencode-session")).toBe(id);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+});
+
+const ocContext: Context = {
+  ...context,
+  model: {
+    ...context.model,
+    provider: "opencode",
+    providerModelId: "deepseek-v4.1-flash",
+  },
+  acceptedResponseModelIds: ["deepseek-v4.1-flash", "deepseek-flash"],
+};
+async function collectOpenCode(
+  events: unknown[],
+  done = true,
+  trailers: unknown[] = [],
+) {
+  const x = mock(events, done, trailers);
+  const parts = [];
+  for await (const part of new OpenCodeProvider(
+    "synthetic-opencode-key",
+    x.fetcher as typeof fetch,
+  ).stream(ocContext, new AbortController().signal))
+    parts.push(part);
+  return { parts, fetcher: x.fetcher };
+}
+describe("OpenCode Go exact provider/model and gateway protocol", () => {
+  it.each(["deepseek-v4.1-flash", "deepseek-flash"])(
+    "preserves actual accepted V4.1 model %s and never changes endpoint",
+    async (model) => {
+      const result = await collectOpenCode([
+        chunk({ content: "Antwort" }, null, model),
+        chunk({}, "stop", model, usage),
+      ]);
+      expect(result.parts).toEqual([
+        { text: "Antwort" },
+        { usage: { inputTokens: 10, outputTokens: 5, model } },
+      ]);
+      const [url, options] = result.fetcher.mock.calls[0] as unknown as [
+        string,
+        RequestInit,
+      ];
+      expect(url).toBe("https://opencode.ai/zen/go/v1/chat/completions");
+      expect(new Headers(options.headers).get("Authorization")).toBe(
+        "Bearer synthetic-opencode-key",
+      );
+      expect(JSON.parse(options.body as string)).toMatchObject({
+        model: "deepseek-v4.1-flash",
+        thinking: { type: "disabled" },
+        max_tokens: 1024,
+        stream: true,
+        stream_options: { include_usage: true },
+      });
+      expect(JSON.parse(options.body as string)).not.toHaveProperty("tools");
+    },
+  );
+  it("supports separate final usage without inventing usage at finish", async () => {
+    const result = await collectOpenCode([
+      chunk({ content: "Antwort" }),
+      chunk({}, "stop"),
+      { model: "deepseek-flash", choices: [], usage },
+    ]);
+    expect(result.parts).toHaveLength(2);
+    expect(result.parts[1]).toEqual({
+      usage: { inputTokens: 10, outputTokens: 5, model: "deepseek-flash" },
+    });
+  });
+  it("accepts only harmless empty gateway metadata, inherited intermediate identity and exact cost trailer", async () => {
+    const result = await collectOpenCode(
+      [
+        {
+          id: "synthetic",
+          object: "chat.completion.chunk",
+          model: "deepseek-v4.1-flash",
+          choices: [],
+        },
+        { id: "", model: "", choices: [] },
+        chunk({ content: "Antwort" }, null, ""),
+        chunk({}, "stop", "deepseek-flash", usage),
+      ],
+      true,
+      [{ choices: [], cost: "0" }],
+    );
+    expect(result.parts).toEqual([
+      { text: "Antwort" },
+      { usage: { inputTokens: 10, outputTokens: 5, model: "deepseek-flash" } },
+    ]);
+  });
+  it.each(["different", "deepseek-v4-flash"])(
+    "known unexpected actual model %s is retained before rejection",
+    async (model) => {
+      const x = mock([chunk({}, "stop", model, usage)]),
+        parts = [];
+      await expect(
+        (async () => {
+          for await (const p of new OpenCodeProvider(
+            "synthetic",
+            x.fetcher as typeof fetch,
+          ).stream(ocContext, new AbortController().signal))
+            parts.push(p);
+        })(),
+      ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+      expect(parts).toEqual([
+        { usage: { inputTokens: 10, outputTokens: 5, model } },
+      ]);
+    },
+  );
+  it.each([
+    "costOnly",
+    "missingUsage",
+    "missingDone",
+    "missingFinish",
+    "blankFirstContent",
+    "blankFinalModel",
+    "unsafeTrailer",
+    "textAfterDone",
+    "earlyUsage",
+    "reasoning",
+    "tools",
+    "duplicateUsage",
+  ])("does not turn %s into successful completion", async (kind) => {
+    const ending = chunk({}, "stop", "deepseek-flash", usage);
+    const events =
+      kind === "costOnly"
+        ? [{ choices: [], cost: "0" }]
+        : kind === "missingUsage"
+          ? [chunk({}, "stop")]
+          : kind === "missingFinish"
+            ? [{ model: "deepseek-flash", choices: [], usage }]
+            : kind === "blankFirstContent"
+              ? [chunk({ content: "Text" }, null, "")]
+              : kind === "blankFinalModel"
+                ? [chunk({ content: "Text" }), chunk({}, "stop", "", usage)]
+                : kind === "earlyUsage"
+                  ? [chunk({ content: "Text" }, null, undefined, usage)]
+                  : kind === "reasoning"
+                    ? [chunk({ reasoning_content: "no" })]
+                    : kind === "tools"
+                      ? [chunk({ tool_calls: [{}] })]
+                      : kind === "duplicateUsage"
+                        ? [ending, ending]
+                        : [ending];
+    const trailers =
+      kind === "unsafeTrailer"
+        ? [{ choices: [], cost: "0", content: "hidden" }]
+        : kind === "textAfterDone"
+          ? [chunk({ content: "extra" })]
+          : [];
+    await expect(
+      collectOpenCode(events, kind !== "missingDone", trailers),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+  });
+  it("terminal content violation still carries known model/tokens to failed finalization", async () => {
+    const x = mock([
+      chunk({ content: "must not emit" }, "stop", "deepseek-flash", usage),
+    ]);
+    const parts = [];
+    await expect(
+      (async () => {
+        for await (const part of new OpenCodeProvider(
+          "synthetic",
+          x.fetcher as typeof fetch,
+        ).stream(ocContext, new AbortController().signal))
+          parts.push(part);
+      })(),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+    expect(parts).toEqual([
+      { usage: { inputTokens: 10, outputTokens: 5, model: "deepseek-flash" } },
+    ]);
+  });
+});
+
+describe("OpenCode actual adapter to actual handler, synthetic transport", () => {
+  it.each(["deepseek-flash", "deepseek-v4.1-flash", "deepseek-v4-flash"])(
+    "finalizes actual model %s without rewriting identity",
+    async (model) => {
+      const x = mock([chunk({}, "stop", model, usage)]);
+      const rpc = vi.fn(async (name: string) =>
+        name === "edge_chat_prepare"
+          ? { messageId: id, context: ocContext, replayed: false }
+          : name === "edge_chat_replay"
+            ? null
+            : {
+                status: model === "deepseek-v4-flash" ? "failed" : "completed",
+                costMicrousd: 9,
+              },
+      );
+      const response = await chatHandler({
+        env: () => undefined,
+        platform: {
+          rpc,
+          authenticate: async () => ({ userId: id, sessionId: id }),
+        },
+        provider: new OpenCodeProvider("synthetic", x.fetcher as typeof fetch),
+      })(
+        new Request("https://example.invalid/api/chat-stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workspaceId: id,
+            conversationId: id,
+            clientRequestId: id,
+            content: "Frage",
+            attachmentIds: [],
+          }),
+        }),
+      );
+      const body = await response.text();
+      expect(body.includes("event: message.completed")).toBe(
+        model !== "deepseek-v4-flash",
+      );
+      expect(
+        rpc.mock.calls.find(([name]) => name === "edge_chat_finish")?.[1],
+      ).toMatchObject({
+        p_status: model === "deepseek-v4-flash" ? "failed" : "completed",
+        p_response_model: model,
+        p_input_tokens: 10,
+        p_output_tokens: 5,
+      });
+    },
+  );
+  it.each(["preferred", "empty"])(
+    "respects %s explicit OpenCode key without implicit direct-provider fallback",
+    async (kind) => {
+      const x = mock([chunk({}, "stop", "deepseek-flash", usage)]);
+      vi.stubGlobal("fetch", x.fetcher);
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+      const rpc = vi.fn(async (name: string) =>
+        name === "edge_chat_prepare"
+          ? { messageId: id, context: ocContext, replayed: false }
+          : name === "edge_chat_replay"
+            ? null
+            : { status: "completed", costMicrousd: 9 },
+      );
+      try {
+        const response = await chatHandler({
+          env: (name) =>
+            name === "DEEPSEEK_API_KEY"
+              ? "legacy-synthetic"
+              : name === "OPENCODE_API_KEY"
+                ? kind === "empty"
+                  ? ""
+                  : "preferred-synthetic"
+                : undefined,
+          platform: {
+            rpc,
+            authenticate: async () => ({ userId: id, sessionId: id }),
+          },
+        })(
+          new Request("https://example.invalid/api/chat-stream", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              workspaceId: id,
+              conversationId: id,
+              clientRequestId: id,
+              content: "Frage",
+              attachmentIds: [],
+            }),
+          }),
+        );
+        const body = await response.text();
+        if (kind === "empty") {
+          expect(x.fetcher).not.toHaveBeenCalled();
+          expect(body).toContain("PROVIDER_NOT_CONFIGURED");
+        } else {
+          expect(body).toContain("event: message.completed");
+          expect(
+            new Headers(
+              (x.fetcher.mock.calls[0] as unknown as [string, RequestInit])[1]
+                .headers,
+            ).get("Authorization"),
+          ).toBe("Bearer preferred-synthetic");
+        }
+      } finally {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+      }
+    },
+  );
 });

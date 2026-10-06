@@ -43,3 +43,11 @@ Der gemeinsame Backend-Vertrag v1.4 wurde konsumiert. Die zugehörige Hosted-Mig
 Der Orchestrator belegte nach Bereitstellung den geöffneten Beispieldialog bei 1920 × 821 px an Position (0, 0) statt in der Mitte. Ursache im Quelltext: Tailwind Preflight setzt global `margin: 0`, während die gemeinsame `.dialog`-Hülle die native automatische Dialogmarge nicht ausdrücklich wiederherstellte. Die Hülle setzt nun `margin: auto`. Die bestehenden Vollbildregeln unter 768 px setzen weiterhin gezielt `margin: 0`.
 
 Nach Änderung: Produktionsbuild inklusive TypeScript, Quellprüfung mit 46 Kontrastpaaren und `git diff --check` bestanden. Keine Verhaltensänderung an Auswahl, Entwurfübernahme oder Anmeldung. Tatsächliche Zentrierung nach neuem Deployment sowie die kleine Ansicht prüft der Orchestrator im vorhandenen Browser. Kein eigener Browser oder Server gestartet.
+
+## Anbieteranzeige: DeepSeek über OpenCode
+
+Nach dem belegten Schlüsselfund wird der neue Backend-Provider `opencode` verwendet; gewünschtes Modell bleibt `deepseek-v4.1-flash` / DeepSeek V4.1 Flash. Frontend ergänzt bei diesem Anbieter „über OpenCode“ im Gesprächskopf, während der Antwort und beim Lesen gespeicherter Antworten. Ein bereits vorhandener OpenCode-Zusatz wird nicht verdoppelt. Historische direkte DeepSeek-Snapshots behalten ihren ursprünglichen Modellnamen und ihre damalige Anbieterkennung.
+
+Die Anbieterzeile in Einstellungen nutzt jetzt eine ausdrückliche Zuordnung. Unbekannte Anbieterkennungen werden sichtbar beibehalten und nicht mehr fälschlich als Mistral AI beschriftet. Keine Netzwerk-, Schlüssel- oder Backendänderung durch den Frontend-Agenten.
+
+Geprüft: TypeScript, ESLint, 52 gezielte Modell-/Chat-/Transporttests, Produktionsbuild und Quell-/Kontrastprüfung bestanden; nach Festlegung auf den alleinigen Enumwert `opencode` zusätzlich alle 17 Modelltests und `git diff --check` bestanden. Die neue Backend-Enum-Migration und der tatsächliche OpenCode-Aufruf werden vom Backend-/Live-Gate geprüft. Kein eigener Browserstart und kein Git-Commit.

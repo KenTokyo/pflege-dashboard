@@ -97,7 +97,9 @@ async function initialize(): Promise<Dependencies> {
   });
   const database = createDatabase(config.database, [
     ...(env("OPENAI_API_KEY") ? ["openai"] : []),
-    ...(env("DEEPSEEK_API_KEY") ? ["deepseek"] : []),
+    ...((env("OPENCODE_API_KEY") ?? env("DEEPSEEK_API_KEY"))
+      ? ["opencode"]
+      : []),
   ]);
   try {
     attachDatabasePool(database.pool);
