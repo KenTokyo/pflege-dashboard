@@ -24,6 +24,7 @@ const FAILED_TITLE: Record<string, string> = {
 export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss }: Props) {
   const live = turn.phase === 'sending' || turn.phase === 'streaming';
   const recovery = recoveryFor(turn);
+  const incompleteAnswer = turn.phase === 'failed' && turn.text.trim().length > 0;
   const model = turn.model ? { displayName: modelDisplayName(turn.model.displayName, turn.model.provider), region: turn.model.region } : null;
 
   return (
@@ -65,8 +66,8 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
         <div className={`alert ${turn.phase === 'failed' ? 'alert-danger' : ''}`} role="alert">
           <CircleAlert className="i" size={18} aria-hidden="true" />
           <div className="min-w-0">
-            <strong>{FAILED_TITLE[turn.phase]}</strong>
-            <span>{turn.error?.message}</span>
+            <strong>{incompleteAnswer ? 'Antwort nicht vollständig abgeschlossen' : FAILED_TITLE[turn.phase]}</strong>
+            <span>{incompleteAnswer && turn.error?.code === 'PROVIDER_FAILED' ? 'Die Antwort wurde unterbrochen. Sie können die Anfrage erneut senden.' : turn.error?.message}</span>
             {recovery === 'fetch_again' ? (
               <span className="block muted">Falls die Antwort bereits gespeichert wurde, wird sie ohne neuen KI-Aufruf übernommen.</span>
             ) : null}

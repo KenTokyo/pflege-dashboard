@@ -154,7 +154,11 @@ export function chatHandler(deps: Dependencies) {
       let cancelled = false;
       let output = "";
       let usage:
-        | { inputTokens: number; outputTokens: number; model: string }
+        | {
+            inputTokens: number | null;
+            outputTokens: number | null;
+            model: string;
+          }
         | undefined;
       let finished = false;
       let sequence = 0;
@@ -318,9 +322,20 @@ export function chatHandler(deps: Dependencies) {
                     }
                     await send("message.delta", { text: part.text });
                     if (controller.signal.aborted) throw abortedError();
-                  } else usage = part.usage;
+                  } else if ("usage" in part) usage = part.usage;
+                  else
+                    usage = {
+                      inputTokens: null,
+                      outputTokens: null,
+                      model: part.usageUnreliable.model,
+                    };
                 }
-                if (!usage) throw new AppError("PROVIDER_FAILED", 502);
+                if (
+                  !usage ||
+                  usage.inputTokens === null ||
+                  usage.outputTokens === null
+                )
+                  throw new AppError("PROVIDER_FAILED", 502);
                 if (controller.signal.aborted) {
                   throw abortedError();
                 }

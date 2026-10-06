@@ -57,7 +57,9 @@ export function MessageView({ message }: { message: MessageRow }) {
     );
   }
   const sources = messageSources(message);
-  const note = STATUS_NOTE[message.status];
+  const note = message.status === 'failed' && message.content.trim().length > 0
+    ? 'Antwort nicht vollständig abgeschlossen. Der Text kann unvollständig sein.'
+    : STATUS_NOTE[message.status];
   return (
     <article className="msg-agent" aria-label="Antwort des KI-Sachbearbeiters">
       <AgentMeta model={messageModel(message)} time={stampWhen(message.created_at, new Date())} />

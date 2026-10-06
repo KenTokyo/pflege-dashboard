@@ -23,7 +23,8 @@ export type ProviderPart =
   | { text: string }
   | {
       usage: { inputTokens: number; outputTokens: number; model: string };
-    };
+    }
+  | { usageUnreliable: { model: string } };
 export interface Provider {
   stream(context: Context, signal: AbortSignal): AsyncIterable<ProviderPart>;
 }
@@ -310,6 +311,7 @@ export type DeepSeekDiagnostic = {
     | "EVENT_ENVELOPE"
     | "CHOICE_SHAPE"
     | "USAGE_SHAPE"
+    | "USAGE_CONFLICT"
     | "MODEL_MISMATCH"
     | "FINISH_REASON"
     | "TOKEN_BOUND"
@@ -477,6 +479,8 @@ export class DeepSeekProvider implements Provider {
     let finishReason: string | undefined;
     let invalidTerminalReason: DeepSeekDiagnostic["reason"] | undefined;
     let terminalText = "";
+    let confirmedUsage:
+      { inputTokens: number; outputTokens: number; model: string } | undefined;
     let invalidFinishReason = false;
     const accepted =
       this.provider === "opencode"
@@ -534,6 +538,69 @@ export class DeepSeekProvider implements Provider {
           /^\d{1,16}(?:\.\d{1,16})?$/.test(event.cost)
         )
           continue;
+        // Live Go sends an additional usage-only chunk after inline usage. Identical values are not a second charge.
+        if (
+          !done &&
+          terminal &&
+          confirmedUsage &&
+          event.usage &&
+          Object.keys(event).every((k) =>
+            ["id", "object", "created", "model", "choices", "usage"].includes(
+              k,
+            ),
+          )
+        ) {
+          const u = event.usage;
+          const validNumbers =
+            Number.isSafeInteger(u.prompt_tokens) &&
+            u.prompt_tokens >= 0 &&
+            Number.isSafeInteger(u.completion_tokens) &&
+            u.completion_tokens >= 0;
+          const validModel =
+            typeof event.model === "string" &&
+            event.model.length > 0 &&
+            event.model.length <= 300;
+          if (
+            validNumbers &&
+            validModel &&
+            (!accepted.includes(event.model) ||
+              u.prompt_tokens > context.inputTokenBound ||
+              u.completion_tokens > context.maxOutputTokens)
+          ) {
+            yield {
+              usage: {
+                inputTokens: u.prompt_tokens,
+                outputTokens: u.completion_tokens,
+                model: event.model,
+              },
+            };
+            this.fail(
+              !accepted.includes(event.model)
+                ? "MODEL_MISMATCH"
+                : "TOKEN_BOUND",
+              envelopeMetadata(),
+            );
+          }
+          if (
+            !validNumbers ||
+            !validModel ||
+            event.model !== confirmedUsage.model ||
+            u.prompt_tokens !== confirmedUsage.inputTokens ||
+            u.completion_tokens !== confirmedUsage.outputTokens ||
+            (u.total_tokens !== undefined &&
+              (!Number.isSafeInteger(u.total_tokens) ||
+                u.total_tokens !== u.prompt_tokens + u.completion_tokens))
+          ) {
+            // Contradictory accounting cannot be trusted: retain the actual model but hold the reservation.
+            yield {
+              usageUnreliable: {
+                model: validModel ? event.model : confirmedUsage.model,
+              },
+            };
+            this.fail("USAGE_CONFLICT", envelopeMetadata());
+          }
+          continue;
+        }
         // Content-free gateway metadata never establishes usage or successful completion.
         if (
           !done &&
@@ -651,6 +718,11 @@ export class DeepSeekProvider implements Provider {
           );
         // Go may carry the final text in its stop chunk; emit once only after usage/safety validation.
         if (terminalText) yield { text: terminalText };
+        confirmedUsage = {
+          inputTokens: usage.prompt_tokens,
+          outputTokens: usage.completion_tokens,
+          model: event.model,
+        };
         terminal = true;
       } else {
         if (

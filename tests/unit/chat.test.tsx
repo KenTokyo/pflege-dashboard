@@ -86,3 +86,33 @@ describe('Chat', () => {
     expect(fake.state.conversations[0]?.title).toBe('Widerspruch vorbereiten · fiktives Beispiel');
   });
 });
+
+
+describe('Providerfehler nach Antwortbeginn', () => {
+  it('sichtbaren Teiltext ehrlich als unvollständig markieren, auch im geladenen Verlauf', async () => {
+    const partial = 'Ein bereits sichtbarer Teil der Antwort. '.repeat(24).slice(0, 907);
+    const { user, fake } = await signedInApp({ modelOperational: true, chat: () => ({ kind: 'stream_error', afterChunks: [partial], code: 'PROVIDER_FAILED' }) }, THREAD);
+    await user.type(await screen.findByLabelText(/Nachricht an den Sachbearbeiter/), 'Was steht an?{Enter}');
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByText('Antwort nicht vollständig abgeschlossen')).toBeTruthy();
+    expect(within(alert).getByText('Die Antwort wurde unterbrochen. Sie können die Anfrage erneut senden.')).toBeTruthy();
+    expect(within(alert).getByRole('button', { name: 'Neu senden' })).toBeTruthy();
+    const persisted = await screen.findByText('Antwort nicht vollständig abgeschlossen. Der Text kann unvollständig sein.');
+    expect(persisted.closest('article')?.textContent).toContain(partial.trim());
+    expect(screen.queryByText('Keine Antwort erhalten')).toBeNull();
+    expect(screen.queryByText('Antwort konnte nicht erzeugt werden.')).toBeNull();
+    expect(screen.queryByText(/Der KI-Anbieter hat nicht geantwortet/)).toBeNull();
+    expect(fake.calls.chat).toHaveLength(1);
+  });
+
+  it.each([{ afterChunks: [] }, { afterChunks: ['   '] }])('ohne sichtbaren Antworttext bleibt der ursprüngliche Fehlerhinweis ($afterChunks)', async ({ afterChunks }) => {
+    const { user, fake } = await signedInApp({ modelOperational: true, chat: () => ({ kind: 'stream_error', afterChunks, code: 'PROVIDER_FAILED' }) }, THREAD);
+    await user.type(await screen.findByLabelText(/Nachricht an den Sachbearbeiter/), 'Was steht an?{Enter}');
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByText('Keine Antwort erhalten')).toBeTruthy();
+    expect(within(alert).getByText(/Der KI-Anbieter hat nicht geantwortet/)).toBeTruthy();
+    expect(await screen.findByText('Antwort konnte nicht erzeugt werden.')).toBeTruthy();
+    expect(screen.queryByText(/Antwort nicht vollständig abgeschlossen/)).toBeNull();
+    expect(fake.calls.chat).toHaveLength(1);
+  });
+});
