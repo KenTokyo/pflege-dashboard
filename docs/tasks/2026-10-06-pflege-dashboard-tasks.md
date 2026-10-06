@@ -41,7 +41,7 @@ Fortsetzung nach direkter Nutzerfreigabe: Werte aus `env.md` geschützt in `.env
 - [x] Supabase-Erweiterung installiert und autorisiert; MCP durch erfolgreiche Aufrufe von `list_organizations` und `list_projects` geprüft. Inzwischen ist auch `pflegedashboard` sichtbar und per SQL erreichbar.
 - [x] Projektspezifischen Datenbankzugriff nach Anlage per MCP-SQL geprüft. Keine zusätzliche globale MCP-Verbindung angelegt.
 - [x] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen. Supabase-Sicherheitsprüfung nach Korrektur des RLS-Trigger-EXECUTE-Rechts ohne Meldungen.
-- [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
+- [x] Backend-Gate und anschließende Migrationen/RLS gegen echtes Supabase abgeschlossen; späterer Node-Abschluss und neue Zusatzprüfung stehen unten.
 
 Historischer Hosted-Bericht vor lokalem Schema-Gate: Hosted-Projekt, `.env`, Auth-Grundeinstellungen und MCP funktionieren und wurden real geprüft. Anwendungstabellen noch nicht übernommen: paralleler Backend-Bericht nennt Storage-Migrationsfehler `must be owner of table objects`; Schema-/Seed-/RLS-Gate offen. Geheimnisse ausschließlich lokal gespeichert, nicht ausgegeben oder committed. Keine eigenen Browser-/Serverprozesse; DB-Verbindungen geschlossen, Nutzer-Tab erhalten. Browser-Finding: zwei Playwright-Linkklicks meldeten Timeouts trotz sichtbarem Link; frischer AX-Zustand und Klick auf dessen aktuelle Elementnummer funktionierten. Pfade: `docs/supabase-provisioning.md`, `docs/backend-runtime-pruefung.md`, `.env.example`.
 
@@ -72,7 +72,18 @@ Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoan
 - [x] Vertrag/Typen verbunden; Frontend-Checks, echter lokaler Supabase-/RLS-/Parallel-/Edge-Lauf und Hosted-Struktur unabhängig durch den Orchestrator geprüft. Beide Themes anhand tatsächlicher PNGs angesehen. Angemeldeter End-to-End-Login/KI-Stream ausdrücklich nicht bestanden; keine Konten oder Providercalls.
 - [ ] Gate: Nutzer kann sich selbst anmelden und in beiden Themes eine echte Unterhaltung führen.
 
-Ergebnis: Phase-1-Implementierung einschließlich notwendiger Sitzungsnacharbeit geliefert und lokal gesichert; Tagwerk-App, 101 Frontendtests, echte lokale Supabase-Dienste und Hosted-App-Schema belegt. Nutzer-Gate bleibt offen: Hosted-Edge-Deployment, Konto/Mitgliedschaft, Provider-Secrets, überprüftes Modell/Preise und bewusst freigegebenes Budget fehlen. Beide ursprünglichen Agenten warten, keine Phase 2. Pfade: `src/`, `supabase/functions/`, `docs/gates/2026-10-06-phase1.md`.
+Historischer Zwischenstand vor der Node-Umstellung: Tagwerk-App, 101 Frontendtests, echte lokale Supabase-Dienste und Hosted-App-Schema belegt. Der damalige Edge-Deployschritt wurde durch die ausdrückliche Nutzerkorrektur aufgehoben und ist kein offener Punkt mehr. Aktueller technischer Node-Abschluss und neue Zusatzprüfung stehen unten. Das echte Nutzer-Gate benötigt weiterhin Konto/Mitgliedschaft, Provider-Schlüssel, überprüftes Modell/Preise und bewusst freigegebenes Budget. Pfade: `src/`, `backend/`, `docs/gates/2026-10-06-phase1.md`.
+
+## Zusatzprüfung 2026-10-06 – Anforderungen, Randfälle und Oberfläche
+
+- [x] Neuen Nutzerauftrag und Grenze von zwei Sol `xhigh` gleichzeitig plus Opus `high` dokumentiert; vorheriger technischer Stand `1dc2782` bleibt Referenz.
+- [x] Unabhängiger Sol liefert 52-zeiligen Anforderungsabgleich; sieben konkrete Querverbindungsfunde an ursprüngliche Bereichsinhaber gegeben. Korrekturen mit 127 Frontend-/60 serverfreien Backendtests und eigenen Abbruchrepros nachgeprüft. Neue SQL-Abnahme bleibt beim Backend/Orchestrator, keine neue Produktphase.
+- [x] Ursprünglicher Backend-Sol behebt Stream-Widerruf, Auth-Störung, Start/Stop, Verbrauch bei Modellabweichung und Kontextreihenfolge/-aufgaben. Native Abnahme: acht Migrationen, 501 SQL, damals 92 Tests, 22 Parallelfälle, 18 PG und 31 HTTP. Nach abschließendem 2,5s-Handlerfix erneut 93 Tests, Typen/Build und 39 Hosted-/Static-Prüfungen unabhängig bestanden. Achte Migration additiv auf eigenem Hosted-Projekt, keine Konten/Kosten.
+- [x] Ursprünglicher Frontend-Opus behebt 13 Funde samt abschließendem Zwei-Paar-Sortierfall. 131 Tests, 38 Vorher-/38 Nachher-Bilder und 28 echte nicht angemeldete Browserprüfungen bestanden. Alle eigenen Browser/Server beendet.
+- [x] Orchestrator prüft Quelländerungen und Lieferungen, führt native Supabase-, finale Frontend- und Hosted-/Static-Gesamtprüfungen unabhängig erfolgreich aus. Vier endgültige Nachher-Bilder tatsächlich angesehen; eigene Prozesse beendet und Bericht abgeschlossen.
+- [x] Geprüften Zusatzprüfungsstand mit Berichten, Regressionen und Bildbelegen lokal als Meilenstein sichern; niemals pushen. Dieser Checklistenstand ist Teil desselben lokalen Abschluss-Commits.
+
+Ergebnis: Zusätzliche technische Abnahme bestanden; sämtliche bestätigten Funde behoben. Echte Anmeldung/KI bleibt ohne Konto/Mitgliedschaft/Provider- und Budgetfreigabe ungeprüft, Phase 2 nicht freigegeben. Pfade: `docs/gates/2026-10-06-phase1-audit.md`, `backend/`, `src/`.
 
 ## Phase 2 – Sachbearbeiter
 
@@ -80,7 +91,7 @@ Ergebnis: Phase-1-Implementierung einschließlich notwendiger Sitzungsnacharbeit
 - [ ] Dokumenteditor, PDF/DOCX, menschliche Übergabe, anschließend Wissenssuche mit Quellen.
 - [ ] Vollständige Chat → Bestätigung → Dokument-Abnahme und serverseitige Sicherheitsprüfungen.
 
-Ergebnis: Nicht begonnen. Pfade: `src/`, `supabase/functions/`, `backend/`.
+Ergebnis: Nicht begonnen. Pfade: `src/`, `supabase/`, `backend/`.
 
 ## Phase 3 – Demo-Paket
 

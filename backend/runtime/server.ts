@@ -268,15 +268,25 @@ export function createAppServer(deps: Dependencies, options: ServerOptions) {
     );
   });
   let closing: Promise<void> | undefined;
+  const startup = new AbortController();
   return {
     server,
     async listen() {
-      server.listen(options.port, options.host);
-      await once(server, "listening");
+      if (stopping) throw new AppError("REQUEST_ABORTED", 409);
+      const ready = once(server, "listening", { signal: startup.signal });
+      try {
+        server.listen(options.port, options.host);
+        await ready;
+      } catch (error) {
+        startup.abort();
+        await ready.catch(() => {});
+        throw error;
+      }
     },
     close() {
       closing ??= (async () => {
         stopping = true;
+        startup.abort();
         const stopped = new Promise<void>((resolve) =>
           server.close(() => resolve()),
         );

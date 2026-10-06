@@ -1,0 +1,165 @@
+{
+  "browser": "Google Chrome for Testing 154.0.8037.92",
+  "shots": [
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-email-fehler-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-email-fehler-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-email-fehler-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/echt/login-email-fehler-telefon-dunkel.png"
+  ],
+  "checks": [
+    {
+      "name": "breit-dunkel: /aufgaben ohne Sitzung → Anmeldung",
+      "ok": true,
+      "detail": "/anmelden?weiter=%2Faufgaben"
+    },
+    {
+      "name": "breit-dunkel: Theme aktiv",
+      "ok": true,
+      "detail": "dunkel"
+    },
+    {
+      "name": "breit-dunkel: unvollständige E-Mail wird lokal abgelehnt",
+      "ok": true,
+      "detail": "Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de."
+    },
+    {
+      "name": "breit-dunkel: Fokus im E-Mail-Feld",
+      "ok": true,
+      "detail": "email"
+    },
+    {
+      "name": "breit-dunkel: keine Anfrage an fremde Dienste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "breit-dunkel: kein waagerechter Überlauf",
+      "ok": true,
+      "detail": "1280px"
+    },
+    {
+      "name": "breit-dunkel: keine Seitenfehler",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "breit-hell: /aufgaben ohne Sitzung → Anmeldung",
+      "ok": true,
+      "detail": "/anmelden?weiter=%2Faufgaben"
+    },
+    {
+      "name": "breit-hell: Theme aktiv",
+      "ok": true,
+      "detail": "hell"
+    },
+    {
+      "name": "breit-hell: unvollständige E-Mail wird lokal abgelehnt",
+      "ok": true,
+      "detail": "Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de."
+    },
+    {
+      "name": "breit-hell: Fokus im E-Mail-Feld",
+      "ok": true,
+      "detail": "email"
+    },
+    {
+      "name": "breit-hell: keine Anfrage an fremde Dienste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "breit-hell: kein waagerechter Überlauf",
+      "ok": true,
+      "detail": "1280px"
+    },
+    {
+      "name": "breit-hell: keine Seitenfehler",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "telefon-hell: /aufgaben ohne Sitzung → Anmeldung",
+      "ok": true,
+      "detail": "/anmelden?weiter=%2Faufgaben"
+    },
+    {
+      "name": "telefon-hell: Theme aktiv",
+      "ok": true,
+      "detail": "hell"
+    },
+    {
+      "name": "telefon-hell: unvollständige E-Mail wird lokal abgelehnt",
+      "ok": true,
+      "detail": "Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de."
+    },
+    {
+      "name": "telefon-hell: Fokus im E-Mail-Feld",
+      "ok": true,
+      "detail": "email"
+    },
+    {
+      "name": "telefon-hell: keine Anfrage an fremde Dienste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "telefon-hell: kein waagerechter Überlauf",
+      "ok": true,
+      "detail": "390px"
+    },
+    {
+      "name": "telefon-hell: keine Seitenfehler",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "telefon-dunkel: /aufgaben ohne Sitzung → Anmeldung",
+      "ok": true,
+      "detail": "/anmelden?weiter=%2Faufgaben"
+    },
+    {
+      "name": "telefon-dunkel: Theme aktiv",
+      "ok": true,
+      "detail": "dunkel"
+    },
+    {
+      "name": "telefon-dunkel: unvollständige E-Mail wird lokal abgelehnt",
+      "ok": true,
+      "detail": "Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de."
+    },
+    {
+      "name": "telefon-dunkel: Fokus im E-Mail-Feld",
+      "ok": true,
+      "detail": "email"
+    },
+    {
+      "name": "telefon-dunkel: keine Anfrage an fremde Dienste",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "telefon-dunkel: kein waagerechter Überlauf",
+      "ok": true,
+      "detail": "390px"
+    },
+    {
+      "name": "telefon-dunkel: keine Seitenfehler",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "blocked": [],
+  "sameOrigin": [],
+  "problems": [],
+  "cleanup": {
+    "browserPid": 57510,
+    "watcherPid": 57558,
+    "devGroup": 57420,
+    "port5173Free": true,
+    "port5174Free": true
+  }
+}

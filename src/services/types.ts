@@ -69,17 +69,21 @@ export interface AuthPort {
   detach(): DetachedSession;
 }
 
+/** Leseabfragen: Abbruch (z. B. bei Abmeldung) reicht bis zur Netzanfrage. */
+export type ReadOptions = { signal?: AbortSignal };
+
+/** Alle Listen werden vollständig geladen (seitenweise), nie still gekürzt. */
 export interface DataPort {
   loadWorkspace(userId: string): Promise<WorkspaceContext | null>;
-  listCareRecipients(workspaceId: string): Promise<CareRecipient[]>;
-  listOpenTasks(workspaceId: string): Promise<TaskRow[]>;
-  listDocuments(workspaceId: string, limit?: number): Promise<DocumentRow[]>;
-  listConversations(workspaceId: string, archived: boolean): Promise<ConversationRow[]>;
-  getConversation(conversationId: string): Promise<ConversationRow | null>;
-  listMessages(conversationId: string): Promise<MessageRow[]>;
-  listModels(workspaceId: string): Promise<ModelRow[]>;
-  getAgentSettings(workspaceId: string): Promise<AgentSettingsView | null>;
-  getDefaultPrompt(workspaceId: string): Promise<PromptVersionRow | null>;
+  listCareRecipients(workspaceId: string, options?: ReadOptions): Promise<CareRecipient[]>;
+  listOpenTasks(workspaceId: string, options?: ReadOptions): Promise<TaskRow[]>;
+  listDocuments(workspaceId: string, options?: ReadOptions): Promise<DocumentRow[]>;
+  listConversations(workspaceId: string, archived: boolean, options?: ReadOptions): Promise<ConversationRow[]>;
+  getConversation(conversationId: string, options?: ReadOptions): Promise<ConversationRow | null>;
+  listMessages(conversationId: string, options?: ReadOptions): Promise<MessageRow[]>;
+  listModels(workspaceId: string, options?: ReadOptions): Promise<ModelRow[]>;
+  getAgentSettings(workspaceId: string, options?: ReadOptions): Promise<AgentSettingsView | null>;
+  getDefaultPrompt(workspaceId: string, options?: ReadOptions): Promise<PromptVersionRow | null>;
   renameConversation(conversationId: string, title: string, expectedRevision: number): Promise<ConversationRow>;
   setConversationArchived(conversation: ConversationRow, archived: boolean): Promise<ConversationRow>;
   createConversation(args: CreateConversationArgs): Promise<ConversationRow>;

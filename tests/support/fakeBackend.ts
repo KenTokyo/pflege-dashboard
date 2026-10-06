@@ -23,6 +23,8 @@ export type FakeOptions = SeedOptions & {
   /** Verzögerung zwischen synthetischen Stream-Ereignissen (ms). */
   tickMs?: number;
   chat?: (request: ChatRequestV1) => ChatScript;
+  /** Synthetischen Bestand vor dem Start erweitern (z. B. große Datenmengen, lange Texte). */
+  extend?: (state: SeedState) => void;
 };
 
 /** Aufrufe, die ein Test gezielt anhalten kann (nie auflösende oder verspätete Netzantworten). */
@@ -64,6 +66,7 @@ function wait(ms: number, signal: AbortSignal): Promise<void> {
 
 export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
   const state = createSeed(options);
+  options.extend?.(state);
   const tick = options.tickMs ?? 0;
   const listeners = new Set<(s: AuthSession | null, c: AuthChange) => void>();
   let session: AuthSession | null = null;
@@ -187,8 +190,8 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
         return userId === TEST_USER_ID ? state.workspace : null;
       },
       listCareRecipients: () => Promise.resolve(state.people),
-      listOpenTasks: () => Promise.resolve(state.tasks.filter((t) => t.status === 'open')),
-      listDocuments: (_ws, limit) => Promise.resolve(state.documents.slice(0, limit ?? 50)),
+      listOpenTasks: () => Promise.resolve(state.tasks.filter((t) => t.status === 'open' || t.status === 'in_progress')),
+      listDocuments: () => Promise.resolve([...state.documents]),
       listConversations: (_ws, archived) =>
         Promise.resolve(state.conversations.filter((c) => (c.archived_at !== null) === archived)),
       getConversation: (id) => Promise.resolve(state.conversations.find((c) => c.id === id) ?? null),
@@ -251,38 +254,57 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
           onEvent({ version: 1, requestId, sequence, conversationId: request.conversationId, type, data } as ChatEventV1);
         };
         const messageId = stored?.id ?? crypto.randomUUID();
-        if (!stored) state.messages.push(message(request.conversationId, 'user', request.content, { client_request_id: request.clientRequestId }));
+        // Wie der Node-Server: Frage und Antwortzeile entstehen beim Start mit demselben Zeitstempel,
+        // die Antwortzeile zunächst leer mit Status „streaming“; sie wird am Ende gefüllt.
+        const startedAt = now();
+        const base = {
+          id: messageId,
+          created_at: startedAt,
+          client_request_id: request.clientRequestId,
+          model_id: chatModel.registryId,
+          model_snapshot: { ...chatModel },
+          prompt_version_id: state.defaultPrompt.id,
+        };
+        const putReply = (row: MessageRow) => {
+          state.messages = [...state.messages.filter((m) => m.id !== row.id), row];
+        };
+        if (!stored) {
+          state.messages.push(message(request.conversationId, 'user', request.content, { client_request_id: request.clientRequestId, created_at: startedAt }));
+          putReply(message(request.conversationId, 'assistant', '', { ...base, status: 'streaming' }));
+        }
         emit('message.started', { messageId, model: chatModel, promptVersionId: state.defaultPrompt.id, replayed: Boolean(stored) });
         const chunks = stored ? [stored.content] : script.kind === 'answer' ? script.chunks : script.afterChunks;
         let text = '';
-        for (const chunk of chunks) {
-          await wait(tick, signal);
-          text += chunk;
-          emit('message.delta', { text: chunk });
-        }
-        if (script.kind === 'stream_error' && !stored) {
-          // Wie der echte Transport: ein SSE-`error`-Ereignis wird zum geworfenen Vertragsfehler.
-          throw new AppError(script.code, { requestId, retryable: false });
-        }
-        if (script.kind === 'answer' && script.holdBeforeComplete && !stored) {
-          await new Promise<void>((resolve, reject) => {
-            releaseHold = resolve;
-            signal.addEventListener('abort', () => reject(new AppError('REQUEST_ABORTED')), { once: true });
-          });
+        try {
+          for (const chunk of chunks) {
+            await wait(tick, signal);
+            text += chunk;
+            emit('message.delta', { text: chunk });
+          }
+          if (script.kind === 'stream_error' && !stored) {
+            // Wie der echte Transport: ein SSE-`error`-Ereignis wird zum geworfenen Vertragsfehler.
+            throw new AppError(script.code, { requestId, retryable: false });
+          }
+          if (script.kind === 'answer' && script.holdBeforeComplete && !stored) {
+            await new Promise<void>((resolve, reject) => {
+              releaseHold = resolve;
+              signal.addEventListener('abort', () => reject(new AppError('REQUEST_ABORTED')), { once: true });
+            });
+          }
+        } catch (error) {
+          // Abbruch speichert den Teiltext als unterbrochen, andere Fehler als fehlgeschlagen.
+          if (!stored) putReply(message(request.conversationId, 'assistant', text, { ...base, status: signal.aborted ? 'interrupted' : 'failed' }));
+          throw error;
         }
         if (!stored) {
           const reply = message(request.conversationId, 'assistant', text, {
-            id: messageId,
-            client_request_id: request.clientRequestId,
-            model_id: chatModel.registryId,
-            model_snapshot: { ...chatModel },
+            ...base,
             provider_response_model: `${chatModel.providerModelId}-synthetisch`,
-            prompt_version_id: state.defaultPrompt.id,
             input_tokens: 812,
             output_tokens: 164,
             sources: script.kind === 'answer' ? (script.sources ?? []) : [],
           });
-          state.messages.push(reply);
+          putReply(reply);
           replies.set(request.clientRequestId, reply);
           // Server hat vollständig gespeichert, aber die Verbindung zum Browser reißt ab.
           if (script.kind === 'cut') throw new AppError('NETWORK');

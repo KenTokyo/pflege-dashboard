@@ -11,6 +11,12 @@ import { redact } from "./redact.mjs";
 import { loadConfiguration } from "../.local/build/backend/runtime/config.js";
 import { createDatabase } from "../.local/build/backend/runtime/database.js";
 const hosted = process.argv.includes("--hosted");
+// Never share the Frontend's 5173/5174 ports. Bind only an ephemeral owned test port.
+const reservation = net.createServer();
+reservation.listen(0, "127.0.0.1");
+await once(reservation, "listening");
+const port = reservation.address().port;
+await new Promise((resolve) => reservation.close(resolve));
 let child;
 let db;
 let processExited;
@@ -25,7 +31,7 @@ const check = (condition, label) => {
 };
 const listening = () =>
   new Promise((resolve) => {
-    const socket = net.createConnection({ host: "127.0.0.1", port: 5174 });
+    const socket = net.createConnection({ host: "127.0.0.1", port });
     let done = false;
     const end = (value) => {
       if (done) return;
@@ -63,7 +69,7 @@ try {
   assert.equal(
     await listening(),
     false,
-    "Port 5174 already used; never stop a foreign server.",
+    "Own test port already used; never stop a foreign server.",
   );
   config = hosted ? await loadConfiguration() : undefined;
   if (!hosted) {
@@ -86,7 +92,7 @@ try {
     await db.verify();
     const app = createAppServer(
       { env: config.env, platform: platform(config.env, fetch, db.rpc) },
-      { host: "127.0.0.1", port: 5174 },
+      { host: "127.0.0.1", port },
     );
     await app.listen();
     child = { exitCode: null, signalCode: null, app };
@@ -101,7 +107,7 @@ try {
       env.STATIC_DIR = path.resolve(backend, "../dist");
     delete env.ALLOWED_ORIGINS;
     delete env.HOST;
-    delete env.PORT;
+    env.PORT = String(port);
     child = spawn(
       process.execPath,
       [path.join(backend, ".local/build/backend/runtime/index.js")],
@@ -121,7 +127,7 @@ try {
     }
     check(await listening(), "actual compiled product server ready");
   }
-  const url = "http://127.0.0.1:5174";
+  const url = `http://127.0.0.1:${port}`;
   const health = await fetch(url + "/api/health", {
     signal: AbortSignal.timeout(10000),
   });
@@ -189,7 +195,7 @@ try {
     const req = http.request(
       {
         host: "127.0.0.1",
-        port: 5174,
+        port,
         path: "/api/health",
         headers: { Host: "evil.invalid" },
       },
@@ -338,6 +344,8 @@ try {
           : "actual native Supabase Auth + SQL, product Node handler",
         checks,
         results,
+        port,
+        ownedPid: child?.app ? process.pid : child?.pid,
         closed,
         accountsCreated: 0,
         providerCalls: 0,

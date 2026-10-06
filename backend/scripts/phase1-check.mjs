@@ -91,6 +91,7 @@ try {
   await step("scripts/runtime-probe.mjs");
   if (!process.argv.includes("--schema-only")) {
     await step("scripts/supabase-safe.mjs", ["test"]);
+    await step("scripts/context-historical-repro.mjs");
     await step("scripts/concurrency.mjs");
     await step("scripts/phase1-concurrency.mjs");
     await step("node_modules/typescript/bin/tsc", ["-p", "tsconfig.build.json"]);

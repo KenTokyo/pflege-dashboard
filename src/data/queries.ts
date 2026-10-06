@@ -5,6 +5,7 @@ import { useSessionEpoch, useWorkspace } from '../auth/AuthProvider';
 import { useBackend } from '../services/BackendContext';
 import { AppError, toAppError } from '../services/errors';
 import type { ConversationRow, Enums } from '../services/types';
+import { orderMessages } from './model';
 
 /** Kein Polling, kein Neuladen beim Fokuswechsel: Daten laden bei Navigation und nach eigenen Änderungen. */
 export function createQueryClient(): QueryClient {
@@ -62,55 +63,56 @@ function useSessionWrite<A, R>(fn: (args: A) => Promise<R>) {
 export function useCareRecipients() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.people(ws), queryFn: () => data.listCareRecipients(ws) });
+  return useQuery({ queryKey: keys.people(ws), queryFn: ({ signal }) => data.listCareRecipients(ws, { signal }) });
 }
 
 export function useOpenTasks() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.tasks(ws), queryFn: () => data.listOpenTasks(ws) });
+  return useQuery({ queryKey: keys.tasks(ws), queryFn: ({ signal }) => data.listOpenTasks(ws, { signal }) });
 }
 
 export function useDocuments() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.documents(ws), queryFn: () => data.listDocuments(ws) });
+  return useQuery({ queryKey: keys.documents(ws), queryFn: ({ signal }) => data.listDocuments(ws, { signal }) });
 }
 
 export function useConversations(archived = false) {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.conversations(ws, archived), queryFn: () => data.listConversations(ws, archived) });
+  return useQuery({ queryKey: keys.conversations(ws, archived), queryFn: ({ signal }) => data.listConversations(ws, archived, { signal }) });
 }
 
 export function useConversation(id: string) {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.conversation(ws, id), queryFn: () => data.getConversation(id) });
+  return useQuery({ queryKey: keys.conversation(ws, id), queryFn: ({ signal }) => data.getConversation(id, { signal }) });
 }
 
 export function useMessages(id: string) {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.messages(ws, id), queryFn: () => data.listMessages(id) });
+  return useQuery({ queryKey: keys.messages(ws, id), queryFn: ({ signal }) => data.listMessages(id, { signal }),
+    select: orderMessages });
 }
 
 export function useModels() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.models(ws), queryFn: () => data.listModels(ws), staleTime: 5 * 60_000 });
+  return useQuery({ queryKey: keys.models(ws), queryFn: ({ signal }) => data.listModels(ws, { signal }), staleTime: 5 * 60_000 });
 }
 
 export function useAgentSettings() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.settings(ws), queryFn: () => data.getAgentSettings(ws) });
+  return useQuery({ queryKey: keys.settings(ws), queryFn: ({ signal }) => data.getAgentSettings(ws, { signal }) });
 }
 
 export function useDefaultPrompt() {
   const ws = useWs();
   const { data } = useBackend();
-  return useQuery({ queryKey: keys.defaultPrompt(ws), queryFn: () => data.getDefaultPrompt(ws), staleTime: 5 * 60_000 });
+  return useQuery({ queryKey: keys.defaultPrompt(ws), queryFn: ({ signal }) => data.getDefaultPrompt(ws, { signal }), staleTime: 5 * 60_000 });
 }
 
 /** Gesprächsänderungen: Ergebnis in Liste und Einzelansicht übernehmen; bei Revisionskonflikt neu laden. */

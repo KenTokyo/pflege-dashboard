@@ -8,6 +8,7 @@ export type AppErrorCode =
   | 'NETWORK'
   | 'NOT_DEPLOYED'
   | 'INVALID_CREDENTIALS'
+  | 'INVALID_EMAIL'
   | 'CONFIG_MISSING'
   | 'PROTOCOL'
   | 'ABORTED'
@@ -36,6 +37,7 @@ const MESSAGES: Record<AppErrorCode, string> = {
   NETWORK: 'Keine Verbindung zum Server. Bitte prüfen Sie Ihre Internetverbindung.',
   NOT_DEPLOYED: 'Diese Funktion ist auf dem Server noch nicht eingerichtet.',
   INVALID_CREDENTIALS: 'E-Mail-Adresse oder Passwort stimmen nicht.',
+  INVALID_EMAIL: 'Bitte geben Sie eine vollständige E-Mail-Adresse ein, zum Beispiel name@beispiel.de.',
   CONFIG_MISSING: 'Die Verbindung zu Supabase ist nicht konfiguriert.',
   PROTOCOL: 'Die Antwort des Servers war unvollständig oder unerwartet.',
   ABORTED: 'Die Antwort wurde abgebrochen.',

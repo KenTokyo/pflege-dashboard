@@ -13,6 +13,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from '../../src/app/App';
 import type { Clock } from '../../src/auth/activity';
 import { createFakeBackend, type ChatScript, type FakeOptions } from '../support/fakeBackend';
+import { emptyWorkspace, longContent } from '../support/scenarios';
 
 const params = new URLSearchParams(location.search);
 const szenario = params.get('szenario') ?? 'seed';
@@ -40,6 +41,10 @@ const SZENARIEN: Record<string, FakeOptions> = {
   budget: { modelOperational: true, chat: () => ({ kind: 'http_error', code: 'BUDGET_EXCEEDED' }) },
   abriss: { modelOperational: true, tickMs: 60, chat: () => ({ kind: 'cut', afterChunks: CHUNKS.slice(0, 3) }) },
   mitglied: { role: 'member' },
+  // Randfälle: lange Inhalte, leerer Bestand, sehr langsame Antwort (zum Abbrechen).
+  lang: { modelOperational: true, tickMs: 60, chat: () => ANSWER, extend: (s) => longContent(s) },
+  leer: { extend: emptyWorkspace },
+  langsam: { modelOperational: true, tickMs: 4000, chat: () => ANSWER },
 };
 
 // Uhr mit Vorspulen, damit der 15-Minuten-Abmeldeweg ohne Warten sichtbar wird.

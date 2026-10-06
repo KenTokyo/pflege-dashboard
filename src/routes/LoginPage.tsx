@@ -1,13 +1,13 @@
 import { useSearch } from '@tanstack/react-router';
 import { ReturnTo } from '../app/returnPath';
 import { ArrowRight, CalendarClock, Clock, Info, LockKeyhole, Mail, MessageSquareText, ShieldCheck } from 'lucide-react';
-import { useId, useState, type SubmitEvent } from 'react';
+import { useEffect, useId, useRef, useState, type SubmitEvent } from 'react';
 import { useAuth, type SignOutReason } from '../auth/AuthProvider';
 import { DemoBanner } from '../components/DemoBanner';
 import { BrandMark, Spray, TagLine } from '../components/Brand';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
-import { toAppError, type AppError } from '../services/errors';
+import { AppError, toAppError } from '../services/errors';
 
 const REASON: Record<SignOutReason, string> = {
   manual: 'Sie wurden abgemeldet.',
@@ -25,6 +25,14 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<AppError | null>(null);
   const errorId = useId();
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  // Während der Anmeldung sind die Felder gesperrt und verlieren den Fokus. Nach einem Fehler
+  // springt er zurück ins passende Feld, damit Tastatur- und Screenreader-Nutzer direkt weitermachen.
+  useEffect(() => {
+    if (!error) return;
+    (error.code === 'INVALID_EMAIL' ? emailRef : passwordRef).current?.focus();
+  }, [error]);
   const weiter = useSearch({ from: '/anmelden', select: (s) => s.weiter });
 
   if (state.status === 'signedIn' || state.status === 'noAccess' || state.status === 'error') {
@@ -36,10 +44,16 @@ export function LoginPage() {
   const onSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (busy) return;
+    const address = email.trim();
+    // Offensichtlich ungültige Adresse gar nicht erst an den Auth-Server schicken.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+      setError(new AppError('INVALID_EMAIL'));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      await signIn(email.trim(), password);
+      await signIn(address, password);
     } catch (err) {
       setError(toAppError(err));
     } finally {
@@ -126,10 +140,12 @@ export function LoginPage() {
 
               <div className="field">
                 <label htmlFor="email">E-Mail-Adresse</label>
-                <div className={`input ${error?.code === 'INVALID_CREDENTIALS' ? 'is-invalid' : ''}`}>
+                <div className={`input ${error?.code === 'INVALID_CREDENTIALS' || error?.code === 'INVALID_EMAIL' ? 'is-invalid' : ''}`}>
                   <Mail className="i" size={18} aria-hidden="true" />
                   <input
                     id="email"
+                    ref={emailRef}
+                    aria-invalid={error?.code === 'INVALID_EMAIL' || error?.code === 'INVALID_CREDENTIALS'}
                     type="email"
                     inputMode="email"
                     autoComplete="username"
@@ -147,6 +163,8 @@ export function LoginPage() {
                   <LockKeyhole className="i" size={18} aria-hidden="true" />
                   <input
                     id="password"
+                    ref={passwordRef}
+                    aria-invalid={error?.code === 'INVALID_CREDENTIALS'}
                     type="password"
                     autoComplete="current-password"
                     required

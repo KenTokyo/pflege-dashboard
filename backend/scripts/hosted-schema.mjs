@@ -12,7 +12,8 @@ import { Client } from "pg";
 import { backend } from "./local-db.mjs";
 import { fingerprint } from "./schema-fingerprint.mjs";
 import { redact } from "./redact.mjs";
-const root = path.resolve(backend, ".."), ref = "ttbfpqveexmlqxkzwlmz";
+const root = path.resolve(backend, ".."),
+  ref = "ttbfpqveexmlqxkzwlmz";
 const action = process.argv[2];
 if (!["inspect", "apply"].includes(action)) {
   throw new Error("Erlaubt: inspect oder apply.");
@@ -37,21 +38,31 @@ const result = {
   seedApplied: false,
 };
 async function state(client) {
-  const tables = (await client.query(
-    "select tablename as name,tableowner as owner,rowsecurity as rls from pg_tables where schemaname='public' order by tablename",
-  )).rows;
-  const storage = (await client.query(
-    "select relname as name,pg_get_userbyid(relowner) as owner,relrowsecurity as rls from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='storage' and relname in ('buckets','objects') order by relname",
-  )).rows;
-  const functions = (await client.query(
-    "select p.proname as name from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' order by p.proname",
-  )).rows.map((x) => x.name);
-  const bucket = (await client.query(
-    "select id,public,file_size_limit,allowed_mime_types from storage.buckets where id='care-private'",
-  )).rows;
-  const policies = (await client.query(
-    "select policyname as name,cmd from pg_policies where schemaname='storage' and policyname like 'care_private_%' order by policyname",
-  )).rows;
+  const tables = (
+    await client.query(
+      "select tablename as name,tableowner as owner,rowsecurity as rls from pg_tables where schemaname='public' order by tablename",
+    )
+  ).rows;
+  const storage = (
+    await client.query(
+      "select relname as name,pg_get_userbyid(relowner) as owner,relrowsecurity as rls from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='storage' and relname in ('buckets','objects') order by relname",
+    )
+  ).rows;
+  const functions = (
+    await client.query(
+      "select p.proname as name from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' order by p.proname",
+    )
+  ).rows.map((x) => x.name);
+  const bucket = (
+    await client.query(
+      "select id,public,file_size_limit,allowed_mime_types from storage.buckets where id='care-private'",
+    )
+  ).rows;
+  const policies = (
+    await client.query(
+      "select policyname as name,cmd from pg_policies where schemaname='storage' and policyname like 'care_private_%' order by policyname",
+    )
+  ).rows;
   return { tables, storage, functions, bucket, policies };
 }
 
@@ -59,18 +70,22 @@ try {
   const envFile = path.join(root, ".env");
   const stat = await lstat(envFile);
   if (
-    !stat.isFile() || (stat.mode & 0o077) !== 0 || stat.uid !== process.getuid()
-  ) throw new Error("Eigene Env-Datei ist nicht geschützt.");
+    !stat.isFile() ||
+    (stat.mode & 0o077) !== 0 ||
+    stat.uid !== process.getuid()
+  )
+    throw new Error("Eigene Env-Datei ist nicht geschützt.");
   const env = {};
   for (const line of (await readFile(envFile, "utf8")).split(/\r?\n/)) {
-    const match = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/
-      .exec(line);
+    const match =
+      /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/.exec(line);
     if (match && names.has(match[1])) {
       let value = match[2];
       if (
         (value.startsWith('"') && value.endsWith('"')) ||
         (value.startsWith("'") && value.endsWith("'"))
-      ) value = value.slice(1, -1);
+      )
+        value = value.slice(1, -1);
       env[match[1]] = value;
     }
   }
@@ -78,19 +93,24 @@ try {
     env.PROJECT_REF !== ref ||
     new URL(env.VITE_SUPABASE_URL).hostname !== `${ref}.supabase.co` ||
     new URL(env.SUPABASE_URL).hostname !== `${ref}.supabase.co`
-  ) throw new Error("Fremdes Projekt wird verweigert.");
+  )
+    throw new Error("Fremdes Projekt wird verweigert.");
   const url = new URL(env.DATABASE_URL);
   if (
     !["postgres:", "postgresql:"].includes(url.protocol) ||
-    !(url.hostname === `db.${ref}.supabase.co` ||
-      decodeURIComponent(url.username) === `postgres.${ref}`) ||
+    !(
+      url.hostname === `db.${ref}.supabase.co` ||
+      decodeURIComponent(url.username) === `postgres.${ref}`
+    ) ||
     !url.password
-  ) throw new Error("Datenbankprojekt nicht eindeutig zugeordnet.");
+  )
+    throw new Error("Datenbankprojekt nicht eindeutig zugeordnet.");
   const caPath = path.resolve(root, env.PGSSLROOTCERT);
   if (
     caPath !== path.join(root, ".local/supabase-ca.crt") ||
     !["verify-full", "verify-ca", "require"].includes(env.PGSSLMODE)
-  ) throw new Error("Offizielle CA-Konfiguration fehlt.");
+  )
+    throw new Error("Offizielle CA-Konfiguration fehlt.");
   for (const key of [...url.searchParams.keys()]) {
     if (key.startsWith("ssl")) url.searchParams.delete(key);
   }
@@ -125,16 +145,16 @@ try {
     const expected = JSON.parse(baseline.phase1);
     result.structureMatchesLocal =
       JSON.stringify(actual) === JSON.stringify(expected);
-    result.structureDifferences = Object.keys(expected).map((key) => ({
-      key,
-      actual: actual[key].length,
-      expected: expected[key].length,
-      different: actual[key].filter((v, i) =>
-        JSON.stringify(v) !== JSON.stringify(expected[key][i])
-      ).length,
-    })).filter((x) =>
-      x.different || x.actual !== x.expected
-    );
+    result.structureDifferences = Object.keys(expected)
+      .map((key) => ({
+        key,
+        actual: actual[key].length,
+        expected: expected[key].length,
+        different: actual[key].filter(
+          (v, i) => JSON.stringify(v) !== JSON.stringify(expected[key][i]),
+        ).length,
+      }))
+      .filter((x) => x.different || x.actual !== x.expected);
     await writeFile(
       path.join(backend, ".local/hosted-structure.json"),
       JSON.stringify({ actual, expected }),
@@ -143,10 +163,11 @@ try {
   } catch {}
   if (
     result.before.storage.length !== 2 ||
-    result.before.storage.some((t) =>
-      !t.rls || t.owner !== "supabase_storage_admin"
+    result.before.storage.some(
+      (t) => !t.rls || t.owner !== "supabase_storage_admin",
     )
-  ) throw new Error("Storage-Owner/RLS weicht ab; keine Besitzübernahme.");
+  )
+    throw new Error("Storage-Owner/RLS weicht ab; keine Besitzübernahme.");
   if (result.before.tables.some((t) => !t.rls || t.owner !== "postgres")) {
     throw new Error("Ungeprüfter App-Owner oder RLS-Zustand.");
   }
@@ -163,11 +184,13 @@ try {
     );
     if (
       createHash("sha256").update(baselineRaw).digest("hex") !==
-        gate.schemaBaselineSha256
-    ) throw new Error("Schema-Nachweis stimmt nicht mit lokalem Gate überein.");
+      gate.schemaBaselineSha256
+    )
+      throw new Error("Schema-Nachweis stimmt nicht mit lokalem Gate überein.");
     const baseline = JSON.parse(baselineRaw);
     const files = (await readdir(path.join(root, "supabase/migrations")))
-      .filter((n) => /^\d+_.*\.sql$/.test(n)).sort();
+      .filter((n) => /^\d+_.*\.sql$/.test(n))
+      .sort();
     const sources = await Promise.all(
       files.map(async (file) => ({
         file,
@@ -182,13 +205,15 @@ try {
       sha256: createHash("sha256").update(x.sql).digest("hex"),
     }));
     if (
-      createHash("sha256").update(
-          await readFile(path.join(root, "supabase/seed.sql")),
-        ).digest("hex") !== gate.seedSha256 ||
+      createHash("sha256")
+        .update(await readFile(path.join(root, "supabase/seed.sql")))
+        .digest("hex") !== gate.seedSha256 ||
       JSON.stringify(hashes) !== JSON.stringify(gate.migrations)
-    ) throw new Error("Migrationen wurden seit lokalem Gate geändert.");
+    )
+      throw new Error("Migrationen wurden seit lokalem Gate geändert.");
     if (
-      result.before.tables.length !== 0 && result.before.tables.length !== 21 &&
+      result.before.tables.length !== 0 &&
+      result.before.tables.length !== 21 &&
       result.before.tables.length !== 25
     ) {
       throw new Error(
@@ -197,18 +222,65 @@ try {
     }
     if (
       result.before.tables.length &&
-      await fingerprint(db, true) !== baseline.phase0
-    ) throw new Error("App-Schemadrift gegenüber geprüfter Phase-0-Grundlage.");
+      (await fingerprint(db, true)) !== baseline.phase0
+    )
+      throw new Error("App-Schemadrift gegenüber geprüfter Phase-0-Grundlage.");
     // Standard Supabase CLI metadata, no app rows and no ownership changes.
     await db.query("create schema if not exists supabase_migrations");
     await db.query(
       "create table if not exists supabase_migrations.schema_migrations(version text primary key,statements text[],name text)",
     );
-    const journal = (await db.query(
-      "select version,statements from supabase_migrations.schema_migrations",
-    )).rows;
+    const journal = (
+      await db.query(
+        "select version,statements from supabase_migrations.schema_migrations",
+      )
+    ).rows;
     const recorded = new Map(journal.map((x) => [x.version, x.statements]));
     const originalCount = result.before.tables.length;
+    // This follow-up replaces one function only. Verify the exact previous
+    // seven-migration structure/ACL before changing it, including private bodies.
+    const contextCorrection = sources.find(
+      (s) => s.file === "20261006150000_phase1_context_order.sql",
+    );
+    if (
+      originalCount === 25 &&
+      contextCorrection &&
+      !recorded.has("20261006150000")
+    ) {
+      const previous = sources.find(
+        (s) => s.file === "20261006131000_phase1_chat.sql",
+      );
+      const body = (sql) =>
+        /create(?: or replace)? function private\.chat_prepare[\s\S]*?as \$\$([\s\S]*?)\$\$/i.exec(
+          sql,
+        )?.[1];
+      const oldBody = body(previous?.sql ?? ""),
+        newBody = body(contextCorrection.sql);
+      if (!oldBody || !newBody)
+        throw new Error("Kontext-Migrationsnachweis fehlt.");
+      const expectedBefore = JSON.parse(baseline.phase1);
+      let replacements = 0;
+      for (const fn of expectedBefore.functions) {
+        if (
+          fn.definition.startsWith(
+            "CREATE OR REPLACE FUNCTION private.chat_prepare(",
+          ) &&
+          fn.definition.includes(newBody)
+        ) {
+          fn.definition = fn.definition.replace(newBody, oldBody);
+          replacements++;
+        }
+      }
+      if (
+        replacements !== 1 ||
+        (await fingerprint(db, false)) !== JSON.stringify(expectedBefore)
+      ) {
+        throw new Error(
+          "Hosted-Bestand weicht von den bisherigen sieben geprüften Migrationen ab.",
+        );
+      }
+      result.previousSevenStructureVerified = true;
+    }
     for (const source of sources) {
       const [version, ...parts] = source.file.replace(/\.sql$/, "").split("_");
       const checksum = createHash("sha256").update(source.sql).digest("hex");
@@ -220,24 +292,25 @@ try {
           throw new Error("Journal und leerer App-Bestand widersprechen sich.");
         }
       }
-      let present = version === "20261006090000"
-        ? originalCount >= 21
-        : version === "20261006091000"
-        ? [
-          "rename_conversation",
-          "set_conversation_preferences",
-          "mark_document_status",
-          "update_agent_settings",
-        ].every((n) => result.before.functions.includes(n)) &&
-          result.before.policies.length === 2 &&
-          result.before.bucket.length === 1
-        : version === "20261006130000"
-        ? originalCount === 25 &&
-          result.before.functions.includes("edge_session")
-        : version === "20261006131000"
-        ? originalCount === 25 &&
-          result.before.functions.includes("edge_chat_replay")
-        : false;
+      let present =
+        version === "20261006090000"
+          ? originalCount >= 21
+          : version === "20261006091000"
+            ? [
+                "rename_conversation",
+                "set_conversation_preferences",
+                "mark_document_status",
+                "update_agent_settings",
+              ].every((n) => result.before.functions.includes(n)) &&
+              result.before.policies.length === 2 &&
+              result.before.bucket.length === 1
+            : version === "20261006130000"
+              ? originalCount === 25 &&
+                result.before.functions.includes("edge_session")
+              : version === "20261006131000"
+                ? originalCount === 25 &&
+                  result.before.functions.includes("edge_chat_replay")
+                : false;
       if (!present) {
         // Each checked migration is its own atomic additive transaction. No reset/drop/data erasure.
         await db.query(source.sql);
@@ -256,25 +329,29 @@ try {
     }
     result.after = await state(db);
     result.structureMatchesLocal =
-      await fingerprint(db, false) === baseline.phase1;
+      (await fingerprint(db, false)) === baseline.phase1;
     if (
-      !result.structureMatchesLocal || result.after.tables.length !== 25 ||
+      !result.structureMatchesLocal ||
+      result.after.tables.length !== 25 ||
       result.after.tables.some((t) => !t.rls) ||
       !result.after.functions.includes("edge_chat_replay")
-    ) throw new Error("Hosted-Abschlussstruktur unvollständig.");
+    )
+      throw new Error("Hosted-Abschlussstruktur unvollständig.");
   }
-  result.journalVersions = (await db.query(
-    "select version from supabase_migrations.schema_migrations order by version",
-  ).catch(() => ({ rows: [] }))).rows.map((x) => x.version);
+  result.journalVersions = (
+    await db
+      .query(
+        "select version from supabase_migrations.schema_migrations order by version",
+      )
+      .catch(() => ({ rows: [] }))
+  ).rows.map((x) => x.version);
   if (action === "inspect") {
     const base = env.VITE_SUPABASE_URL;
     const headers = { apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY };
     result.http = [];
-    for (
-      const [name, route] of [
-        ["anonymous-workspaces", "/rest/v1/workspaces?select=id"],
-      ]
-    ) {
+    for (const [name, route] of [
+      ["anonymous-workspaces", "/rest/v1/workspaces?select=id"],
+    ]) {
       try {
         const response = await fetch(base + route, {
           headers,
@@ -289,14 +366,23 @@ try {
     }
   }
   result.data = {
-    authUsers:
-      (await db.query("select count(*)::int n from auth.users")).rows[0].n,
+    authUsers: (await db.query("select count(*)::int n from auth.users"))
+      .rows[0].n,
     workspaces: result.before.tables.some((t) => t.name === "workspaces")
       ? (await db.query("select count(*)::int n from public.workspaces"))
-        .rows[0].n
+          .rows[0].n
       : result.seedApplied
-      ? 1
-      : 0,
+        ? 1
+        : 0,
+    zeroBudgetPreserved: result.before.tables.some(
+      (t) => t.name === "workspace_budgets",
+    )
+      ? (
+          await db.query(
+            "select bool_and(monthly_cap_microusd=0) as ok from public.workspace_budgets",
+          )
+        ).rows[0].ok
+      : null,
   };
   result.passed = true;
 } catch (error) {

@@ -1,7 +1,7 @@
 import { CircleAlert, Info, MessageSquareText, Quote } from 'lucide-react';
 import { SafeMarkdown } from '../../chat/Markdown';
 import { messageModel, messageSources, REGION_LABEL, type MessageModel } from '../../data/model';
-import { formatTime } from '../../lib/format';
+import { stampWhen } from '../../lib/format';
 import type { MessageRow } from '../../services/types';
 
 export function RegionBadge({ region }: { region: 'eu' | 'us' | 'unverified' }) {
@@ -60,7 +60,7 @@ export function MessageView({ message }: { message: MessageRow }) {
   const note = STATUS_NOTE[message.status];
   return (
     <article className="msg-agent" aria-label="Antwort des KI-Sachbearbeiters">
-      <AgentMeta model={messageModel(message)} time={formatTime(message.created_at)} />
+      <AgentMeta model={messageModel(message)} time={stampWhen(message.created_at, new Date())} />
       {message.content ? <SafeMarkdown text={message.content} /> : null}
       {note ? (
         <p className="msg-status is-warn">

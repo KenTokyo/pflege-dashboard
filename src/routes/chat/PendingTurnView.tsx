@@ -41,7 +41,13 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
           <AgentMeta
             model={model}
             time={null}
-            {...(turn.phase === 'sending' ? { note: 'Anfrage wird gesendet …' } : turn.replayed ? { note: 'gespeicherte Antwort' } : {})}
+            {...(turn.phase === 'sending'
+              ? { note: 'Anfrage wird gesendet …' }
+              : turn.phase === 'streaming' && !turn.text
+                ? { note: 'Antwort wird erstellt …' }
+                : turn.replayed
+                  ? { note: 'gespeicherte Antwort' }
+                  : {})}
           />
           {turn.text ? (
             <div className="relative">

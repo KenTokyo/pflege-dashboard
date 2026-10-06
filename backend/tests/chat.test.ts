@@ -432,10 +432,50 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
       "synthetic-key",
       fetcher(event("response.completed", { response })),
     ).stream(context, new AbortController().signal);
-    await expect(generator.next()).rejects.toMatchObject({
-      code: "PROVIDER_FAILED",
-    });
+    const consume = async () => {
+      for await (const _part of generator) {
+        /* Known usage may precede failure, never success. */
+      }
+    };
+    await expect(consume()).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
   });
+  it.each([
+    { model: "different", usage: { input_tokens: 10, output_tokens: 5 } },
+    {
+      model: "fixture-no-call",
+      usage: { input_tokens: 10001, output_tokens: 5 },
+    },
+    {
+      model: "fixture-no-call",
+      usage: { input_tokens: 10, output_tokens: 1025 },
+    },
+  ])(
+    "actual adapter transports known rejected usage/model to handler finalization %j",
+    async (response) => {
+      const fake = fetcher(
+        event("response.output_text.delta", { delta: "Partial" }) +
+          event("response.completed", { response }),
+      );
+      const x = setup({ provider: new OpenAIProvider("synthetic-key", fake) });
+      const text = await (await chatHandler(x.deps)(request())).text();
+      expect(text).toContain("PROVIDER_FAILED");
+      expect(text).not.toContain("event: message.completed");
+      expect(text).not.toContain("event: usage.final");
+      expect(
+        x.rpc.mock.calls.filter((call) => call[0] === "edge_chat_finish"),
+      ).toHaveLength(1);
+      expect(
+        x.rpc.mock.calls.find((call) => call[0] === "edge_chat_finish")?.[1],
+      ).toMatchObject({
+        p_status: "failed",
+        p_content: "Partial",
+        p_input_tokens: response.usage.input_tokens,
+        p_output_tokens: response.usage.output_tokens,
+        p_response_model: response.model,
+      });
+      expect(fake).toHaveBeenCalledTimes(2);
+    },
+  );
   it("missing terminal event never becomes success", async () => {
     const gen = new OpenAIProvider(
       "synthetic-key",
@@ -472,7 +512,189 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
     expect(data).toEqual(['{"text":"Grüße"}', "first\nsecond"]);
   });
 });
+describe("active live-session watchdog, silent provider and blocked consumer", () => {
+  it("a non-returning session check stops the provider at its 2.5s deadline", async () => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    let aborted = false,
+      checkCount = 0;
+    const x = setup({
+      provider: {
+        async *stream(_c: Context, signal: AbortSignal) {
+          await new Promise<void>((resolve) =>
+            signal.addEventListener(
+              "abort",
+              () => {
+                aborted = true;
+                resolve();
+              },
+              { once: true },
+            ),
+          );
+          throw new DOMException("synthetic abort", "AbortError");
+        },
+      },
+    });
+    const original = x.rpc.getMockImplementation()!;
+    x.rpc.mockImplementation(async (name: string) => {
+      if (name === "edge_chat_check" && ++checkCount > 2)
+        return new Promise(() => {});
+      return original(name);
+    });
+    let consumed: Promise<string> | undefined;
+    try {
+      consumed = (
+        await chatHandler(x.deps)(request({}, controller.signal))
+      ).text();
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(checkCount).toBe(3);
+      expect(aborted).toBe(false);
+      await vi.advanceTimersByTimeAsync(2500);
+      expect(aborted).toBe(true);
+      const text = await consumed;
+      expect(text).toContain("INTERNAL_ERROR");
+      expect(text).not.toContain("REQUEST_ABORTED");
+      expect(text).not.toContain("message.completed");
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      controller.abort();
+      if (consumed) await consumed;
+      vi.useRealTimers();
+    }
+  });
+  it.each(["SESSION_EXPIRED", "WORKSPACE_FORBIDDEN"])(
+    "silent provider stops with the actual %s reason",
+    async (code) => {
+      vi.useFakeTimers();
+      const controller = new AbortController();
+      let revoked = false,
+        aborted = false;
+      const x = setup({
+        provider: {
+          async *stream(_c: Context, signal: AbortSignal) {
+            await new Promise<void>((resolve) =>
+              signal.addEventListener(
+                "abort",
+                () => {
+                  aborted = true;
+                  resolve();
+                },
+                { once: true },
+              ),
+            );
+            throw new DOMException("synthetic abort", "AbortError");
+          },
+        },
+      });
+      const original = x.rpc.getMockImplementation()!;
+      x.rpc.mockImplementation(async (name: string) => {
+        if (name === "edge_chat_check" && revoked)
+          throw new AppError(code, code === "SESSION_EXPIRED" ? 401 : 403);
+        return original(name);
+      });
+      let consumed: Promise<string> | undefined;
+      try {
+        const response = await chatHandler(x.deps)(
+          request({}, controller.signal),
+        );
+        consumed = response.text();
+        await vi.advanceTimersByTimeAsync(0);
+        revoked = true;
+        await vi.advanceTimersByTimeAsync(5000);
+        expect(aborted).toBe(true);
+        const text = await consumed;
+        expect(text).toContain(code);
+        expect(text).not.toContain("REQUEST_ABORTED");
+        expect(text).not.toContain("message.completed");
+        expect(
+          x.rpc.mock.calls.filter((call) => call[0] === "edge_chat_finish"),
+        ).toHaveLength(1);
+        expect(
+          x.rpc.mock.calls.find((call) => call[0] === "edge_chat_finish")?.[1],
+        ).toMatchObject({ p_status: "interrupted", p_input_tokens: null });
+        expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        controller.abort();
+        if (consumed) await consumed;
+        vi.useRealTimers();
+      }
+    },
+  );
+  it("checks and wakes a backpressured stream, with no provider retry or later timer", async () => {
+    vi.useFakeTimers();
+    let revoked = false,
+      generated = 0,
+      providerClosed = false;
+    const x = setup({
+      provider: {
+        async *stream() {
+          try {
+            for (let i = 0; i < 10; i++) {
+              generated++;
+              yield { text: "private partial" };
+            }
+          } finally {
+            providerClosed = true;
+          }
+        },
+      },
+    });
+    const original = x.rpc.getMockImplementation()!;
+    x.rpc.mockImplementation(async (name: string) => {
+      if (name === "edge_chat_check" && revoked)
+        throw new AppError("WORKSPACE_FORBIDDEN", 403);
+      return original(name);
+    });
+    const response = await chatHandler(x.deps)(request());
+    try {
+      await vi.advanceTimersByTimeAsync(0);
+      expect(generated).toBe(1);
+      revoked = true;
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(providerClosed).toBe(true);
+      expect(generated).toBe(1);
+      const text = await response.text();
+      expect(text).toContain("WORKSPACE_FORBIDDEN");
+      expect(text).not.toContain("event: message.delta");
+      expect(vi.getTimerCount()).toBe(0);
+      const calls = x.rpc.mock.calls.length;
+      await vi.advanceTimersByTimeAsync(15000);
+      expect(x.rpc.mock.calls).toHaveLength(calls);
+    } finally {
+      await response.body?.cancel().catch(() => {});
+      vi.useRealTimers();
+    }
+  });
+});
 describe("Auth and CORS transport", () => {
+  it("Auth network failure is retryable unavailability, not a rejected login", async () => {
+    const p = platform(
+      (n) =>
+        n === "SUPABASE_URL" ? "https://own.example.invalid" : "synthetic-key",
+      vi.fn().mockRejectedValue(new TypeError("synthetic network failure")),
+    );
+    await expect(p.authenticate(request())).rejects.toMatchObject({
+      code: "INTERNAL_ERROR",
+      status: 503,
+      retryable: true,
+    });
+  });
+  it("an aborted Auth request keeps its abort classification", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fake = vi
+      .fn()
+      .mockRejectedValue(new DOMException("test", "AbortError"));
+    const p = platform(
+      (n) =>
+        n === "SUPABASE_URL" ? "https://own.example.invalid" : "synthetic-key",
+      fake,
+    );
+    await expect(
+      p.authenticate(request({}, controller.signal)),
+    ).rejects.toMatchObject({ code: "REQUEST_ABORTED" });
+    expect(fake).not.toHaveBeenCalled();
+  });
   it("getUser validation is required before trusting decoded JWT", async () => {
     const fake = vi.fn().mockResolvedValue(new Response("{}", { status: 401 }));
     const p = platform(

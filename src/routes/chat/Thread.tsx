@@ -9,11 +9,13 @@ import { EmptyState, ErrorState, Loading } from '../../components/States';
 import { effectiveModel } from '../../data/model';
 import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels } from '../../data/queries';
 import { messageFor } from '../../services/errors';
-import type { CareRecipient } from '../../services/types';
+import type { CareRecipient, MessageRow } from '../../services/types';
 import { Composer } from './Composer';
 import { MessageView } from './MessageView';
 import { PendingTurnView } from './PendingTurnView';
 import { ThreadHead } from './ThreadHead';
+
+const FINAL_STATUS = new Set<MessageRow['status']>(['completed', 'interrupted', 'failed']);
 
 export function Thread({ conversationId, people }: { conversationId: string; people: CareRecipient[] }) {
   const ws = useWorkspace().workspace.id;
@@ -54,13 +56,21 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   }, [conversationId, modelKnown, modelUsable, archived, store]);
 
   // Gespeicherten Verlauf mit der lokalen Anfrage abgleichen.
-  const history = messages.data ?? [];
+  // Der Server legt die Antwortzeile schon beim Start an (Status „streaming“) und füllt sie später.
+  // Solange sie nicht endgültig ist, zeigt der lokale Live-Stand den aktuellen Text; die halbfertige
+  // gespeicherte Zeile derselben Anfrage wird so lange ausgeblendet (auch nach Weg- und Zurücknavigieren).
+  const stored = messages.data ?? [];
   const requestId = turn?.clientRequestId ?? null;
-  const userStored = requestId !== null && history.some((m) => m.role === 'user' && m.client_request_id === requestId);
-  const assistantStored = history.find((m) => m.role === 'assistant' && m.client_request_id === requestId) ?? null;
+  const userStored = requestId !== null && stored.some((m) => m.role === 'user' && m.client_request_id === requestId);
+  const assistantFinal =
+    requestId === null
+      ? null
+      : (stored.find((m) => m.role === 'assistant' && m.client_request_id === requestId && FINAL_STATUS.has(m.status)) ?? null);
+  const history =
+    requestId !== null && !assistantFinal ? stored.filter((m) => !(m.role === 'assistant' && m.client_request_id === requestId)) : stored;
   useEffect(() => {
-    if (turn?.phase === 'completed' && assistantStored) store.dismiss(conversationId);
-  }, [turn?.phase, assistantStored, store, conversationId]);
+    if (turn?.phase === 'completed' && assistantFinal) store.dismiss(conversationId);
+  }, [turn?.phase, assistantFinal, store, conversationId]);
 
   // Am Ende des Verlaufs bleiben, solange der Nutzer nicht hochgescrollt hat.
   useLayoutEffect(() => {
@@ -138,7 +148,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
           <PendingTurnView
             turn={turn}
             showUser={!userStored}
-            showAssistant={!assistantStored}
+            showAssistant={!assistantFinal}
             onFetchAgain={() => store.fetchAgain(conversationId)}
             onSendNew={() => store.send(conversationId, turn.content)}
             onReload={() => void qc.invalidateQueries({ queryKey: keys.messages(ws, conversationId) })}

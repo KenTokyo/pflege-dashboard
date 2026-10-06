@@ -144,9 +144,9 @@ export class OpenAIProvider implements Provider {
           !Number.isSafeInteger(usage?.output_tokens) ||
           usage.input_tokens < 0 ||
           usage.output_tokens < 0 ||
-          usage.input_tokens > context.inputTokenBound ||
-          usage.output_tokens > context.maxOutputTokens ||
-          r?.model !== context.model.providerModelId
+          typeof r?.model !== "string" ||
+          r.model.length < 1 ||
+          r.model.length > 300
         ) {
           throw new AppError("PROVIDER_FAILED", 502);
         }
@@ -157,7 +157,14 @@ export class OpenAIProvider implements Provider {
             model: r.model,
           },
         };
-        if (event.type === "response.incomplete") {
+        // Known actual usage/model must reach conservative SQL finalization even
+        // when it cannot be billed against the saved model/price/token snapshot.
+        if (
+          event.type === "response.incomplete" ||
+          usage.input_tokens > context.inputTokenBound ||
+          usage.output_tokens > context.maxOutputTokens ||
+          r.model !== context.model.providerModelId
+        ) {
           throw new AppError("PROVIDER_FAILED", 502);
         }
         finished = true;

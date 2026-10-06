@@ -39,7 +39,7 @@ function DocItem({ doc, person }: { doc: DocumentRow; person: string }) {
           </div>
         ) : null}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="doc-status flex items-center gap-2">
         <label htmlFor={`st-${doc.id}`} className="sr-only">
           Status von {doc.title}
         </label>

@@ -21,7 +21,9 @@
     "check:proxy": "node tools/check-proxy.mjs",
     "check:dev": "node tools/check-dev.mjs",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:bundle && npm run check:source && npm run check:proxy && npm run check:dev",
-    "shots": "node tools/shots.mjs"
+    "shots": "node tools/shots.mjs",
+    "shots:randfaelle": "node tools/edge-shots.mjs",
+    "shots:echt": "node tools/real-app-shots.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

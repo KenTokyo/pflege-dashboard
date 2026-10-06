@@ -30,12 +30,22 @@ export function relativeDays(days: number): string {
   return `noch ${days} Tage`;
 }
 
-/** Kurze Zeitangabe für Listen: heute → Uhrzeit, gestern → „gestern“, sonst Datum. */
+const sameYear = (iso: string, now: Date) => dayKey(new Date(iso)).slice(0, 4) === dayKey(now).slice(0, 4);
+
+/** Kurze Zeitangabe für Listen: heute → Uhrzeit, gestern → „gestern“, dieses Jahr → TT.MM., sonst mit Jahr. */
 export function listWhen(iso: string, now: Date): string {
   const d = daysUntil(iso, now);
   if (d === 0) return formatTime(iso);
   if (d === -1) return 'gestern';
-  return formatShortDate(iso);
+  return sameYear(iso, now) ? formatShortDate(iso) : formatDate(iso);
+}
+
+/** Zeitstempel einer Nachricht: heute nur Uhrzeit, sonst Tag und Uhrzeit (über Tage laufende Gespräche). */
+export function stampWhen(iso: string, now: Date): string {
+  const d = daysUntil(iso, now);
+  if (d === 0) return formatTime(iso);
+  if (d === -1) return `gestern, ${formatTime(iso)}`;
+  return `${sameYear(iso, now) ? formatShortDate(iso) : formatDate(iso)}, ${formatTime(iso)}`;
 }
 
 export function ageFrom(birthDate: string | null, now: Date): number | null {

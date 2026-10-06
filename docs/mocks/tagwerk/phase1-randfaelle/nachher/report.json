@@ -1,0 +1,786 @@
+{
+  "appRoot": "/Users/kentoky/Documents/React Projects/pflege-dashboard",
+  "browser": "Google Chrome for Testing 154.0.8037.92",
+  "shots": [
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dashboard-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-aufgaben-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dokumente-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-gespraeche-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-tabelle-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dashboard-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-tabelle-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dashboard-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dashboard-personen-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-aufgaben-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dokumente-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-gespraeche-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-tabelle-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dashboard-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-aufgaben-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-dokumente-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-gespraeche-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/lang-chat-tabelle-tablet-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/leer-dashboard-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/leer-gespraeche-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/leer-dashboard-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/leer-gespraeche-telefon-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-wartet-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-teiltext-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-abgebrochen-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-wartet-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-teiltext-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/langsam-abgebrochen-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/login-email-unvollstaendig-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/login-passwort-falsch-telefon-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/login-email-unvollstaendig-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/login-passwort-falsch-breit-dunkel.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/tastatur-fokus-breit-hell.png",
+    "/Users/kentoky/Documents/React Projects/pflege-dashboard/docs/mocks/tagwerk/phase1-randfaelle/nachher/tastatur-fokus-telefon-dunkel.png"
+  ],
+  "audits": [
+    {
+      "name": "lang-dashboard-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-aufgaben-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dokumente-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-gespraeche-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-tabelle-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dashboard-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-tabelle-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dashboard-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dashboard-personen-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-aufgaben-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dokumente-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-gespraeche-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-tabelle-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dashboard-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-aufgaben-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-dokumente-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-gespraeche-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "lang-chat-tabelle-tablet-hell",
+      "scrollW": 768,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "leer-dashboard-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "leer-gespraeche-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "leer-dashboard-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "leer-gespraeche-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-wartet-telefon-hell",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-teiltext-telefon-hell",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-abgebrochen-telefon-hell",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-wartet-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-teiltext-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "langsam-abgebrochen-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "login-email-unvollstaendig-telefon-hell",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "login-passwort-falsch-telefon-hell",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "login-email-unvollstaendig-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "login-passwort-falsch-breit-dunkel",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "tastatur-fokus-breit-hell",
+      "scrollW": 1280,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    },
+    {
+      "name": "tastatur-fokus-telefon-dunkel",
+      "scrollW": 390,
+      "beyond": 0,
+      "overlap": 0,
+      "outside": 0,
+      "tiny": 0,
+      "small": 0
+    }
+  ],
+  "keyboard": [
+    {
+      "tag": "breit",
+      "steps": [
+        {
+          "name": "a \"Pflege-Dashboard, Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Gespräche\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Dokumente\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Aufgaben\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Einstellungen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Zu dunkles Design wechseln\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Konto: Testnutzerin (synthetisch)\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Sachbearbeiter fragen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "input \"\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "select \"AllgemeinHildegard Friederike von Sonnen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch gegen den Bescheid zur Einst\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch vorbereiten · fiktives Beisp\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle anzeigen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch · fiktiver MusterentwurfEntw\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Antrag auf Höherstufung des Pflegegrades\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "body"
+        },
+        {
+          "name": "a \"Zum Inhalt springen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Pflege-Dashboard, Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Gespräche\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Dokumente\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Aufgaben\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Einstellungen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Zu dunkles Design wechseln\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Konto: Testnutzerin (synthetisch)\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Sachbearbeiter fragen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "input \"\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        }
+      ]
+    },
+    {
+      "tag": "telefon",
+      "steps": [
+        {
+          "name": "a \"Pflege-Dashboard, Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Einstellungen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Zu helles Design wechseln\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Konto: Testnutzerin (synthetisch)\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Sachbearbeiter fragen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "input \"\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "select \"AllgemeinHildegard Friederike von Sonnen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch gegen den Bescheid zur Einst\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch vorbereiten · fiktives Beisp\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle anzeigen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch · fiktiver MusterentwurfEntw\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Antrag auf Höherstufung des Pflegegrades\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Gespräche\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Dokumente\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Aufgaben\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "body"
+        },
+        {
+          "name": "a \"Zum Inhalt springen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Pflege-Dashboard, Übersicht\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Einstellungen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Zu helles Design wechseln\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "button \"Konto: Testnutzerin (synthetisch)\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Sachbearbeiter fragen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "input \"\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "select \"AllgemeinHildegard Friederike von Sonnen\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Alle\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch gegen den Bescheid zur Einst\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        },
+        {
+          "name": "a \"Widerspruch vorbereiten · fiktives Beisp\"",
+          "visible": true,
+          "ring": true,
+          "focusVisible": true
+        }
+      ]
+    }
+  ],
+  "focus": [
+    {
+      "where": "nach Abbruch telefon",
+      "active": "textarea \"Nachricht an den Sachbearbeiter\""
+    },
+    {
+      "where": "nach Abbruch breit",
+      "active": "textarea \"Nachricht an den Sachbearbeiter\""
+    },
+    {
+      "where": "E-Mail unvollständig telefon",
+      "active": "input \"E-Mail-Adresse\""
+    },
+    {
+      "where": "Passwort falsch telefon",
+      "active": "input \"Passwort\""
+    },
+    {
+      "where": "E-Mail unvollständig breit",
+      "active": "input \"E-Mail-Adresse\""
+    },
+    {
+      "where": "Passwort falsch breit",
+      "active": "input \"Passwort\""
+    }
+  ],
+  "problems": [],
+  "console": [],
+  "cleanup": {
+    "browserPid": 69242,
+    "watcherPid": 69283
+  }
+}

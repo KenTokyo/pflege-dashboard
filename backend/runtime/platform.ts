@@ -33,6 +33,7 @@ export function platform(
         ?.match(/^Bearer ([^\s]+)$/i)?.[1];
       if (!token) throw new AppError("AUTH_REQUIRED", 401);
       if (!url || !publicKey) throw new AppError("INTERNAL_ERROR");
+      if (request.signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
       let user: any;
       let claims: any;
       const signal = AbortSignal.any([
@@ -47,17 +48,29 @@ export function platform(
         });
         if (!response.ok) {
           await response.body?.cancel();
-          throw new Error();
+          throw response.status === 401 || response.status === 403
+            ? new AppError("AUTH_REQUIRED", 401)
+            : new AppError("INTERNAL_ERROR", 503, true);
         }
         user = await response.json();
+        if (!user || typeof user !== "object" || !uuid(user.id))
+          throw new AppError("INTERNAL_ERROR", 503, true);
+      } catch (error) {
+        if (request.signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
+        if (error instanceof AppError) throw error;
+        throw new AppError("INTERNAL_ERROR", 503, true);
+      }
+      try {
         claims = JSON.parse(
           Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
         );
       } catch {
-        throw new AppError("AUTH_REQUIRED", 401);
+        throw new AppError("SESSION_EXPIRED", 401);
       }
       // Only decode AFTER the real own-project Auth service has validated the access token.
       if (
+        !claims ||
+        typeof claims !== "object" ||
         claims.iss !== (env("AUTH_JWT_ISSUER") ?? `${url}/auth/v1`) ||
         !uuid(user.id) ||
         claims.sub !== user.id ||

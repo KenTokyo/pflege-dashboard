@@ -1,5 +1,5 @@
 import { ArrowUp, ShieldCheck, Square } from 'lucide-react';
-import { useLayoutEffect, useRef, type KeyboardEvent, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type KeyboardEvent, type RefObject } from 'react';
 
 export const MAX_MESSAGE = 8000;
 
@@ -27,6 +27,16 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
   }, [value, ref]);
+
+  // Der Abbruch-Knopf verschwindet, sobald die Antwort endet. Lag der Fokus auf ihm (Tastatur),
+  // geht er ins Eingabefeld statt auf die Seite verloren.
+  const stopFocused = useRef(false);
+  useEffect(() => {
+    if (streaming || !stopFocused.current) return;
+    stopFocused.current = false;
+    const active = document.activeElement;
+    if (!active || active === document.body) ref.current?.focus();
+  }, [streaming, ref]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -66,11 +76,22 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
           aria-invalid={tooLong}
         />
         {streaming ? (
-          <button type="button" className="btn btn-secondary composer-send" onClick={onStop} aria-label="Antwort abbrechen" title="Antwort abbrechen">
+          <button
+            key="stop"
+            type="button"
+            className="btn btn-secondary composer-send"
+            onClick={onStop}
+            onFocus={() => (stopFocused.current = true)}
+            onBlur={(e) => {
+              if (e.target.isConnected) stopFocused.current = false;
+            }}
+            aria-label="Antwort abbrechen"
+            title="Antwort abbrechen"
+          >
             <Square className="i" size={16} aria-hidden="true" />
           </button>
         ) : (
-          <button type="submit" className="btn btn-primary composer-send" disabled={!canSend} aria-label="Nachricht senden" title="Senden (Enter)">
+          <button key="send" type="submit" className="btn btn-primary composer-send" disabled={!canSend} aria-label="Nachricht senden" title="Senden (Enter)">
             <ArrowUp className="i" size={18} aria-hidden="true" />
           </button>
         )}

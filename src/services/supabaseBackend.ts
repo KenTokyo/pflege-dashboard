@@ -18,6 +18,61 @@ function must<T>(result: { data: T; error: { code?: string; message?: string } |
   return result.data;
 }
 
+/**
+ * Seitengröße für Listen. Höchstens so groß wie PostgREST `max_rows` (lokal 500, gehostet Standard 1000),
+ * sonst würde eine volle Seite für das Ende gehalten.
+ */
+export const PAGE_SIZE = 500;
+
+type PageResult<T> = { data: T[] | null; error: { code?: string; message?: string } | null };
+export type PageGuard = {
+  /** false, sobald die Sitzung gewechselt hat (Abmeldung, Neuanmeldung): keine weitere Seite laden. */
+  isCurrent: () => boolean;
+  signal?: AbortSignal | undefined;
+};
+
+/** Abfrage beendet, weil abgebrochen oder die Sitzung inzwischen gewechselt hat. */
+function stale(guard: PageGuard): AppError | null {
+  if (guard.signal?.aborted) return new AppError('REQUEST_ABORTED');
+  if (!guard.isCurrent()) return new AppError('AUTH_REQUIRED');
+  return null;
+}
+
+/**
+ * Lädt eine Liste vollständig in Seiten (`range`). Ohne künstliche Obergrenze: Es endet, sobald eine Seite
+ * weniger Zeilen als PAGE_SIZE liefert. Die Abfrage muss eindeutig sortiert sein (zuletzt nach `id`),
+ * sonst können Zeilen zwischen Seiten springen. Doppelte IDs (neue Zeilen während des Ladens) fallen weg.
+ * Vor jeder Seite und vor dem Ergebnis wird die Sitzungsgeneration geprüft: Nach einer Abmeldung lädt
+ * keine Folgeseite über einen neuen Client weiter, und kein Teilergebnis wird zurückgegeben.
+ */
+export async function fetchAll<T extends { id: string }>(
+  page: (from: number, to: number) => PromiseLike<PageResult<T>>,
+  guard: PageGuard,
+): Promise<T[]> {
+  const out: T[] = [];
+  const seen = new Set<string>();
+  for (let from = 0; ; ) {
+    const before = stale(guard);
+    if (before) throw before;
+    const result = await page(from, from + PAGE_SIZE - 1);
+    const after = stale(guard);
+    if (after) throw after;
+    const rows = must(result);
+    for (const row of rows) {
+      if (seen.has(row.id)) continue;
+      seen.add(row.id);
+      out.push(row);
+    }
+    if (rows.length < PAGE_SIZE) return out;
+    from += rows.length;
+  }
+}
+
+/** Abbruchsignal bis zur PostgREST-Anfrage durchreichen (sonst läuft sie nach Abmeldung weiter). */
+function withSignal<Q extends { abortSignal(signal: AbortSignal): Q }>(query: Q, signal?: AbortSignal): Q {
+  return signal ? query.abortSignal(signal) : query;
+}
+
 export function createSupabaseBackend(config: PublicConfig): Backend {
   const listeners = new Set<(session: AuthSession | null, change: AuthChange) => void>();
   const emit = (session: AuthSession | null, change: AuthChange) => listeners.forEach((l) => l(session, change));
@@ -45,22 +100,38 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
   };
   const token = async () => (await getSession())?.accessToken ?? null;
 
+  /** Client einer Leseanfrage festhalten; Folgeseiten und Ergebnis nur, solange er noch gilt. */
+  const reader = (signal?: AbortSignal) => {
+    const client = current;
+    return { c: client, guard: { isCurrent: () => client === current, signal } satisfies PageGuard };
+  };
+  const single = async <T>(guard: PageGuard, run: PromiseLike<T>): Promise<T> => {
+    const result = await run;
+    const gone = stale(guard);
+    if (gone) throw gone;
+    return result;
+  };
+
   const data: DataPort = {
     async loadWorkspace(userId): Promise<WorkspaceContext | null> {
-      const profiles = must(await db().from('profiles').select('id, workspace_id, display_name').eq('user_id', userId));
+      const { c, guard } = reader();
+      const profiles = must(await single(guard, c.from('profiles').select('id, workspace_id, display_name').eq('user_id', userId)));
       if (profiles.length === 0) return null;
       const memberships = must(
-        await db()
-          .from('workspace_memberships')
-          .select('profile_id, workspace_id, role')
-          .in('profile_id', profiles.map((p) => p.id))
-          .eq('status', 'active'),
+        await single(
+          guard,
+          c
+            .from('workspace_memberships')
+            .select('profile_id, workspace_id, role')
+            .in('profile_id', profiles.map((p) => p.id))
+            .eq('status', 'active'),
+        ),
       );
       const membership = memberships[0];
       const profile = profiles.find((p) => p.id === membership?.profile_id);
       if (!membership || !profile) return null;
       const workspace = must(
-        await db().from('workspaces').select('id, name, demo_banner').eq('id', membership.workspace_id).maybeSingle(),
+        await single(guard, c.from('workspaces').select('id, name, demo_banner').eq('id', membership.workspace_id).maybeSingle()),
       );
       return {
         workspace: { id: workspace.id, name: workspace.name, demoBanner: workspace.demo_banner },
@@ -69,81 +140,126 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
       };
     },
 
-    async listCareRecipients(workspaceId): Promise<CareRecipient[]> {
+    async listCareRecipients(workspaceId, options = {}): Promise<CareRecipient[]> {
+      const { c, guard } = reader(options.signal);
       const [people, contacts] = await Promise.all([
-        db().from('care_recipients').select('*').eq('workspace_id', workspaceId).order('name'),
-        db().from('contacts').select('id, name').eq('workspace_id', workspaceId),
+        fetchAll(
+          (from, to) =>
+            withSignal(c.from('care_recipients').select('*').eq('workspace_id', workspaceId).order('name').order('id').range(from, to), options.signal),
+          guard,
+        ),
+        fetchAll(
+          (from, to) => withSignal(c.from('contacts').select('id, name').eq('workspace_id', workspaceId).order('id').range(from, to), options.signal),
+          guard,
+        ),
       ]);
-      const names = new Map(must(contacts).map((c) => [c.id, c.name]));
-      return must(people).map((p) => ({ ...p, insurerName: p.insurer_contact_id ? (names.get(p.insurer_contact_id) ?? null) : null }));
+      const names = new Map(contacts.map((x) => [x.id, x.name]));
+      return people.map((p) => ({ ...p, insurerName: p.insurer_contact_id ? (names.get(p.insurer_contact_id) ?? null) : null }));
     },
 
-    async listOpenTasks(workspaceId) {
-      return must(
-        await db()
-          .from('tasks')
-          .select('*')
-          .eq('workspace_id', workspaceId)
-          .in('status', ['open', 'in_progress'])
-          .order('due_at', { ascending: true, nullsFirst: false })
-          .limit(100),
+    // Listen vollständig (seitenweise), damit Zählungen und Verläufe nie still abgeschnitten werden.
+    async listOpenTasks(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return fetchAll(
+        (from, to) =>
+          withSignal(
+            c
+              .from('tasks')
+              .select('*')
+              .eq('workspace_id', workspaceId)
+              .in('status', ['open', 'in_progress'])
+              .order('due_at', { ascending: true, nullsFirst: false })
+              .order('id')
+              .range(from, to),
+            options.signal,
+          ),
+        guard,
       );
     },
 
-    async listDocuments(workspaceId, limit = 50) {
-      return must(
-        await db().from('documents').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }).limit(limit),
+    async listDocuments(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return fetchAll(
+        (from, to) =>
+          withSignal(
+            c.from('documents').select('*').eq('workspace_id', workspaceId).order('created_at', { ascending: false }).order('id').range(from, to),
+            options.signal,
+          ),
+        guard,
       );
     },
 
-    async listConversations(workspaceId, archived) {
-      const base = db().from('conversations').select('*').eq('workspace_id', workspaceId);
-      const filtered = archived ? base.not('archived_at', 'is', null) : base.is('archived_at', null);
-      return must(await filtered.order('created_at', { ascending: false }).limit(200));
+    async listConversations(workspaceId, archived, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return fetchAll((from, to) => {
+        const query = c.from('conversations').select('*').eq('workspace_id', workspaceId);
+        const filtered = archived ? query.not('archived_at', 'is', null) : query.is('archived_at', null);
+        return withSignal(filtered.order('created_at', { ascending: false }).order('id').range(from, to), options.signal);
+      }, guard);
     },
 
-    async getConversation(conversationId) {
-      const result = await db().from('conversations').select('*').eq('id', conversationId).maybeSingle();
+    async getConversation(conversationId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      const result = await single(guard, withSignal(c.from('conversations').select('*').eq('id', conversationId), options.signal).maybeSingle());
       if (result.error) throw fromDbError(result.error);
       return result.data;
     },
 
-    async listMessages(conversationId) {
-      return must(
-        await db()
-          .from('messages')
-          .select('*')
-          .eq('conversation_id', conversationId)
-          .in('role', ['user', 'assistant', 'system'])
-          .order('created_at', { ascending: true })
-          .limit(400),
+    // Ganzer Verlauf, älteste zuerst: Die neueste Antwort darf bei langen Gesprächen nie fehlen.
+    async listMessages(conversationId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return fetchAll(
+        (from, to) =>
+          withSignal(
+            c
+              .from('messages')
+              .select('*')
+              .eq('conversation_id', conversationId)
+              .in('role', ['user', 'assistant', 'system'])
+              .order('created_at', { ascending: true })
+              .order('id')
+              .range(from, to),
+            options.signal,
+          ),
+        guard,
       );
     },
 
-    async listModels(workspaceId) {
-      return must(await db().from('ai_models').select('*').eq('workspace_id', workspaceId).order('display_name'));
+    async listModels(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return fetchAll(
+        (from, to) =>
+          withSignal(c.from('ai_models').select('*').eq('workspace_id', workspaceId).order('display_name').order('id').range(from, to), options.signal),
+        guard,
+      );
     },
 
-    async getAgentSettings(workspaceId) {
-      const settings = await db().from('agent_settings').select('*').eq('workspace_id', workspaceId).maybeSingle();
+    async getAgentSettings(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      const settings = await single(guard, withSignal(c.from('agent_settings').select('*').eq('workspace_id', workspaceId), options.signal).maybeSingle());
       if (settings.error) throw fromDbError(settings.error);
       if (!settings.data) return null;
       const version = must(
-        await db().from('agent_setting_versions').select('*').eq('id', settings.data.current_version_id).maybeSingle(),
+        await single(
+          guard,
+          withSignal(c.from('agent_setting_versions').select('*').eq('id', settings.data.current_version_id), options.signal).maybeSingle(),
+        ),
       );
-      const prompt = must(await db().from('prompt_versions').select('*').eq('id', version.prompt_version_id).maybeSingle());
+      const prompt = must(
+        await single(guard, withSignal(c.from('prompt_versions').select('*').eq('id', version.prompt_version_id), options.signal).maybeSingle()),
+      );
       return { settings: settings.data, version, prompt };
     },
 
-    async getDefaultPrompt(workspaceId) {
-      const result = await db()
-        .from('prompt_versions')
-        .select('*')
-        .eq('workspace_id', workspaceId)
-        .eq('is_default', true)
-        .order('version', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+    async getDefaultPrompt(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      const result = await single(
+        guard,
+        withSignal(
+          c.from('prompt_versions').select('*').eq('workspace_id', workspaceId).eq('is_default', true).order('version', { ascending: true }).limit(1),
+          options.signal,
+        ).maybeSingle(),
+      );
       if (result.error) throw fromDbError(result.error);
       return result.data;
     },

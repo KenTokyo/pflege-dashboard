@@ -391,6 +391,50 @@ describe("real Node HTTP transport; MOCK identity/provider only, no Auth account
       await state.app.close();
     }
   });
+  it("real HTTP silent stream detects workspace revocation and delivers the exact error", async () => {
+    const x = deps();
+    let revoked = false,
+      aborted = false;
+    const original = x.platform.rpc.getMockImplementation()!;
+    x.platform.rpc.mockImplementation(
+      async (name: string, ...args: unknown[]) => {
+        if (name === "edge_chat_check" && revoked)
+          throw new AppError("WORKSPACE_FORBIDDEN", 403);
+        return original(name, ...args);
+      },
+    );
+    x.provider = {
+      async *stream(_c, signal) {
+        await new Promise<void>((resolve) =>
+          signal.addEventListener(
+            "abort",
+            () => {
+              aborted = true;
+              resolve();
+            },
+            { once: true },
+          ),
+        );
+        throw new DOMException("mock abort", "AbortError");
+      },
+    };
+    await withServer(async ({ post }) => {
+      vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+      try {
+        const res = await post("/api/chat-stream");
+        revoked = true;
+        await vi.advanceTimersByTimeAsync(5000);
+        const text = await res.text();
+        expect(aborted).toBe(true);
+        expect(text).toContain("WORKSPACE_FORBIDDEN");
+        expect(text).not.toContain("REQUEST_ABORTED");
+        expect(text).not.toContain("message.completed");
+        expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    }, x);
+  });
 });
 describe("fixed parameterized RPC whitelist", () => {
   it.each([
@@ -469,6 +513,44 @@ describe("actual static HTTP delivery", () => {
       );
     } finally {
       await rm(temp, { recursive: true, force: true });
+    }
+  });
+});
+describe("listener startup/stop edge cases on own dynamic ports", () => {
+  it("stop during listen settles startup and never leaves a listening server", async () => {
+    const closeDatabase = vi.fn(async () => {});
+    const app = createAppServer(deps(), {
+      host: "127.0.0.1",
+      port: 0,
+      closeDatabase,
+    });
+    const listening = app.listen().then(
+      () => "ready",
+      () => "stopped",
+    );
+    try {
+      await app.close();
+      const outcome = await Promise.race([
+        listening,
+        new Promise((resolve) => setTimeout(() => resolve("pending"), 100)),
+      ]);
+      expect(outcome).not.toBe("pending");
+      expect(app.server.listening).toBe(false);
+      expect(closeDatabase).toHaveBeenCalledOnce();
+    } finally {
+      await app.close();
+    }
+  });
+  it("a stopped server refuses a later start", async () => {
+    const app = createAppServer(deps(), { host: "127.0.0.1", port: 0 });
+    try {
+      await app.close();
+      await expect(app.listen()).rejects.toMatchObject({
+        code: "REQUEST_ABORTED",
+      });
+    } finally {
+      app.server.closeAllConnections();
+      await new Promise<void>((resolve) => app.server.close(() => resolve()));
     }
   });
 });

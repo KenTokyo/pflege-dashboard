@@ -191,3 +191,7 @@ Make it so good that people in the room forget it's a demo and ask when they can
 Original: „iregndwie muss das gehei hc kann das nicht machen ich möchte auch keine edge functions“.
 
 Die ältere Pflicht zu Supabase Edge Functions entfällt. Stattdessen übernimmt ein normaler lokaler Node-Server Sitzung und KI-Streaming mit den bestehenden Sicherheits-, Bestätigungs-, Audit- und Budgetregeln. Supabase bleibt für Auth, Daten und Storage. Beide ursprünglichen Agenten verbinden die aktuelle Phase-1-App mit dem Server; ein gemeinsamer lokaler Start vermeidet zusätzliche Einrichtungsschritte. Keine Edge-Bereitstellung, keine eigenmächtige Kontoanlage und keine Budgeterhöhung. Das echte Nutzer-/KI-Gate bleibt erforderlich.
+
+## Zusätzlicher Prüfauftrag vom 06.10.2026
+
+Der Nutzer beauftragt nach dem technischen Node-Abschluss einen vollständigen Anforderungsabgleich, Randfallprüfungen und bei Bedarf Oberflächentests. Aktuelle Grenze: höchstens zwei GPT-6.1 Sol mit `reasoningEffort: xhigh` gleichzeitig und zusätzlich bei Bedarf Claude Opus 5.5 mit `effort: high` für die Oberfläche. Die ursprünglichen Bereichsinhaber beheben belegte Fehler selbst; ein zusätzlicher unabhängiger Sol prüft die Querverbindungen. Dieser Prüfauftrag hebt keine Phase-Gates, Konto- oder Kostengrenzen auf. Der vollständige Originaltext und die laufenden Prüfschritte stehen im bestehenden Aufgabenpaar unter `docs/tasks/`.

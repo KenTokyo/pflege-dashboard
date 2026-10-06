@@ -141,3 +141,44 @@ export function titleFromQuestion(text: string): string {
   if (!clean) return 'Neues Gespräch';
   return clean.length <= 60 ? clean : `${clean.slice(0, 57).trimEnd()} …`;
 }
+
+const ROLE_RANK: Record<string, number> = { system: 0, user: 1, assistant: 2 };
+
+/**
+ * Verlauf in Lesereihenfolge. Der Server legt Frage und Antwort einer Anfrage mit demselben Zeitstempel an;
+ * die zufällige UUID darf dann nicht entscheiden. Deshalb wie im Backend (Migration phase1_context_order):
+ * Zeit, dann Anfrage (`client_request_id`, sonst eigene ID), dann Rolle (Frage vor Antwort), dann ID.
+ * So bleiben bei gleichem Zeitstempel ganze Paare zusammen.
+ * Zusätzlich steht eine Antwort immer direkt hinter der Frage mit derselben client_request_id,
+ * auch wenn ihr Zeitstempel (Uhrabweichung) davor liegt.
+ */
+export function orderMessages(list: readonly MessageRow[]): MessageRow[] {
+  const sorted = [...list].sort((a, b) => {
+    const t = Date.parse(a.created_at) - Date.parse(b.created_at);
+    if (t) return t;
+    const ka = a.client_request_id ?? a.id;
+    const kb = b.client_request_id ?? b.id;
+    if (ka !== kb) return ka < kb ? -1 : 1;
+    const r = (ROLE_RANK[a.role] ?? 3) - (ROLE_RANK[b.role] ?? 3);
+    if (r) return r;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+  const questions = new Set(sorted.filter((m) => m.role === 'user' && m.client_request_id).map((m) => m.client_request_id));
+  const deferred = new Map<string, MessageRow[]>();
+  const out: MessageRow[] = [];
+  const emitted = new Set<string>();
+  for (const m of sorted) {
+    const rid = m.client_request_id;
+    if (m.role === 'assistant' && rid && questions.has(rid) && !emitted.has(rid)) {
+      deferred.set(rid, [...(deferred.get(rid) ?? []), m]);
+      continue;
+    }
+    out.push(m);
+    if (m.role === 'user' && rid) {
+      emitted.add(rid);
+      out.push(...(deferred.get(rid) ?? []));
+      deferred.delete(rid);
+    }
+  }
+  return out;
+}

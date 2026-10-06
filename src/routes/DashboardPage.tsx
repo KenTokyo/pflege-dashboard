@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'motion/react';
-import { AlarmClock, ArrowUp, CalendarDays, FileText, MessageSquare, MessageSquareText, User } from 'lucide-react';
+import { AlarmClock, ArrowUp, CalendarDays, CircleAlert, FileText, MessageSquare, MessageSquareText, User } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { useWorkspace } from '../auth/AuthProvider';
 import { useStartConversation } from '../chat/useStartConversation';
@@ -31,7 +31,22 @@ export function DocStatus({ status }: { status: DocumentRow['status'] }) {
   return <span className={`pill ${status === 'sent' ? 'pill-sent' : 'pill-reviewed'}`}>{DOC_STATUS_LABEL[status]}</span>;
 }
 
-function PersonCard({ person, task, now, tone, graffiti }: { person: CareRecipient; task: TaskRow | null; now: Date; tone: number; graffiti: boolean }) {
+function PersonCard({
+  person,
+  task,
+  tasksFailed,
+  now,
+  tone,
+  graffiti,
+}: {
+  person: CareRecipient;
+  task: TaskRow | null;
+  /** Aufgaben unbekannt (Ladefehler): keine Aussage über Fristen machen. */
+  tasksFailed: boolean;
+  now: Date;
+  tone: number;
+  graffiti: boolean;
+}) {
   const age = ageFrom(person.birth_date, now);
   const days = task?.due_at ? daysUntil(task.due_at, now) : null;
   const urgent = task ? isUrgent(task, days) : false;
@@ -42,8 +57,8 @@ function PersonCard({ person, task, now, tone, graffiti }: { person: CareRecipie
         <span className={`avatar avatar-lg tone-${tone % 2}`} aria-hidden="true">
           {initials(person.name)}
         </span>
-        <div>
-          <h2 id={`p-${person.id}`} className="person-name truncate">
+        <div className="min-w-0">
+          <h2 id={`p-${person.id}`} className="person-name">
             {baseName(person.name)}
           </h2>
           <p className="small muted">{[age !== null ? `${age} Jahre` : null, fictional ? 'fiktive Person' : null].filter(Boolean).join(' · ')}</p>
@@ -56,14 +71,21 @@ function PersonCard({ person, task, now, tone, graffiti }: { person: CareRecipie
         </div>
         <div>
           <dt>Pflegekasse</dt>
-          <dd className="truncate">{person.insurerName ? baseName(person.insurerName) : 'Nicht hinterlegt'}</dd>
+          <dd>{person.insurerName ? baseName(person.insurerName) : 'Nicht hinterlegt'}</dd>
         </div>
       </dl>
-      {task?.due_at && days !== null ? (
+      {tasksFailed ? (
+        <div className="deadline">
+          <p className="dl-label">
+            <CircleAlert className="i" size={15} aria-hidden="true" />
+            <span>Fristen konnten nicht geladen werden</span>
+          </p>
+        </div>
+      ) : task?.due_at && days !== null ? (
         <div className={`deadline ${urgent ? 'is-urgent' : ''}`}>
           <div className="dl-label">
             {urgent ? <AlarmClock className="i" size={15} aria-hidden="true" /> : <CalendarDays className="i" size={15} aria-hidden="true" />}
-            <span className="truncate">{task.title}</span>
+            <span className="line-clamp-2">{task.title}</span>
           </div>
           <div className="dl-value">
             <span className="dl-date">{formatDate(task.due_at)}</span>
@@ -293,7 +315,7 @@ export function DashboardPage() {
           ) : (
             <motion.div className="contents" variants={listIn} initial={reduce ? false : 'hidden'} animate="show">
               {peopleList.map((p, i) => (
-                <PersonCard key={p.id} person={p} task={nextTaskFor(p.id, sorted)} now={now} tone={i} graffiti={p.id === graffitiPerson} />
+                <PersonCard key={p.id} person={p} task={nextTaskFor(p.id, sorted)} tasksFailed={tasks.isError} now={now} tone={i} graffiti={p.id === graffitiPerson} />
               ))}
             </motion.div>
           )}
