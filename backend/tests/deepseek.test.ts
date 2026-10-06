@@ -298,6 +298,15 @@ describe("safe real-adapter diagnostics without provider response content", () =
       contentType: "sse",
       observedModel: "other",
       errorCode: "other",
+      phase: "streaming",
+      shape: {
+        root: "object",
+        fields: { model: "string", choices: "array", error: "object" },
+        unknownFields: 0,
+        choices: "zero",
+        choice: {},
+        delta: {},
+      },
     });
     expect(JSON.stringify(report.mock.calls)).not.toContain(secret);
   });
@@ -881,5 +890,144 @@ describe("OpenCode Go terminal text regression from real live failure", () => {
       p_output_tokens: 275,
       p_response_model: "deepseek-v4.1-flash",
     });
+  });
+});
+
+describe("OpenCode unknown final envelope safe shape diagnosis", () => {
+  it.each([
+    "streaming",
+    "awaiting_usage",
+    "after_usage",
+    "after_done",
+  ] as const)(
+    "reports %s phase without granting unknown shape",
+    async (phase) => {
+      const bad = {
+        model:
+          phase === "streaming" || phase === "awaiting_usage"
+            ? 17
+            : "deepseek-v4.1-flash",
+        choices: [],
+        usage: null,
+      };
+      const end = chunk({}, "stop", "deepseek-v4.1-flash", usage);
+      const x = mock(
+        phase === "streaming"
+          ? [bad]
+          : phase === "awaiting_usage"
+            ? [chunk({}, "stop", "deepseek-v4.1-flash"), bad]
+            : phase === "after_usage"
+              ? [end, bad]
+              : [end],
+        phase === "after_done",
+        phase === "after_done" ? [bad] : [],
+      );
+      const report = vi.fn();
+      await expect(
+        (async () => {
+          for await (const _ of new OpenCodeProvider(
+            "synthetic",
+            x.fetcher as typeof fetch,
+            report,
+          ).stream(ocContext, new AbortController().signal)) {
+          }
+        })(),
+      ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+      expect(report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reason: "EVENT_ENVELOPE",
+          phase,
+          shape: expect.objectContaining({
+            root: "object",
+            choices: "zero",
+            fields: {
+              model:
+                phase === "streaming" || phase === "awaiting_usage"
+                  ? "number"
+                  : "string",
+              choices: "array",
+              usage: "null",
+            },
+          }),
+        }),
+      );
+    },
+  );
+  it("does not copy unknown field names, secret/text values, usage counts or data into logs", async () => {
+    const marker = "private-synthetic-value-must-never-be-logged";
+    const event = {
+      id: marker,
+      model: "deepseek-v4.1-flash",
+      choices: [
+        {
+          index: 0,
+          delta: {
+            content: marker,
+            reasoning_content: marker,
+            tool_calls: [{ secret: marker }],
+          },
+          finish_reason: "stop",
+        },
+      ],
+      usage: {
+        prompt_tokens: 123456,
+        completion_tokens: 876,
+        extraSecret: marker,
+      },
+      error: { message: marker, code: marker },
+      [marker]: marker,
+    };
+    const x = mock([chunk({}, "stop", "deepseek-v4.1-flash", usage), event]);
+    const report = vi.fn();
+    await expect(
+      (async () => {
+        for await (const _ of new OpenCodeProvider(
+          marker,
+          x.fetcher as typeof fetch,
+          report,
+        ).stream(ocContext, new AbortController().signal)) {
+        }
+      })(),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+    const diagnostic = report.mock.calls[0][0];
+    expect(diagnostic.shape).toMatchObject({
+      unknownFields: 1,
+      choices: "one",
+      delta: {
+        content: "string",
+        reasoning_content: "string",
+        tool_calls: "array",
+      },
+      usage: { prompt_tokens: "number", completion_tokens: "number" },
+    });
+    const log = JSON.stringify(diagnostic);
+    expect(log).not.toContain(marker);
+    expect(log).not.toContain("123456");
+    expect(log).not.toContain("876");
+    expect(log).not.toContain("extraSecret");
+  });
+  it("does not log untrusted array entries or number of choices", async () => {
+    const report = vi.fn();
+    // Trigger envelope validation before any array-content handling.
+    const y = mock([
+      chunk({}, "stop", "deepseek-v4.1-flash", usage),
+      {
+        model: "deepseek-v4.1-flash",
+        choices: ["private", {}, {}],
+        usage: null,
+      },
+    ]);
+    await expect(
+      (async () => {
+        for await (const _ of new OpenCodeProvider(
+          "synthetic",
+          y.fetcher as typeof fetch,
+          report,
+        ).stream(ocContext, new AbortController().signal)) {
+        }
+      })(),
+    ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+    expect(report.mock.calls[0][0].shape.choices).toBe("many");
+    expect(JSON.stringify(report.mock.calls)).not.toContain("private");
   });
 });

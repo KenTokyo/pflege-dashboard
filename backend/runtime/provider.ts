@@ -188,6 +188,119 @@ export class OpenAIProvider implements Provider {
   }
 }
 
+type ShapeType = "object" | "array" | "string" | "number" | "boolean" | "null";
+type EventShape = {
+  root: ShapeType;
+  fields: Partial<
+    Record<
+      | "id"
+      | "object"
+      | "created"
+      | "model"
+      | "choices"
+      | "usage"
+      | "cost"
+      | "error"
+      | "type",
+      ShapeType
+    >
+  >;
+  unknownFields: number;
+  choices?: "zero" | "one" | "many";
+  choice?: Partial<
+    Record<
+      "index" | "delta" | "finish_reason" | "message" | "logprobs",
+      ShapeType
+    >
+  >;
+  delta?: Partial<
+    Record<"role" | "content" | "reasoning_content" | "tool_calls", ShapeType>
+  >;
+  usage?: Partial<
+    Record<"prompt_tokens" | "completion_tokens" | "total_tokens", ShapeType>
+  >;
+};
+const shapeType = (value: unknown): ShapeType =>
+  value === null
+    ? "null"
+    : Array.isArray(value)
+      ? "array"
+      : (typeof value as ShapeType);
+/** Fixed schema names/types only. Never copy untrusted names, strings, counts of text or token values. */
+function eventShape(event: unknown): EventShape {
+  const fields = [
+    "id",
+    "object",
+    "created",
+    "model",
+    "choices",
+    "usage",
+    "cost",
+    "error",
+    "type",
+  ] as const;
+  const types = <K extends string>(
+    value: unknown,
+    names: readonly K[],
+  ): Partial<Record<K, ShapeType>> => {
+    const result: Partial<Record<K, ShapeType>> = {};
+    if (value && typeof value === "object" && !Array.isArray(value))
+      for (const name of names)
+        if (Object.hasOwn(value, name))
+          result[name] = shapeType((value as Record<string, unknown>)[name]);
+    return result;
+  };
+  const object =
+    event && typeof event === "object" && !Array.isArray(event)
+      ? (event as Record<string, unknown>)
+      : undefined;
+  const choices = Array.isArray(object?.choices) ? object.choices : undefined;
+  const choice = choices?.[0];
+  return {
+    root: shapeType(event),
+    fields: types(event, fields),
+    unknownFields: object
+      ? Math.min(
+          64,
+          Object.keys(object).filter(
+            (k) => !fields.includes(k as (typeof fields)[number]),
+          ).length,
+        )
+      : 0,
+    ...(choices
+      ? {
+          choices:
+            choices.length === 0
+              ? "zero"
+              : choices.length === 1
+                ? "one"
+                : "many",
+          choice: types(choice, [
+            "index",
+            "delta",
+            "finish_reason",
+            "message",
+            "logprobs",
+          ] as const),
+          delta: types(choice?.delta, [
+            "role",
+            "content",
+            "reasoning_content",
+            "tool_calls",
+          ] as const),
+        }
+      : {}),
+    ...(object && Object.hasOwn(object, "usage")
+      ? {
+          usage: types(object.usage, [
+            "prompt_tokens",
+            "completion_tokens",
+            "total_tokens",
+          ] as const),
+        }
+      : {}),
+  };
+}
 export type DeepSeekDiagnostic = {
   reason:
     | "HTTP_REJECTED"
@@ -207,6 +320,8 @@ export type DeepSeekDiagnostic = {
     | "UNEXPECTED_REASONING"
     | "UNEXPECTED_TOOLS"
     | "EARLY_USAGE";
+  phase?: "streaming" | "awaiting_usage" | "after_usage" | "after_done";
+  shape?: EventShape;
   httpStatus?: number;
   contentType?: "sse" | "json" | "other" | "missing";
   observedModel?:
@@ -369,7 +484,13 @@ export class DeepSeekProvider implements Provider {
         : [context.model.providerModelId];
     for await (const data of sseData(response.body, signal)) {
       if (data === "[DONE]") {
-        if (done) this.fail("EVENT_ENVELOPE");
+        if (done)
+          this.fail("EVENT_ENVELOPE", {
+            httpStatus: response.status,
+            contentType,
+            phase: "after_done",
+            shape: eventShape(data),
+          });
         done = true;
         if (this.provider === "opencode") continue;
         break;
@@ -386,6 +507,17 @@ export class DeepSeekProvider implements Provider {
         observedModel: classifiedDeepSeekModel(event?.model),
         errorCode: classifiedDeepSeekError(event?.error),
       };
+      const envelopeMetadata = () => ({
+        ...metadata,
+        phase: (done
+          ? "after_done"
+          : terminal
+            ? "after_usage"
+            : finishReason !== undefined
+              ? "awaiting_usage"
+              : "streaming") as NonNullable<DeepSeekDiagnostic["phase"]>,
+        shape: eventShape(event),
+      });
       if (
         this.provider === "opencode" &&
         event &&
@@ -422,7 +554,7 @@ export class DeepSeekProvider implements Provider {
               this.fail("MODEL_MISMATCH", metadata);
             observed ??= event.model;
           } else if (event.model !== "" && event.model !== undefined)
-            this.fail("EVENT_ENVELOPE", metadata);
+            this.fail("EVENT_ENVELOPE", envelopeMetadata());
           continue;
         }
       }
@@ -441,7 +573,7 @@ export class DeepSeekProvider implements Provider {
         currentModel.length < 1 ||
         currentModel.length > 300
       )
-        this.fail("EVENT_ENVELOPE", metadata);
+        this.fail("EVENT_ENVELOPE", envelopeMetadata());
       observed ??= currentModel;
       consistent &&=
         observed === currentModel ||
