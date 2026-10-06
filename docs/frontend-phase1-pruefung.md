@@ -5,9 +5,9 @@ Stand: 06.10.2026. Verfasser: Frontend-/Design-Unterchat. Keine Git-Aktionen (ke
 ## Ergebnis in Kürze
 
 - Die echte Tagwerk-App steht: Login, App-Hülle, Dashboard, Gespräche mit Streaming, Dokumente, Aufgaben, Einstellungen.
-- Daten kommen über Supabase JS aus dem Backend-Vertrag v1.0. Es gibt keine fest eingebauten Erfolgskarten.
-- Der Chat streamt per `fetch`/SSE von `POST /functions/v1/chat-stream`. Fehlt der Anbieter oder ein Modell, zeigt die App das ehrlich an. Es gibt keine Ersatzantwort.
-- Alle Prüfungen laufen grün: Typprüfung, Lint, 101 Tests, Build, Bundle-Prüfung auf Geheimnisse, Kontrast- und Ruheprüfung.
+- Daten kommen über Supabase JS (Auth, Tabellen, RPCs) aus dem Backend-Vertrag v1.1. Es gibt keine fest eingebauten Erfolgskarten.
+- Der Chat streamt per `fetch`/SSE von `POST /api/chat-stream` am eigenen Node-Server, gleicher Ursprung. **Keine Edge Functions** (Nutzerkorrektur, Abschnitt „Nachtrag: eigener /api-Server“). Fehlt der Anbieter oder ein Modell, zeigt die App das ehrlich an. Es gibt keine Ersatzantwort.
+- Alle Prüfungen laufen grün: Typprüfung, Lint, 105 Tests, Build, Bundle-Prüfung auf Geheimnisse und Edge-Pfade, Kontrast- und Ruheprüfung, echter HTTP-Proxytest, Prozess-Abbau-Test.
 - Nachtrag Sitzungsgrenzen: Die lokale Abmeldung greift jetzt sofort, auch wenn Server oder Auth nie antworten. Späte Antworten alter Sitzungen werden verworfen (Abschnitt „Nachtrag: Sitzungsgrenzen“).
 - 44 Bilder in beiden Themes, dazu Telefon- und Tablet-Breite. Ich habe sie selbst angesehen und Fehler daraus behoben.
 - **Grenze:** Alle Bilder und UI-Abläufe nutzen einen synthetischen Test-Transport. Ein echter Login mit echtem Konto und eine echte KI-Antwort wurden **nicht** geprüft (siehe „Grenzen“).
@@ -33,7 +33,7 @@ TypeScript ist bewusst 6.0.3. Grund: typescript-eslint 8.71 unterstützt TypeScr
 | --- | --- |
 | Login | E-Mail/Passwort über Supabase Auth. Keine Registrierung, kein „Angemeldet bleiben“. Das Passwortfeld wird nach jedem Versuch geleert. Nach der Anmeldung geht es zurück zur zuvor geöffneten Seite. Erlaubt sind nur bekannte App-Pfade. |
 | Sitzung | Nur im flüchtigen Speicher (`persistSession:false`, `autoRefreshToken:false`). Abmeldung von Hand, nach 15 Minuten ohne Aktivität oder nach der 8-Stunden-Zeitbox. |
-| Server-Sitzung | `POST /functions/v1/session` mit `touch`: einmal nach der Anmeldung, danach nur bei echter Interaktion, höchstens einmal pro Minute. Es gibt keinen Heartbeat. `SESSION_EXPIRED`, `AUTH_REQUIRED` und `WORKSPACE_FORBIDDEN` melden ab. |
+| Server-Sitzung | `POST /api/session` (eigener Node-Server) mit `touch`: einmal nach der Anmeldung, danach nur bei echter Interaktion, höchstens einmal pro Minute. Es gibt keinen Heartbeat. `SESSION_EXPIRED`, `AUTH_REQUIRED` und `WORKSPACE_FORBIDDEN` melden ab. |
 | Abmelden | Lokal sofort und ohne Warten: Generation ungültig, Streams abbrechen, Token-Client abtrennen, Query-Cache leeren, Entwurfsübergabe löschen, Zustand „abgemeldet“. Danach im Hintergrund und begrenzt: `session end` (höchstens 4 s, wird abgebrochen; nicht bei abgelaufener Sitzung) und Widerruf über `signOut({scope:'local'})` am abgetrennten Client (höchstens 4 s). |
 | Dashboard | Personen mit Pflegegrad, Kasse und nächster Frist, dringende Aufgaben, neue Dokumente mit Status, letzte Gespräche, große Chat-Eingabe. Alles aus dem echten Seed „Beispielwald“. |
 | Gespräche | Liste mit Suche und Archiv. Umbenennen, Archivieren und Wiederherstellen über die vorhandenen RPCs. Neues Gespräch über `create_conversation` (Idempotenzschlüssel). Personenbezug über `assign_conversation_recipient`. Revisionskonflikte werden verständlich gemeldet. |
@@ -55,7 +55,7 @@ Befehl: `npm run check`. Er führt die folgenden Schritte nacheinander aus und b
 | --- | --- |
 | `tsc --noEmit` (strict) | ✅ 0 Fehler |
 | `eslint --max-warnings=0 .` (strictTypeChecked, react-hooks) | ✅ 0 Befunde |
-| `vitest run` | ✅ 10 Dateien, **101 Tests bestanden** |
+| `vitest run` | ✅ 10 Dateien, **105 Tests bestanden** (Stand nach dem /api-Nachtrag) |
 | `vite build` | ✅ größter Teil 219 kB (react), Einstieg 29 kB, keine Warnung über 500 kB, keine Sourcemaps |
 | `tools/check-bundle.mjs` | ✅ 29 Dateien. 4 nicht öffentliche `.env`-Werte gegen den Build geprüft (Werte nie ausgegeben). Keine Geheimnis-Muster, kein `service_role`-JWT, kein Testcode, nur die zwei öffentlichen `VITE_`-Namen. Gegenprobe mit einer präparierten Datei: wird erkannt (Exit 1). |
 | `tools/check-source.mjs` | ✅ 46 Kontrastpaare (dunkel + hell, auch halbtransparente Flächen) erfüllen AA. Kein `setInterval`, kein Polling, keine Endlos-Animation, kein `sessionStorage`, Schrift ≥ 12 px, Sie-Form, Demo-Banner-Text. |
@@ -187,6 +187,52 @@ Ergebnis nach dem Nachtrag mit `npm run check`: Typprüfung, Lint, **101 Tests**
 - **Bilder:** Am Aussehen hat sich nichts geändert. Die 44 Bilder sind deshalb nicht neu aufgenommen. Im Bildskript wartet nur die Abmeldeprüfung jetzt auf den Hintergrundschritt. Für diesen Nachtrag lief kein Prüfbrowser.
 - **Grenze:** Auch diese Belege nutzen den synthetischen Test-Transport bzw. einen Fetch-Stub. Ein synthetischer Test ist kein echter Login und kein echter Widerruf gegen den gehosteten Auth-Server.
 
+## Nachtrag: eigener /api-Server statt Edge Functions
+
+Anlass: Nutzerkorrektur vom 06.10.2026 – keine Edge Functions. Supabase bleibt für Auth, Datenbank und Speicher. Am Layout hat sich nichts geändert, deshalb gibt es keine neuen Bilder. Es lief kein Browser.
+
+### Was sich geändert hat
+
+| Bereich | Vorher | Jetzt |
+| --- | --- | --- |
+| Client-Pfad | `https://<projekt>.supabase.co/functions/v1/…` | `/api/session`, `/api/chat-stream` (gleicher Ursprung), `src/services/api.ts` |
+| Header | Bearer + `apikey` | nur Bearer, kein Projektschlüssel, `credentials: 'omit'` (keine Cookies) |
+| Server nicht erreichbar | — | 502/503/504 ohne JSON → `NETWORK` („Verbindung“), nicht „Serverfehler“ |
+| Dev | `vite` | `npm run dev`: Node-Server `127.0.0.1:5174`, wartet auf `/api/health`, dann Vite `127.0.0.1:5173` mit Proxy `^/api/` → 5174 |
+| Produktion | `vite preview` | `npm start`: Node liefert `dist/` und `/api` auf 5174 (`STATIC_DIR`). `npm run preview` = Build + Start |
+| Prüfungen | — | Bundle und Quelltext verbieten `functions/v1`, `.functions` und feste lokale Hosts im eigenen Code |
+
+Vertrag v1.1 stammt vom Backend-Agenten (`docs/api-contract.md`, `PHASE1_API` in `types/phase1.ts`). Ein Unit-Test prüft, dass die Client-Pfade genau `PHASE1_API` entsprechen. Die JSON- und SSE-Formate sind unverändert. Alle Sitzungs-, Abmelde-, Generations- und Abbruchtests sind unverändert grün.
+
+Der Vite-Proxy schreibt `Host` auf das Ziel um (`changeOrigin`), lässt `Origin` unverändert (der Node-Server prüft sie) und protokolliert keine Header oder Bodys. Fällt der Node-Server aus, antwortet der Proxy selbst mit `502 {error:{code:"NETWORK",…}}`.
+
+**Ausnahme in der Bundle-Prüfung:** Der Chunk `supabase-*.js` enthält den mitgelieferten, ungenutzten Functions-Client der Bibliothek (Standard-URL `functions/v1`). Er wird nie aufgerufen; die Quelltext-Prüfung verbietet `.functions` im eigenen Code.
+
+### Prozess-Aufsicht (`tools/lib/supervisor.mjs`)
+
+- Jeder Dienst startet in einer eigenen Prozessgruppe. Signale gehen nur an diese eigenen Gruppen.
+- Strg+C, SIGTERM, SIGHUP, Ausfall oder Startfehler eines Dienstes: SIGTERM an alle eigenen Gruppen, nach 5 s SIGKILL an die noch lebenden.
+- Ist Port 5173 oder 5174 schon belegt, bricht das Skript ab. Es beendet keine fremden Prozesse.
+- Der Node-Server liest `.env` selbst. Die Skripte lesen, kopieren und protokollieren keine Werte.
+
+### Belege (echte HTTP-Anfragen, ohne Konto und ohne Provider)
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| `tools/check-proxy.mjs`: echter Vite-Server mit `vite.config.ts` → synthetischer App-Server; echter Client-Code (`api.ts`) | ✅ 21/21: Pfade, Bearer ja, `apikey`/Cookie nein, Host umgeschrieben, Origin erhalten, 401-JSON durchgereicht, 404-JSON, **SSE ungepuffert** (Bild 2 wird erst gesendet, nachdem der Client Bild 1 hat), **Abbruch schließt den Upstream**, `/apix` und `/api` ohne Schrägstrich nicht weitergeleitet, Server weg → 502 `NETWORK`, kein Token und kein Authorization-Header in den Vite-Logs |
+| Gegenproben Proxytest | ✅ erkannt: eigener Fehlerhandler entfernt, `apikey` wieder gesendet, Proxy-Muster `/api` statt `^/api/`, Abbruchsignal nicht an `fetch` übergeben |
+| `tools/check-dev.mjs`: Aufsicht mit synthetischen Diensten samt Enkelprozessen | ✅ 14/14: normales Ende, Ausfall beendet den anderen Dienst, hängender Dienst nach Frist erzwungen beendet (< 2 s bei 0,8 s Frist), Startfehler, SIGINT → Exit 130, keine Restprozesse |
+| Gegenproben Aufsicht | ✅ erkannt: nur Hauptprozess statt Gruppe signalisiert (8 Fehler), kein SIGKILL (2 Fehler), Ausfall stoppt nicht. Das Prüfskript räumt seine eigenen PIDs danach selbst ab (nur PIDs mit eigenem Testbefehl). |
+| Echter `npm run dev`, Endstand (gehostet, Rolle `pflege_backend`, finaler Start-/Shutdown-Fix im Backend) | ✅ Abschlusslauf: `/api/health` über Vite 200 `{"ok":true}`; `/api/session` und `/api/chat-stream` ohne Token sowie mit ungültigem Token 401 `AUTH_REQUIRED` (echte Supabase-Auth-Prüfung); fremde Origin 403; Startseite 200. Strg+C → Exit 130 sofort, alle 4 eigenen Prozesse beendet, 5173/5174 frei, keine Token-/Schlüsselmuster im Log |
+| Echter `npm start`, Endstand | ✅ Abschlusslauf: `/api/health` 200; `/api/session` ohne Token 401; `index.html` `no-cache`, `/assets/*` `immutable`, SPA-Rückfall für `/aufgaben`, fehlendes Asset 404, `/.env` und Traversal 403, `/api/x` 404 JSON. Strg+C → Exit 130 nach ≤ 1 s, 3 eigene Prozesse beendet, 5174 frei, keine Token-/Schlüsselmuster im Log |
+| Port belegt | ✅ `npm run dev` und `npm start` brechen mit Hinweis ab, der fremde Prozess läuft unberührt weiter |
+
+### Offene Punkte
+
+- Abschluss durch Orchestrator: Der Backend-Agent hat unbekannte `/api`-Pfade auf „Endpunkt nicht vorhanden.“ korrigiert. Code und Status bleiben gleich. Der Orchestrator hat den Diff gelesen und Typecheck plus alle 29 betroffenen Backend-HTTP-/Transporttests bestanden. Der gemeldete Textbefund ist damit geschlossen.
+- **Verlauf:** Zwischen ca. 14:20 und der Fertigmeldung startete der Node-Server nicht. Grund: Er brauchte schon die neue Datenbankrolle `pflege_backend` (Migration `20261006140000_node_role.sql`), die im gehosteten Projekt noch fehlte. Mein Startskript hat dabei richtig reagiert: Exit 1, keine Restprozesse.
+- Wird der Aufsichtsprozess selbst hart beendet (SIGKILL), kann er seine Dienste nicht mehr abbauen. Das kann kein Prozess für sich selbst lösen. Dann laufen die Dienste in eigenen Gruppen weiter und müssen von Hand beendet werden.
+
 ## Noten vorher → nachher (eigene Einschätzung, 1–10)
 
 „Vorher“ meint den Stand vor meiner Bild- und Testprüfung. Die Noten sind Einschätzungen, keine Messwerte.
@@ -210,7 +256,7 @@ Ergebnis nach dem Nachtrag mit `npm run check`: Typprüfung, Lint, **101 Tests**
 ## Grenzen (ehrlich)
 
 - **Kein echter Login, keine echte KI-Antwort.** Alle UI-Abläufe und Bilder nutzen den synthetischen Test-Transport aus `tests/support/fakeBackend.ts`. Das Login-Formular, die Routen, die Sitzungslogik und die Stream-Verarbeitung sind echter Produktcode. Netz, Supabase und Anbieter sind ersetzt. Ein synthetischer Bildlauf ist **kein bestandener echter Login- oder KI-Gate-Lauf.**
-- **Backend-Anschluss (Stand laut Orchestrator):** Die lokalen Backend-Prüfungen sind bestanden, Hosted-Schema und Seed stehen. Die gehosteten Edge Functions `session` und `chat-stream` fehlen noch. Gehostet laufen deshalb Login, Daten und RPCs. Server-Sitzung und Chat zeigen dort „Diese Funktion ist auf dem Server noch nicht eingerichtet“. Die Abmeldung bleibt lokal trotzdem vollständig. Deployment, Konten und Secrets sind nicht meine Aufgabe und nicht von mir geprüft.
+- **Backend-Anschluss:** Keine Edge Functions mehr. `/api/session` und `/api/chat-stream` laufen im eigenen Node-Server des Backend-Agenten (`backend/runtime/`). Ich habe ihn nur ohne Konto angesprochen (Health, 401, 403, 404, statische Dateien). Ein angemeldeter Touch, ein echter Logout am Server und ein echter Stream sind ohne Konto, Providerkey und Budget **nicht** geprüft. Konten und Secrets sind nicht meine Aufgabe.
 - **Synthetisches Modell nur im Harness.** „OpenAI · Testmodell (synthetisch)“ gibt es nur im Harness. Der echte Seed hat kein freigegebenes Modell und Budget 0. Das Produkt zeigt deshalb „Kein Modell freigegeben“ (Bilder `chat-ohne-modell-*`).
 - **Keine Konten, keine Zugangsdaten.** Ich habe keine Konten angelegt und keine Zugangsdaten eingegeben. Die Test-Anmeldedaten (`pruefung@beispiel.invalid`) gelten nur für den Test-Transport. Sie stehen nachweislich nicht im Produkt-Build.
 - **Ältere Tokens.** Nach dem Abmelden können bereits ausgegebene JWTs direkte Tabellenzugriffe bis zu ihrem Ablauf behalten (laut Vertrag 300 s). Das ist eine Backend-Grenze.
@@ -229,10 +275,11 @@ Ergebnis nach dem Nachtrag mit `npm run check`: Typprüfung, Lint, **101 Tests**
 - Tests und Harness:
   - `tests/unit/*` und `tests/support/*` (synthetischer Seed, Test-Transport mit haltbaren Aufrufen, Render-Helfer)
   - `tests/harness/*` und `vite.harness.config.ts` (nur für Bilder, nie im Build)
-- Werkzeuge: `tools/check-bundle.mjs`, `tools/check-source.mjs`, `tools/shots.mjs` (nutzt `docs/mocks/tools/browser.mjs`)
+- Werkzeuge: `tools/check-bundle.mjs`, `tools/check-source.mjs`, `tools/check-proxy.mjs`, `tools/check-dev.mjs`, `tools/dev.mjs`, `tools/start.mjs`, `tools/lib/supervisor.mjs`, `tools/shots.mjs` (nutzt `docs/mocks/tools/browser.mjs`)
 - Bilder: `docs/mocks/tagwerk/phase1/*.png` und `report.json`
 
 Befehle zum Wiederholen:
 
 - `npm run check` (ohne Browser)
+- `npm run dev` (Node-Server 5174 + Vite 5173), `npm start` (Node liefert `dist/` und `/api` auf 5174), `npm run dev:web` (nur Vite, `/api` meldet dann „nicht erreichbar“)
 - `taskpolicy -b nice -n 10 npm run shots` (genau ein Prüfbrowser, räumt selbst auf)

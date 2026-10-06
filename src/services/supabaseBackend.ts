@@ -2,7 +2,7 @@ import { createClient, type Session, type SupabaseClient } from '@supabase/supab
 import type { BackendDatabase } from '../../types/rpc';
 import type { PublicConfig } from '../lib/env';
 import { AppError, fromDbError } from './errors';
-import { createChatTransport, createSessionTransport } from './functions';
+import { createChatTransport, createSessionTransport } from './api';
 import type { AuthChange, AuthSession, Backend, CareRecipient, DataPort, WorkspaceContext } from './types';
 
 type Client = SupabaseClient<BackendDatabase>;
@@ -242,7 +242,7 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
       },
     },
     data,
-    chat: createChatTransport(config, token),
-    session: createSessionTransport(config, token),
+    chat: createChatTransport(token),
+    session: createSessionTransport(token),
   };
 }

@@ -1,5 +1,5 @@
 {
-  "name": "pflege-dashboard-backend-phase0",
+  "name": "pflege-dashboard-backend",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,14 +14,21 @@
     "supabase:stop": "node scripts/supabase-safe.mjs stop",
     "check:phase1": "node scripts/phase1-check.mjs",
     "hosted:inspect": "node scripts/hosted-schema.mjs inspect",
-    "hosted:apply": "node scripts/hosted-schema.mjs apply"
+    "hosted:apply": "node scripts/hosted-schema.mjs apply",
+    "build": "tsc -p tsconfig.build.json",
+    "serve": "npm run build && node .local/build/backend/runtime/index.js",
+    "smoke:node": "npm run build && node scripts/node-smoke.mjs --hosted"
   },
   "devDependencies": {
-    "deno": "2.9.6",
-    "pg": "8.23.1",
+    "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
+    "prettier": "3.9.9",
     "supabase": "2.119.0",
     "typescript": "7.0.2",
     "vite": "8.3.3",
     "vitest": "5.0.3"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
   }
 }

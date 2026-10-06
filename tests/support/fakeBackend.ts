@@ -1,6 +1,6 @@
 /**
  * Synthetischer Test-Transport für Unit-Tests und den Bild-Harness. Ersetzt NUR die Netzwerkgrenze
- * (Supabase/Edge Functions); Login-Formular, Routen, Sitzungslogik und Stream-Verarbeitung bleiben
+ * (Supabase und eigener /api-Server); Login-Formular, Routen, Sitzungslogik und Stream-Verarbeitung bleiben
  * Produktcode. Diese Datei liegt außerhalb von src/ und gelangt nie in den Produkt-Build.
  */
 import type { ChatEventV1, ChatModel, ChatRequestV1, Phase1Code } from '../../types/phase1';

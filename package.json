@@ -8,15 +8,19 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "node tools/dev.mjs",
+    "dev:web": "vite",
     "build": "tsc -p tsconfig.json --noEmit && vite build",
-    "preview": "vite preview",
+    "start": "node tools/start.mjs",
+    "preview": "npm run build && node tools/start.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint --max-warnings=0 .",
     "test": "vitest run",
     "check:bundle": "node tools/check-bundle.mjs",
     "check:source": "node tools/check-source.mjs",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:bundle && npm run check:source",
+    "check:proxy": "node tools/check-proxy.mjs",
+    "check:dev": "node tools/check-dev.mjs",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:bundle && npm run check:source && npm run check:proxy && npm run check:dev",
     "shots": "node tools/shots.mjs"
   },
   "dependencies": {

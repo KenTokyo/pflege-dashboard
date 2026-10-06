@@ -106,6 +106,7 @@ const RULES = [
   [/from ['"][./]*tests\//, 'Import aus tests/'],
   [/service_role|sb_secret_|OPENAI_API_KEY|SUPABASE_DB_PASSWORD|DATABASE_URL/, 'Server-Geheimnisname'],
   [/persistSession:\s*true|autoRefreshToken:\s*true/, 'dauerhafte Sitzung/Hintergrund-Refresh'],
+  [/functions\/v1|\.functions\b/, 'Edge-Function-Aufruf (Nutzerkorrektur: nur eigener /api-Server)'],
 ];
 for (const f of src) {
   const s = read(f);
@@ -117,6 +118,9 @@ for (const f of src) {
 }
 if (!/refetchOnWindowFocus:\s*false/.test(read('src/data/queries.ts'))) problems.push('refetchOnWindowFocus nicht abgeschaltet');
 if (!/persistSession:\s*false/.test(read('src/services/supabaseBackend.ts'))) problems.push('persistSession:false fehlt');
+// App-Server nur gleicher Ursprung: kein fester Host, kein Port im Client.
+if (!/export const API_BASE = '\/api';/.test(read('src/services/api.ts'))) problems.push("API_BASE ist nicht '/api'");
+for (const f of src) if (/127\.0\.0\.1|localhost:\d+/.test(read(f))) problems.push(`fester lokaler Host in ${f}`);
 
 // ---------- Schriftgrößen ----------
 for (const f of files('src/styles', /\.css$/)) {

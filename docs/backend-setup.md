@@ -1,8 +1,48 @@
-# Backend einrichten und sicher prüfen — Phase 1
+# Backend starten und prüfen — Node + Supabase
 
-Das Backend verwendet echte Supabase CLI **2.119.0** mit nativer Laufzeit auf Apple Silicon. Kein eigener PostgreSQL-/Node-HTTP-Ersatz, kein Browser. Deno **2.9.6** und alle Prüfwerkzeuge liegen unter `backend/`. Die root `.env` verbindet die Oberfläche mit dem eigenen Hosted-Projekt **ttbfpqveexmlqxkzwlmz** in Frankfurt. Das geprüfte App-Schema und der fiktive Seed sind dort vorhanden; der lokale Prüfstapel bleibt nach Tests gestoppt.
+Stand 06.10.2026, Vertrag v1.1. **Keine Edge Functions und kein Deployment.** Ein gewöhnlicher lokaler Node-Server führt Sitzung und Chat aus; Supabase bleibt für Auth, Datenbank und private Dateien zuständig. Root `.env` gehört zum ausdrücklich autorisierten eigenen Frankfurt-Projekt `ttbfpqveexmlqxkzwlmz`. Sie wird nur im Server gelesen, niemals angezeigt, umgeschrieben oder an Vite weitergegeben. `env.md` und fremde Env-Dateien werden nicht gelesen.
 
-## Vollständige lokale Wiederholung
+## App-Anschluss
+
+Frontend besitzt den gemeinsamen Root-Start. `npm run dev` startet Node auf **127.0.0.1:5174** und Vite auf **5173**. Vite proxyt `/api` mit `changeOrigin:true` zum Node-Server. `npm start` verwendet den gebauten Root-`dist` und denselben Node-Ursprung. Diese Root-Skripte werden vom Frontend geliefert; der Backend-Chat verändert sie nicht.
+
+Backend einzeln, vom Projektwurzelordner:
+
+```sh
+cd '/Users/kentoky/Documents/React Projects/pflege-dashboard'
+npm --prefix backend run serve
+```
+
+Der Befehl baut TypeScript nach `backend/.local/build` und startet `backend/.local/build/backend/runtime/index.js`. Der Server liest geschützte root `.env`, prüft eigenes Projekt und offizielle CA, verbindet den begrenzten PG-Pool und prüft die freigegebenen SQL-Funktionen, bevor `/api/health` bereit ist. Ausgaben sind feste sichere Texte, keine URLs mit Secrets, Token oder Datenbankfehler. Zum Beenden Ctrl+C; SIGINT/SIGTERM schließen eigene Requests, Sockets und Pool in weniger als fünf Sekunden.
+
+Gebautes Frontend einzeln über Node anbieten:
+
+```sh
+cd '/Users/kentoky/Documents/React Projects/pflege-dashboard'
+STATIC_DIR='/Users/kentoky/Documents/React Projects/pflege-dashboard/dist' npm --prefix backend run serve
+```
+
+`STATIC_DIR` muss absolut auf das tatsächliche Root-`dist` zeigen. Ohne diese Variable gibt es nur API. Hosts nur `localhost:<PORT>` und `127.0.0.1:<PORT>`. Default `HOST=127.0.0.1`, `PORT=5174`; öffentliche Bindung wird nicht angeboten. Preview erreichbar unter `http://127.0.0.1:5174`. Health ist minimal `GET /api/health` → `200 {"ok":true}`; das beweist Serverbereitschaft, keinen angemeldeten KI-Erfolg.
+
+API: `POST /api/session` und `POST /api/chat-stream`, `Authorization: Bearer <Access-Token>`, JSON, kein apikey-Header, keine Cookies (`credentials:omit`). Session- und SSE-Formen in `types/phase1.ts`; Pfade als `PHASE1_API`. Browser liest Supabase-Tabellen und verwendet nur sechs auditierende Metadaten-RPCs. Serverseitige Chat-/Session-SQL-Namen `edge_*` sind historische kompatible Namen, keine Edge-Abhängigkeit.
+
+## Serverkonfiguration ohne Schlüsselanzeige
+
+| Name                                                  | Nutzung                                                                                                                                                                                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY` | Bereits vorhandene öffentliche Clientwerte; Node verwendet sie für echte Supabase-Auth-Tokenprüfung                                                                                                                        |
+| `DATABASE_URL`                                        | Bereits vorhandene eigene Serververbindung; niemals `VITE_` oder Clientimport                                                                                                                                              |
+| `PGSSLROOTCERT` / `PGSSLMODE`                         | Offizielle CA; `require`, `verify-ca` oder `verify-full` in vorhandener Datei werden sicher mit tatsächlichem `rejectUnauthorized:true` und Hostprüfung verwendet. URL-SSL-Parameter können diese Prüfung nicht abschalten |
+| `OPENAI_API_KEY`                                      | Optionaler zukünftiger Providerkey ausschließlich im Server. Fehlt aktuell; kein Agent legt ihn an oder gibt ihn aus                                                                                                       |
+| `HOST` / `PORT`                                       | Default `127.0.0.1` / `5174`; nur Loopback                                                                                                                                                                                 |
+| `STATIC_DIR`                                          | Absoluter gebauter Root-`dist`, nur für Produktionsvorschau                                                                                                                                                                |
+| `ALLOWED_ORIGINS`                                     | Optionaler vollständiger Ersatz der vier exakten Standard-Origins. Ein gesetzter leerer Wert sperrt Browserherkünfte; keine Wildcard                                                                                       |
+
+Standard-Origins: `http://localhost:5173`, `http://127.0.0.1:5173`, `http://localhost:5174`, `http://127.0.0.1:5174`. Prozessumgebung überschreibt nur diese bekannten Namen; bestehende Env-Werte bleiben unverändert. Root `.env` muss reguläre eigene Datei mit Modus 600 sein. Datenbank und Provider bleiben serverseitig; Vite erhält ausschließlich seine öffentlichen `VITE_SUPABASE_*`-Werte. Keine Shell-Ausgabe oder `cat .env` verwenden. Ein Service-Role-Key, PAT, Supabase Login/Link und Edge Secrets sind für diesen Weg nicht erforderlich.
+
+Node setzt in kurzen parametrisierten Transaktionen ausschließlich **pflege_backend**. Dies ist eine **NOLOGIN-Berechtigungsrolle**, kein Auth-Konto, ohne Passwort, RLS-Bypass, direkte Tabellenrechte oder private Schema-Rechte. Nur sieben geprüfte SQL-Wrapper sind ausführbar. Funktion/Rolle/SQL/Actor werden nicht aus Clientpayload gewählt. Supabase Auth validiert den Bearer live; SQL prüft zusätzlich tatsächliche `auth.sessions`, Mitgliedschaft, 15m-Inaktivität und 8h-Zeitbox. `300s` JWT ist lokal konfiguriert; Hosted-Free garantiert diese zusätzlichen Grenzen nicht. Direkte Browser-Metadatenzugriffe können bis zum JWT-Ablauf bestehen; empfindlicher Node-Chat prüft live.
+
+## Vollständige lokale Prüfung
 
 ```sh
 cd '/Users/kentoky/Documents/React Projects/pflege-dashboard/backend'
@@ -11,77 +51,41 @@ npm ci --no-audit --no-fund > .local/npm-ci.log 2>&1
 npm run check:phase1
 ```
 
-Der Node-Ablauf begrenzt die Arbeit auf 15 Minuten. Anschließend bleibt die Bereinigung ebenfalls begrenzt: Stop und Nachprüfung jeweils höchstens drei Minuten, mit gezieltem Abbruch eigener Prozesse. Er startet ausschließlich den eigenen Supabase-Stapel, resettet dessen Testdatenbank, wendet **sechs Migrationen** samt Seed frisch an, prüft tatsächliche Auth-/REST-/Storage-/Edge-Dienste, SQL-Zugriffsregeln, echte Parallelkonflikte, HTTP, Provider-/Streamlogik und Typen. `finally` stoppt und prüft eigene Prozesse/Ports auch bei Fehler und Ctrl+C. Kein Hosted-Reset, keine Auth-Konten, keine Providerkontakte. Positive SQL-Geschäftslogik verwendet synthetische Claims/Aktivitätszeilen; Produktion prüft zusätzlich die reale `auth.sessions`-Zeile. Mock-Provider ist ausschließlich Testabhängigkeit.
+Ein zeitlich begrenzter Node-Ablauf startet ausschließlich den eigenen **echten nativen Supabase-Stapel**, resettet seine lokale Testdatenbank, wendet sieben Migrationen und den fiktiven Seed frisch an, spricht Auth/REST/Storage tatsächlich an, prüft SQL/RLS/Storage/Audit/Session/Kosten, Parallelfälle, den Node-HTTP-Transport und echte PG-Abbrüche. Danach reale CLI-Typgenerierung, Strict-Typecheck, Build und Mock-Provider-/Transporttests. **Keine Auth-Konten, keine kostenpflichtigen Providerkontakte.** `finally` stoppt ausschließlich den eigenen Stack und prüft Prozesse/Ports, auch nach Fehler. Edge-Dienst bleibt absichtlich gestoppt. Die CLI-Sammelreadiness kann wegen dieses deaktivierten Dienstes `stopped` heißen; vier benötigte Dienste und reale HTTP-Antworten werden separat belegt.
 
-Der Wrapper kopiert nur unsere Config, Migrationen, Seed, SQL-Tests und Functions nach `backend/.local/supabase-project`. Er liest keine root `.env` und niemals `env.md`. Nur im ignorierten Spiegel schreibt er `supabase/functions/.env` mit zwei öffentlichen lokalen Origins, ohne Providerwerte. Supabase liefert seine Serverkeys selbst an die Edge-Laufzeit; sie erscheinen nicht in Browser oder Ausgabe. CLI-Start/Status/Testausgaben werden nur redigiert unter `backend/.local/` geschrieben. Keine rohe `supabase status`-Ausgabe verwenden.
+Eigener `SUPABASE_HOME`: vom Betriebssystem bereitgestelltes Temp-Verzeichnis, darunter `pflege-dashboard-supabase-57aea064-phase0`. Spiegel: `backend/.local/supabase-project`. Der Wrapper kopiert ausschließlich eigene Config/Migrationen/Seed/SQL-Tests, niemals root `.env`. Kein Ersatz-PostgreSQL und kein globales Supabase-Home. Vorhandene fremde Stacks werden nicht gestoppt. Ports 56421/56422; historischer eigener Inspectorport 56428 wird beim Cleanup mit geprüft. Node-Smoke benutzt 5174 nur, wenn er vorher frei ist; vorhandenen fremden Server nicht beenden.
 
-Eigener SUPABASE_HOME: System-Tempordner + `pflege-dashboard-supabase-57aea064-phase0`. Der Name bleibt zur sicheren Identität erhalten. Tatsächlicher absoluter Pfad steht im Prüfbericht. Leerzeichenfreier Laufzeitpfad vermeidet einen nachgewiesenen Fehler der experimentellen nativen TLS-Startlogik. Eigene Ports 56421, 56422, 56428; keine fremden Stacks stoppen. Gestoppte eigene Caches und Testdaten dürfen für die nächste Wiederholung bestehen bleiben.
-
-## Typen und gezielte Prüfung
+Gezielte Wiederholung ohne Gesamtreset:
 
 ```sh
 cd '/Users/kentoky/Documents/React Projects/pflege-dashboard/backend'
-node scripts/supabase-safe.mjs start
-node scripts/supabase-safe.mjs types
 npm run typecheck
+npm run build
 npm test
-node scripts/supabase-safe.mjs stop
+npm run smoke:node
+npm run hosted:inspect
+```
+
+`smoke:node` startet den echten gebauten Node-Server gegen das eigene Hosted-Supabase, prüft HTTP-Verweigerung/TLS/SQL und beendet ihn zuverlässig. Kein tatsächlicher Login oder KI-Request. `hosted:inspect` ist ein reiner Bestands-/Owner-/RLS-/Rechte-/CA-Vergleich und anonyme REST-Leseverweigerung; keine Edge-Route mehr.
+
+Manuelle lokale Supabase-Schritte nur mit anschließender Bereinigung:
+
+```sh
+cd '/Users/kentoky/Documents/React Projects/pflege-dashboard/backend'
+npm run supabase:start
+npm run supabase:reset
+npm run supabase:test
+npm run supabase:types
+npm run supabase:stop
 node scripts/runtime-cleanup.mjs
 ```
 
-Manuelle Schritte verlangen Stop/Cleanup auch nach einem Fehler; der Gesamtprüfbefehl übernimmt das zuverlässig. CLI-Generierung ist tatsächlich `supabase gen types --local --lang typescript --schema public`, mit eigenem SUPABASE_HOME und Spiegel. Kein Handpatch der generierten Datei. Frontend nutzt `BackendDatabase` aus `types/rpc.ts` und HTTP-/SSE-Formen aus `types/phase1.ts`. Backend gibt keine Root-Paketdatei und keinen UI-Code vor.
+Exakter Generierweg intern: `supabase gen types --local --lang typescript --schema public` über `scripts/supabase-safe.mjs`, eigenes Home und Spiegel; komplette CLI-Status-/Startausgaben ausschließlich redigiert in ignorierte `.local/`-Logs. **Keine rohe `supabase status`-Ausgabe.** Automatischer Gesamtbefehl ist für Fehlerfälle vorzuziehen. Seed und Tests enthalten eindeutig fiktive Personen; SQL-Claims/Aktivitätsfixtures sind keine Login-Konten.
 
-## Eigenes Hosted-Schema prüfen
+## Hosted-Bestand und verbleibende Gates
 
-```sh
-cd '/Users/kentoky/Documents/React Projects/pflege-dashboard/backend'
-npm run hosted:inspect
-npm run hosted:apply
-```
+Die vorhandenen sechs App-Migrationen und der fiktive Seed sind geprüft. Die neue siebte additive Migration richtet nur die reine Node-Ausführungsrolle und genaue Rechte ein; keine historischen Migrationen ändern, keine Nutzerdaten resetten/dropen, keine Systemtabellen übernehmen. `npm run hosted:apply` darf ausschließlich nach aktuellem vollständigem lokalem Gate und geprüftem tatsächlichem Bestand/Owner/RLS auf dem autorisierten eigenen Projekt arbeiten. Vorhandener Seed wird bei bestehender App nicht wiederholt. Der Abschlussbericht nennt den tatsächlich ausgeführten Stand.
 
-`inspect` ist read-only. `apply` akzeptiert ausschließlich das autorisierte Projekt, geschützt gespeicherte eigene Env-Datei und offizielle `.local/supabase-ca.crt`. Node TLS verlangt eine autorisierte verschlüsselte Verbindung und `rejectUnauthorized:true`. Keine Zertifikatsprüfung abschalten. URL/Passwort/Keys bleiben im Speicher, nicht in Argumenten oder Ausgaben. Kein Supabase Login/Link und keine fremde Env-Datei.
+Weiter offen: echtes Auth-Konto und vertrauenswürdig zugewiesene Demo-Mitgliedschaft, serverseitiger Providerkey, geprüftes aktives OpenAI-Textmodell und gültige obere Preisversion sowie ausdrücklich freigegebenes Budget. Der Agent erstellt keine Konten und beschafft keine Providerzugänge. **Budget bleibt 0.** Kein Produkt-Mockchat. Fehlende Voraussetzungen liefern konkrete sichere Fehler; der vorhandene Produktadapter bleibt kostenfrei unaufgerufen. Anthropic/EU-Anbieter sind geplante spätere Erweiterungen, keine erfundene Machbarkeit oder EU-Datenschutzgarantie.
 
-`apply` verlangt einen erfolgreichen aktuellen lokalen Komplettlauf, identische Migration-/Seed-Hashes und dessen gesicherten Schemanachweis. Es prüft wirklichen Bestand, Tabellenowner und RLS, erhält Supabase-Storage-Owner/RLS und eine Supabase-eigene `rls_auto_enable`-Hilfsfunktion. Es verwendet das normale `supabase_migrations.schema_migrations`-Journal für Infrastrukturmetadaten; diese Tabelle ist kein App-Datensatz. Bereits vorhandene App-Daten bleiben erhalten. Migrationen laufen additiv und einzeln transaktional. Seed wird ausschließlich bei ursprünglich leerem App-Bestand angewendet. Wiederholung schreibt keine zweite Demo-Familie. Noch nicht abgeschlossene/driftende Zustände stoppen mit konkretem Nachweis.
-
-## Vom Nutzer noch einzurichten
-
-1. Nutzer legt Email-/Passwortkonto manuell im eigenen Supabase-Dashboard an. Registrierung und anonyme Auth bleiben aus. Agenten legen keine Konten an und geben keine Zugangsdaten ein.
-2. Nutzer ordnet die Auth-User-ID vertrauenswürdig dem Demo-Workspace zu. Keine automatische Mitgliedschaft durch Browser oder ersten Login. Die folgende Transaktion ist eine **manuelle Admin-Vorlage**, noch nicht ausgeführt: UUID und Namen bewusst ersetzen. Sie verlangt einen vorhandenen nicht anonymen Auth-Nutzer; erstellt ausschließlich Profil/Mitgliedschaft, keinen Auth-Nutzer.
-
-```sql
-begin;
-do $$
-declare u uuid := '<VORHANDENE_AUTH_USER_UUID>';
-actor uuid;
-begin
-  if not exists(select 1 from auth.users where id=u and not coalesce(is_anonymous,false)
-      and deleted_at is null and (banned_until is null or banned_until<=now())) then
-    raise exception 'Vorhandenen freigegebenen Auth-Nutzer zuerst prüfen';
-  end if;
-  insert into public.profiles(workspace_id,created_by,kind,user_id,display_name)
-    values('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002','user',u,'Demozugang')
-    on conflict(workspace_id,user_id) do update set display_name=excluded.display_name
-    returning id into actor;
-  insert into public.workspace_memberships(workspace_id,created_by,profile_id,role,status)
-    values('10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000002',actor,'admin','active')
-    on conflict(workspace_id,profile_id) do update set role='admin',status='active';
-end $$;
-commit;
-```
-
-`admin` ist hier eine bewusste manuelle Demo-Adminzuweisung. Für weitere reguläre Zugänge `member` wählen. Keine Self-Escalation aus der Oberfläche. Supabase-Free garantiert die 15m-/8h-Grenzen nicht; App-Client und serverseitige Session-Funktion setzen sie durch. JWT konfiguriert 300s, direkte RLS-/Metadaten-RPC-Restlaufzeit bis JWT-Ablauf ausdrücklich beachten.
-
-3. Management-Autorisierung für die eigenen beiden Edge Functions bereitstellen. In diesem Backend-Scope gibt es derzeit weder Supabase-MCP-Deploymentwerkzeug noch eigenes `SUPABASE_ACCESS_TOKEN`; kein Zugriff auf globale Login-Caches. Hosted-Functions sind deshalb **noch nicht deployed**. Autorisierte spätere CLI-Schritte, ohne Token als Argument und ohne sichtbare Apps:
-
-```sh
-cd '/Users/kentoky/Documents/React Projects/pflege-dashboard'
-backend/node_modules/.bin/supabase functions deploy session --project-ref ttbfpqveexmlqxkzwlmz --use-api > backend/.local/deploy-session.log 2>&1
-backend/node_modules/.bin/supabase functions deploy chat-stream --project-ref ttbfpqveexmlqxkzwlmz --use-api > backend/.local/deploy-chat.log 2>&1
-```
-
-Nur mit vorher vom Nutzer geschütztem Prozess-Token ausführen; keine rohe Logausgabe. `verify_jwt=false` in der Functions-Config ist bewusst: Die Function prüft den User live mit Supabase Auth und anschließend dessen reale Session; sie verlässt sich nicht auf eine bloße JWT-Decodierung. Provideraufrufe bleiben ohne weitere Einrichtung unmöglich. JWT-Issuer wird gegen SUPABASE_URL/auth/v1 geprüft; AUTH_JWT_ISSUER darf bei einer ausdrücklich geprüften abweichenden nativen Auth-Adresse nur als serverseitige Konfiguration gesetzt werden. Es ist kein Browserparameter.
-
-4. Nutzer setzt `ALLOWED_ORIGINS` auf ausdrücklich erlaubte Browserherkünfte und `OPENAI_API_KEY` ausschließlich als **Supabase Edge Secrets**. Keine Provider-/Adminwerte mit `VITE_`, keine Übertragung der gesamten root Env als Secrets. Den vorhandenen Beispielen fehlen geprüfte Betriebsfähigkeit und Preise: erst eine reale OpenAI-Textmodell-ID, tatsächliche Fähigkeiten, gültige obere `model_prices`-Version mit Quelle und Ablauf und Workspace-Standard/Override bewusst einrichten. Anthropic/Mistral sind geplante Erweiterungen. Keine erfundenen Preise oder Regionszusagen. **Budget bleibt 0**, bis Nutzer ein Budget ausdrücklich freigibt. Agenten erhöhen es nicht und rufen keine bezahlte KI auf.
-5. Erst danach echter Nutzer-Login, Sitzung/Logout, Gespräch/Personenzuordnung und Antwortenstream in beiden Themes. Phase 2 nimmt später Chat → editierte Vorschau → Bestätigung → Dokument samt Export, Uploads, Übergabe und RAG ab. Diese Abläufe sind noch nicht implementiert.
-
-Die native Laufzeit beantwortet OPTIONS teilweise selbst mit `Access-Control-Allow-Origin:*`. Die geschützten POST-Antworten unserer Functions tragen die genaue erlaubte Herkunft; fremde Herkunft wird vor Auth/DB mit 403 verworfen. Hosted-CORS bleibt nach Deployment zusätzlich real zu prüfen.
+Der echte Nutzertest Login → Sitzung → Gespräch → KI-Stream bleibt ohne diese Voraussetzungen offen. Phase 2 erst nach eigenem Gate: bearbeitbare Vorschau → bestätigte transaktionale Erstellung → Dokument/Task/Notiz, RAG/Uploads/Exporte/Übergabe. Kein Node-Login-Testkonto und kein vorgezogener Bestätigungsflow.

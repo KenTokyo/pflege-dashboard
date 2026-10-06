@@ -6,18 +6,10 @@
     "strict": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": [],
+    "types": ["node"],
     "ignoreDeprecations": "6.0",
     "allowImportingTsExtensions": true,
-    "lib": [
-      "ES2023",
-      "DOM",
-      "DOM.Iterable"
-    ]
+    "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
-  "include": [
-    "../types/**/*.ts",
-    "tests/*.typecheck.ts",
-    "../supabase/functions/_shared/**/*.ts"
-  ]
+  "include": ["../types/**/*.ts", "tests/*.typecheck.ts", "runtime/**/*.ts"]
 }

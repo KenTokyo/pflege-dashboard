@@ -1,5 +1,11 @@
-/** Verbindlicher Anschluss v1.0; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
+/** Verbindlicher Anschluss v1.1; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
 import type { Database } from "./database.types.js";
+export const PHASE1_API = {
+  session: "/api/session",
+  chatStream: "/api/chat-stream",
+  health: "/api/health",
+} as const;
+export type HealthResult = { ok: true };
 export type ConversationRow =
   Database["public"]["Tables"]["conversations"]["Row"];
 export type CreateConversationArgs = {

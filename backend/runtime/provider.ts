@@ -14,9 +14,11 @@ export type Context = {
   inputTokenBound: number;
   maximumCostMicrousd: number;
 };
-export type ProviderPart = { text: string } | {
-  usage: { inputTokens: number; outputTokens: number; model: string };
-};
+export type ProviderPart =
+  | { text: string }
+  | {
+      usage: { inputTokens: number; outputTokens: number; model: string };
+    };
 export interface Provider {
   stream(context: Context, signal: AbortSignal): AsyncIterable<ProviderPart>;
 }
@@ -43,8 +45,11 @@ export async function* sseData(
       while ((match = /\r?\n\r?\n/.exec(buffer))) {
         const block = buffer.slice(0, match.index);
         buffer = buffer.slice(match.index + match[0].length);
-        const data = block.split(/\r?\n/).filter((l) => l.startsWith("data:"))
-          .map((l) => l.slice(5).replace(/^ /, "")).join("\n");
+        const data = block
+          .split(/\r?\n/)
+          .filter((l) => l.startsWith("data:"))
+          .map((l) => l.slice(5).replace(/^ /, ""))
+          .join("\n");
         if (data) yield data;
       }
     }
@@ -56,7 +61,10 @@ export async function* sseData(
   }
 }
 export class OpenAIProvider implements Provider {
-  constructor(private key: string, private fetcher: typeof fetch = fetch) {}
+  constructor(
+    private key: string,
+    private fetcher: typeof fetch = fetch,
+  ) {}
   async *stream(
     context: Context,
     signal: AbortSignal,
@@ -83,7 +91,8 @@ export class OpenAIProvider implements Provider {
     if (!count.ok) throw new AppError("PROVIDER_FAILED", 502);
     const counted = await count.json();
     if (
-      !Number.isSafeInteger(counted.input_tokens) || counted.input_tokens < 0 ||
+      !Number.isSafeInteger(counted.input_tokens) ||
+      counted.input_tokens < 0 ||
       counted.input_tokens > context.inputTokenBound
     ) {
       throw new AppError("PRICING_UNVERIFIED", 503);
@@ -102,9 +111,11 @@ export class OpenAIProvider implements Provider {
       redirect: "error",
     });
     if (
-      !response.ok || !response.body ||
+      !response.ok ||
+      !response.body ||
       !response.headers.get("content-type")?.includes("text/event-stream")
-    ) throw new AppError("PROVIDER_FAILED", 502);
+    )
+      throw new AppError("PROVIDER_FAILED", 502);
     let finished = false;
     for await (const data of sseData(response.body, signal)) {
       if (data === "[DONE]") continue;
@@ -131,7 +142,8 @@ export class OpenAIProvider implements Provider {
         if (
           !Number.isSafeInteger(usage?.input_tokens) ||
           !Number.isSafeInteger(usage?.output_tokens) ||
-          usage.input_tokens < 0 || usage.output_tokens < 0 ||
+          usage.input_tokens < 0 ||
+          usage.output_tokens < 0 ||
           usage.input_tokens > context.inputTokenBound ||
           usage.output_tokens > context.maxOutputTokens ||
           r?.model !== context.model.providerModelId
@@ -151,9 +163,11 @@ export class OpenAIProvider implements Provider {
         finished = true;
         break;
       } else if (
-        event.type === "error" || event.type === "response.failed" ||
+        event.type === "error" ||
+        event.type === "response.failed" ||
         event.type?.includes("function_call")
-      ) throw new AppError("PROVIDER_FAILED", 502);
+      )
+        throw new AppError("PROVIDER_FAILED", 502);
     }
     if (!finished) throw new AppError("PROVIDER_FAILED", 502);
   }

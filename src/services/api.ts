@@ -1,21 +1,25 @@
 import type { ChatRequestV1, SessionResult } from '../../types/phase1';
 import { SseParser, errorFromEvent, parseChatEvent } from '../chat/sse';
-import type { PublicConfig } from '../lib/env';
 import { AppError, isAppErrorCode } from './errors';
 import type { ChatPort, SessionPort, StreamHandlers } from './types';
 
 export type TokenSource = () => Promise<string | null>;
 type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
 
+/** Eigener App-Server, gleicher Ursprung. Dev: Vite leitet /api an den lokalen Node-Server weiter. */
+export const API_BASE = '/api';
+export type ApiEndpoint = 'chat-stream' | 'session';
+
 /**
- * Aufrufe der Supabase Edge Functions. Token nur im Authorization-Header, nie in der URL.
+ * Aufrufe des eigenen Node-Servers (keine Edge Functions). Token nur im Authorization-Header,
+ * nie in der URL; kein Projektschlüssel, keine Cookies.
  * Fehler vor Streambeginn: JSON `{error:{code,message,requestId,retryable}}` (Vertrag v1.0).
  */
 async function post(
   fetchImpl: FetchLike,
-  config: PublicConfig,
+  base: string,
   getToken: TokenSource,
-  name: 'chat-stream' | 'session',
+  name: ApiEndpoint,
   body: unknown,
   signal?: AbortSignal,
 ): Promise<Response> {
@@ -23,11 +27,10 @@ async function post(
   if (!token) throw new AppError('AUTH_REQUIRED');
   let response: Response;
   try {
-    response = await fetchImpl(`${config.supabaseUrl}/functions/v1/${name}`, {
+    response = await fetchImpl(`${base}/${name}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        apikey: config.publishableKey,
         'Content-Type': 'application/json',
         Accept: name === 'chat-stream' ? 'text/event-stream' : 'application/json',
       },
@@ -63,15 +66,17 @@ export async function errorFromResponse(response: Response): Promise<AppError> {
     }
   }
   if (response.status === 404) return new AppError('NOT_DEPLOYED');
+  // App-Server nicht erreichbar (Proxy ohne Ziel, Neustart): Verbindungsproblem, kein Serverfehler.
+  if (response.status === 502 || response.status === 503 || response.status === 504) return new AppError('NETWORK');
   if (response.status === 401) return new AppError('AUTH_REQUIRED');
   if (response.status === 403) return new AppError('WORKSPACE_FORBIDDEN');
   return new AppError('INTERNAL_ERROR');
 }
 
-export function createChatTransport(config: PublicConfig, getToken: TokenSource, fetchImpl: FetchLike = fetch): ChatPort {
+export function createChatTransport(getToken: TokenSource, fetchImpl: FetchLike = fetch, base: string = API_BASE): ChatPort {
   return {
     async stream(request: ChatRequestV1, { signal, onEvent }: StreamHandlers): Promise<void> {
-      const response = await post(fetchImpl, config, getToken, 'chat-stream', request, signal);
+      const response = await post(fetchImpl, base, getToken, 'chat-stream', request, signal);
       if (!(response.headers.get('content-type') ?? '').includes('text/event-stream') || !response.body) {
         throw new AppError('PROTOCOL');
       }
@@ -110,10 +115,10 @@ export function createChatTransport(config: PublicConfig, getToken: TokenSource,
   };
 }
 
-export function createSessionTransport(config: PublicConfig, getToken: TokenSource, fetchImpl: FetchLike = fetch): SessionPort {
+export function createSessionTransport(getToken: TokenSource, fetchImpl: FetchLike = fetch, base: string = API_BASE): SessionPort {
   return {
     async touch(workspaceId) {
-      const response = await post(fetchImpl, config, getToken, 'session', { workspaceId, action: 'touch' });
+      const response = await post(fetchImpl, base, getToken, 'session', { workspaceId, action: 'touch' });
       const data: unknown = await response.json().catch(() => null);
       if (
         typeof data !== 'object' ||
@@ -127,7 +132,7 @@ export function createSessionTransport(config: PublicConfig, getToken: TokenSour
     },
     async end(workspaceId, options = {}) {
       const tokenSource = options.via ? () => options.via?.getToken() ?? Promise.resolve(null) : getToken;
-      await post(fetchImpl, config, tokenSource, 'session', { workspaceId, action: 'end' }, options.signal);
+      await post(fetchImpl, base, tokenSource, 'session', { workspaceId, action: 'end' }, options.signal);
     },
   };
 }

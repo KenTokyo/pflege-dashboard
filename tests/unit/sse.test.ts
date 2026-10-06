@@ -3,11 +3,11 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ChatEventV1, ChatRequestV1 } from '../../types/phase1';
 import { parseChatEvent, SseParser } from '../../src/chat/sse';
 import { AppError } from '../../src/services/errors';
-import { createChatTransport, createSessionTransport } from '../../src/services/functions';
+import { PHASE1_API } from '../../types/phase1';
+import { API_BASE, createChatTransport, createSessionTransport } from '../../src/services/api';
 
 const CONV = '10000000-0000-4000-8000-000000000050';
 const REQ = 'req-1';
-const config = { supabaseUrl: 'https://beispiel.invalid', publishableKey: 'sb_publishable_test' };
 const request: ChatRequestV1 = {
   workspaceId: 'ws',
   conversationId: CONV,
@@ -40,7 +40,7 @@ function sseResponse(parts: string[], { cut = false } = {}) {
 async function run(response: Response | (() => Promise<Response>), signal = new AbortController().signal) {
   const events: ChatEventV1[] = [];
   const fetchImpl = vi.fn(typeof response === 'function' ? response : () => Promise.resolve(response));
-  const transport = createChatTransport(config, () => Promise.resolve('jwt'), fetchImpl);
+  const transport = createChatTransport(() => Promise.resolve('jwt'), fetchImpl);
   const result = transport.stream(request, { signal, onEvent: (e) => events.push(e) }).then(
     () => null,
     (e: unknown) => e,
@@ -82,13 +82,24 @@ describe('parseChatEvent', () => {
   });
 });
 
+describe('App-Server-Pfade', () => {
+  it('entsprechen dem Backend-Vertrag v1.1 (types/phase1.ts)', () => {
+    expect(`${API_BASE}/session`).toBe(PHASE1_API.session);
+    expect(`${API_BASE}/chat-stream`).toBe(PHASE1_API.chatStream);
+  });
+});
+
 describe('Chat-Transport', () => {
-  it('sendet Token nur im Header, nie in der URL', async () => {
+  it('ruft den eigenen Server gleichen Ursprungs, Token nur im Header', async () => {
     const { fetchImpl } = await run(sseResponse([started, delta(2, 'Hallo'), completed(3)]));
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe('https://beispiel.invalid/functions/v1/chat-stream');
+    expect(url).toBe('/api/chat-stream');
     expect(url).not.toContain('jwt');
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer jwt');
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe('Bearer jwt');
+    // Kein Supabase-Projektschlüssel, keine Cookies an den App-Server.
+    expect(Object.keys(headers).map((h) => h.toLowerCase())).not.toContain('apikey');
+    expect(init.credentials).toBe('omit');
     expect(JSON.parse(init.body as string)).toEqual(request);
   });
 
@@ -141,14 +152,19 @@ describe('Chat-Transport', () => {
     expect(events).toHaveLength(0);
   });
 
-  it('nicht ausgerollte Funktion (404 ohne JSON) wird NOT_DEPLOYED', async () => {
+  it('unbekannter Endpunkt (404 ohne JSON) wird NOT_DEPLOYED', async () => {
     const { error } = await run(new Response('not found', { status: 404 }));
     expect((error as AppError).code).toBe('NOT_DEPLOYED');
   });
 
+  it.each([502, 503, 504])('App-Server nicht erreichbar (%i ohne JSON) wird NETWORK', async (status) => {
+    const { error } = await run(new Response('Bad Gateway', { status }));
+    expect((error as AppError).code).toBe('NETWORK');
+  });
+
   it('ohne Token kein Netzaufruf', async () => {
     const fetchImpl = vi.fn();
-    const transport = createChatTransport(config, () => Promise.resolve(null), fetchImpl);
+    const transport = createChatTransport(() => Promise.resolve(null), fetchImpl);
     await expect(transport.stream(request, { signal: new AbortController().signal, onEvent: vi.fn() })).rejects.toMatchObject({ code: 'AUTH_REQUIRED' });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
@@ -156,18 +172,19 @@ describe('Chat-Transport', () => {
 
 describe('Session-Transport', () => {
   it('touch prüft die Antwortform', async () => {
-    const t = createSessionTransport(config, () => Promise.resolve('jwt'), () => Promise.resolve(new Response('{}', { status: 200 })));
+    const t = createSessionTransport(() => Promise.resolve('jwt'), () => Promise.resolve(new Response('{}', { status: 200 })));
     await expect(t.touch('ws')).rejects.toMatchObject({ code: 'PROTOCOL' });
   });
   it('401 SESSION_EXPIRED wird durchgereicht', async () => {
     const body = JSON.stringify({ error: { code: 'SESSION_EXPIRED', message: 'x', requestId: 'r', retryable: false } });
-    const t = createSessionTransport(config, () => Promise.resolve('jwt'), () => Promise.resolve(new Response(body, { status: 401 })));
+    const t = createSessionTransport(() => Promise.resolve('jwt'), () => Promise.resolve(new Response(body, { status: 401 })));
     await expect(t.touch('ws')).rejects.toMatchObject({ code: 'SESSION_EXPIRED' });
   });
-  it('sendet action end mit Workspace', async () => {
+  it('sendet action end mit Workspace an /api/session', async () => {
     const fetchImpl = vi.fn(() => Promise.resolve(new Response('{}', { status: 200 })));
-    await createSessionTransport(config, () => Promise.resolve('jwt'), fetchImpl).end('ws');
-    const init = (fetchImpl.mock.calls[0] as unknown as [string, RequestInit])[1];
+    await createSessionTransport(() => Promise.resolve('jwt'), fetchImpl).end('ws');
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('/api/session');
     expect(JSON.parse(init.body as string)).toEqual({ workspaceId: 'ws', action: 'end' });
   });
 });

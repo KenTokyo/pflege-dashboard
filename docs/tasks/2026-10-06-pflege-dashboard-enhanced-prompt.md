@@ -47,6 +47,14 @@ bitte keine feedbacks geben sondern nur orchestrierer spielen und die sachen zus
 
 tagwerk sieht am besten aus damit weitermachen
 
+### Selbständige Einrichtung und Architekturkorrektur 2026-10-06
+
+sollst du am besten machen bitteich kann darauf nicht zugreifen
+
+nutze mein browser hierzu bitte
+
+iregndwie muss das gehei hc kann das nicht machen ich möchte auch keine edge functions
+
 ## Improved prompt
 
 Setze die vollständigen [Anforderungen](../anforderungen.md) als eigenständiges Projekt in `/Users/kentoky/Documents/React Projects/pflege-dashboard` um. Phase 0 ist geliefert und lokal mit `689e735` gesichert. Die Nutzerwahl **Tagwerk** gibt jetzt Phase 1 frei. Die historischen Werkzeugblockaden und Unterbrechungen sind keine aktuelle Fortsetzungssperre: Echtes natives Supabase samt App-Migrationen und Zugriffsprüfungen ist nachgewiesen. Das eigene Hosted-Projekt und geschützte `.env` wurden separat nutzerautorisiert eingerichtet; Hosted-App-Schema, Anmeldung und KI-Aufrufe sind noch nicht nachgewiesen.
@@ -62,3 +70,8 @@ Nur fiktive Daten, Demo-Banner sichtbar. Keine Auth-/Nutzerkonten anlegen und ke
 Agenten lesen die vollständigen Anforderungen, Coding-Regeln und vor Browserprüfungen die globalen Browserregeln. Erst Node-/Quellprüfungen, dann höchstens ein unsichtbarer passender Chrome for Testing gleichzeitig, maximal 1280×720. Keine persönlichen Browser, sichtbaren Apps oder Fokuswechsel. Alle eigenen Prüfbrowser und Server unmittelbar nach der Prüfung schließen; begrenzte Supabase-Prüfläufe im finally aufräumen. Keine endlosen dekorativen Animationen; inaktive Arbeit und Timer stoppen, reduzierte Bewegung berücksichtigen. AA-Kontrast, Tastaturbedienung und mobil nutzbare Ansichten prüfen.
 
 Gate 1 verlangt eine echte angemeldete Unterhaltung in beiden Themes. Vollständige Implementierung, Tests mit synthetischen SQL-Claims/Mock-Provider und echte Supabase-Läufe sind getrennt von diesem nutzerseitigen Test zu belegen. Fehlende Konten/Secrets werden nicht durch Ersatzantworten kaschiert. Phase 2 bis 4 bleiben im Plan, beginnen erst nach dem jeweiligen Gate. Lokal pro geprüftem Meilenstein committen, niemals pushen. Deutsch, kurze Gate-Berichte mit Ergebnis, echten Prüfungen, Grenzen und Selbstbewertung.
+
+
+### Aktueller Vorrang: ohne Edge Functions
+
+Die jüngste Nutzeranweisung ersetzt die bisherige Edge-Pflicht: keine Supabase Edge Functions einrichten oder deployen. Supabase bleibt zwingend für Auth, Datenbank und Storage. Dieselben ursprünglichen Agenten stellen Phase 1 auf einen normalen lokalen Node-Server um. Er verwendet die vorhandene geschützte Projektkonfiguration ausschließlich serverseitig, prüft Supabase-Sitzungen und ruft die vorhandenen geprüften Datenbankfunktionen auf. Ein gemeinsamer lokaler Start verbindet App und Server; Browser spricht gleichursprünglich `/api/session` und `/api/chat-stream`. Keine zusätzlichen Hosting-, Konto- oder Token-Schritte an den Nutzer auslagern, soweit bestehender autorisierter Zugang genügt. Kein PAT beschaffen oder fremde Geheimnisse lesen. Keine neue Phase, keine Kontoanlage, keine Providerkosten oder Budgeterhöhung. Fehlender Nutzerlogin und KI-Schlüssel bleiben offen. Browserweg wurde live geprüft, ist hier weiter nicht verbunden; keine persönliche Chrome-/OS-Umgehung. Supabase-Plugin ist inzwischen verbunden, aber aufgrund Nutzerkorrektur kein Edge-Deployment.

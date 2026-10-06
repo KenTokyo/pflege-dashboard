@@ -273,8 +273,6 @@ try {
     for (
       const [name, route] of [
         ["anonymous-workspaces", "/rest/v1/workspaces?select=id"],
-        ["session-deployment", "/functions/v1/session"],
-        ["chat-deployment", "/functions/v1/chat-stream"],
       ]
     ) {
       try {

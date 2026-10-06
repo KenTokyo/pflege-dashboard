@@ -64,7 +64,7 @@ timebox = "8h"
 inactivity_timeout = "15m"
 
 [edge_runtime]
-enabled = true
+enabled = false
 policy = "per_worker"
 inspector_port = 56428
 
@@ -74,9 +74,3 @@ port = 56427
 
 [experimental]
 stack = true
-
-[functions.chat-stream]
-verify_jwt = false
-
-[functions.session]
-verify_jwt = false

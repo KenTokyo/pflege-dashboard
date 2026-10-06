@@ -1,15 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  chatHandler,
-  sessionHandler,
-} from "../../supabase/functions/_shared/handler.ts";
-import { AppError } from "../../supabase/functions/_shared/errors.ts";
-import {
-  type Context,
-  OpenAIProvider,
-  sseData,
-} from "../../supabase/functions/_shared/provider.ts";
-import { cors, platform } from "../../supabase/functions/_shared/platform.ts";
+import { chatHandler, sessionHandler } from "../runtime/handler.ts";
+import { AppError } from "../runtime/errors.ts";
+import { type Context, OpenAIProvider, sseData } from "../runtime/provider.ts";
+import { cors, platform } from "../runtime/platform.ts";
 const w = "10000000-0000-4000-8000-000000000001",
   c = "10000000-0000-4000-8000-000000000050",
   r = "40000000-0000-4000-8000-000000000001";
@@ -31,7 +24,7 @@ const context: Context = {
   maximumCostMicrousd: 10000,
 };
 const request = (extra: Record<string, unknown> = {}, signal?: AbortSignal) =>
-  new Request("https://example.invalid/functions/v1/chat-stream", {
+  new Request("https://example.invalid/api/chat-stream", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,7 +41,7 @@ const request = (extra: Record<string, unknown> = {}, signal?: AbortSignal) =>
     signal,
   });
 const event = (type: string, data: unknown) =>
-  `event: ${type}\ndata: ${JSON.stringify({ type, ...data as object })}\n\n`;
+  `event: ${type}\ndata: ${JSON.stringify({ type, ...(data as object) })}\n\n`;
 function setup(overrides: Record<string, unknown> = {}) {
   const rpc = vi.fn(async (name: string) => {
     if (name === "edge_chat_prepare") {
@@ -81,15 +74,16 @@ function setup(overrides: Record<string, unknown> = {}) {
     },
   };
 }
-describe("actual Edge handler with MOCK provider, no live Auth account", () => {
+describe("actual Node handler with MOCK provider, no live Auth account", () => {
   it("streams ordered events and commits before completed", async () => {
     const x = setup();
     const response = await chatHandler(x.deps)(request());
     expect(response.status).toBe(200);
     const text = await response.text();
-    const data = text.split("\n").filter((l) => l.startsWith("data:")).map(
-      (l) => JSON.parse(l.slice(5)),
-    );
+    const data = text
+      .split("\n")
+      .filter((l) => l.startsWith("data:"))
+      .map((l) => JSON.parse(l.slice(5)));
     expect(data.map((x) => x.type)).toEqual([
       "message.started",
       "message.delta",
@@ -164,17 +158,17 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
     x.rpc.mockImplementation(async (name) =>
       name === "edge_chat_prepare"
         ? {
-          messageId: r,
-          context,
-          replayed: true,
-          content: "Stored",
-          inputTokens: 10,
-          outputTokens: 5,
-          costMicrousd: 20,
-        }
+            messageId: r,
+            context,
+            replayed: true,
+            content: "Stored",
+            inputTokens: 10,
+            outputTokens: 5,
+            costMicrousd: 20,
+          }
         : name === "edge_chat_replay"
-        ? null
-        : true
+          ? null
+          : true,
     );
     const text = await (await chatHandler(x.deps)(request())).text();
     expect(text).toContain("Stored");
@@ -197,27 +191,31 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
     expect(text).toContain("PROVIDER_FAILED");
     expect(text).not.toContain("provider secret");
     expect(text).not.toContain("event: message.completed");
-    expect(x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1])
-      .toMatchObject({
-        p_content: "Partial",
-        p_status: "failed",
-        p_input_tokens: null,
-      });
+    expect(
+      x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1],
+    ).toMatchObject({
+      p_content: "Partial",
+      p_status: "failed",
+      p_input_tokens: null,
+    });
   });
   it("stream cancellation aborts provider and persists interruption", async () => {
     let aborted = false;
     let done: () => void = () => {};
-    const persisted = new Promise<void>((resolve) => done = resolve);
+    const persisted = new Promise<void>((resolve) => (done = resolve));
     const x = setup({
       provider: {
         async *stream(_c: Context, signal: AbortSignal) {
-          yield { text: "Partial" };
-          await new Promise<void>((resolve) => {
-            signal.addEventListener("abort", () => {
+          const stopped = new Promise<void>((resolve) => {
+            const onAbort = () => {
               aborted = true;
               resolve();
-            }, { once: true });
+            };
+            if (signal.aborted) onAbort();
+            else signal.addEventListener("abort", onAbort, { once: true });
           });
+          yield { text: "Partial" };
+          await stopped;
           throw new AppError("REQUEST_ABORTED", 409);
         },
       },
@@ -239,8 +237,9 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
     await reader.cancel();
     await persisted;
     expect(aborted).toBe(true);
-    expect(x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1])
-      .toMatchObject({ p_status: "interrupted" });
+    expect(
+      x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1],
+    ).toMatchObject({ p_status: "interrupted" });
   });
   it("server time limit aborts provider and persists interruption", async () => {
     const x = setup({
@@ -250,9 +249,11 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
           yield { text: "Partial before timeout" };
           await new Promise<void>((resolve) => {
             if (signal.aborted) resolve();
-            else {signal.addEventListener("abort", () => resolve(), {
+            else {
+              signal.addEventListener("abort", () => resolve(), {
                 once: true,
-              });}
+              });
+            }
           });
           throw new DOMException("Synthetic aborted fetch", "AbortError");
         },
@@ -261,12 +262,13 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
     const text = await (await chatHandler(x.deps)(request())).text();
     expect(text).toContain("REQUEST_ABORTED");
     expect(text).not.toContain("message.completed");
-    expect(x.rpc.mock.calls.find((call) => call[0] === "edge_chat_finish")?.[1])
-      .toMatchObject({
-        p_status: "interrupted",
-        p_content: "Partial before timeout",
-        p_input_tokens: null,
-      });
+    expect(
+      x.rpc.mock.calls.find((call) => call[0] === "edge_chat_finish")?.[1],
+    ).toMatchObject({
+      p_status: "interrupted",
+      p_content: "Partial before timeout",
+      p_input_tokens: null,
+    });
   });
   it("known usage on provider incomplete still persists usage", async () => {
     const x = setup({
@@ -285,12 +287,13 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
     });
     const text = await (await chatHandler(x.deps)(request())).text();
     expect(text).toContain("PROVIDER_FAILED");
-    expect(x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1])
-      .toMatchObject({
-        p_input_tokens: 10,
-        p_output_tokens: 5,
-        p_status: "failed",
-      });
+    expect(
+      x.rpc.mock.calls.find((x) => x[0] === "edge_chat_finish")?.[1],
+    ).toMatchObject({
+      p_input_tokens: 10,
+      p_output_tokens: 5,
+      p_status: "failed",
+    });
   });
   it("session revoked during output stops before delta", async () => {
     const x = setup();
@@ -329,12 +332,16 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
       body: JSON.stringify({ workspaceId: w, action: "touch" }),
     });
     expect((await sessionHandler(x.deps)(req)).status).toBe(200);
-    expect(x.rpc.mock.calls[0]).toEqual(["edge_session", {
-      p_workspace_id: w,
-      p_user_id: u,
-      p_session_id: s,
-      p_action: "touch",
-    }]);
+    expect(x.rpc.mock.calls[0]).toEqual([
+      "edge_session",
+      {
+        p_workspace_id: w,
+        p_user_id: u,
+        p_session_id: s,
+        p_action: "touch",
+      },
+      expect.any(AbortSignal),
+    ]);
   });
 
   it("session action array is invalid, not coerced into touch", async () => {
@@ -360,7 +367,9 @@ describe("actual Edge handler with MOCK provider, no live Auth account", () => {
 });
 describe("actual OpenAI HTTP adapter against synthetic fetch, zero external calls", () => {
   const fetcher = (payload: string) =>
-    vi.fn().mockResolvedValueOnce(Response.json({ input_tokens: 12 }))
+    vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ input_tokens: 12 }))
       .mockResolvedValueOnce(
         new Response(payload, {
           headers: { "Content-Type": "text/event-stream" },
@@ -377,15 +386,17 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
         }),
     );
     const parts = [];
-    for await (
-      const p of new OpenAIProvider("synthetic-key", fetch).stream(
-        context,
-        new AbortController().signal,
-      )
-    ) parts.push(p);
-    expect(parts).toEqual([{ text: "Hallo" }, {
-      usage: { inputTokens: 12, outputTokens: 2, model: "fixture-no-call" },
-    }]);
+    for await (const p of new OpenAIProvider("synthetic-key", fetch).stream(
+      context,
+      new AbortController().signal,
+    ))
+      parts.push(p);
+    expect(parts).toEqual([
+      { text: "Hallo" },
+      {
+        usage: { inputTokens: 12, outputTokens: 2, model: "fixture-no-call" },
+      },
+    ]);
     const body = JSON.parse(fetch.mock.calls[1][1].body);
     expect(body).toMatchObject({
       store: false,
@@ -397,9 +408,9 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
     expect(body).not.toHaveProperty("tool_choice");
   });
   it("actual count over reserved bound prevents generation", async () => {
-    const fetch = vi.fn().mockResolvedValue(
-      Response.json({ input_tokens: 10001 }),
-    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(Response.json({ input_tokens: 10001 }));
     const generator = new OpenAIProvider("synthetic-key", fetch).stream(
       context,
       new AbortController().signal,
@@ -409,21 +420,22 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
     });
     expect(fetch).toHaveBeenCalledTimes(1);
   });
-  it.each([{ model: "wrong", usage: { input_tokens: 1, output_tokens: 1 } }, {
-    model: "fixture-no-call",
-    usage: { input_tokens: 1, output_tokens: 1025 },
-  }, { model: "fixture-no-call", usage: null }])(
-    "rejects unverified completion %j",
-    async (response) => {
-      const generator = new OpenAIProvider(
-        "synthetic-key",
-        fetcher(event("response.completed", { response })),
-      ).stream(context, new AbortController().signal);
-      await expect(generator.next()).rejects.toMatchObject({
-        code: "PROVIDER_FAILED",
-      });
+  it.each([
+    { model: "wrong", usage: { input_tokens: 1, output_tokens: 1 } },
+    {
+      model: "fixture-no-call",
+      usage: { input_tokens: 1, output_tokens: 1025 },
     },
-  );
+    { model: "fixture-no-call", usage: null },
+  ])("rejects unverified completion %j", async (response) => {
+    const generator = new OpenAIProvider(
+      "synthetic-key",
+      fetcher(event("response.completed", { response })),
+    ).stream(context, new AbortController().signal);
+    await expect(generator.next()).rejects.toMatchObject({
+      code: "PROVIDER_FAILED",
+    });
+  });
   it("missing terminal event never becomes success", async () => {
     const gen = new OpenAIProvider(
       "synthetic-key",
@@ -433,14 +445,13 @@ describe("actual OpenAI HTTP adapter against synthetic fetch, zero external call
     await expect(gen.next()).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
   });
   it("does not retry provider errors", async () => {
-    const fetch = vi.fn().mockResolvedValue(
-      new Response("private error", { status: 429 }),
-    );
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response("private error", { status: 429 }));
     await expect(
-      new OpenAIProvider("synthetic-key", fetch).stream(
-        context,
-        new AbortController().signal,
-      ).next(),
+      new OpenAIProvider("synthetic-key", fetch)
+        .stream(context, new AbortController().signal)
+        .next(),
     ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
     expect(fetch).toHaveBeenCalledTimes(1);
   });
@@ -469,8 +480,8 @@ describe("Auth and CORS transport", () => {
         n === "SUPABASE_URL"
           ? "https://own.example.invalid"
           : n === "AUTH_JWT_ISSUER"
-          ? undefined
-          : "synthetic-key",
+            ? undefined
+            : "synthetic-key",
       fake,
     );
     await expect(p.authenticate(request())).rejects.toMatchObject({
@@ -499,8 +510,8 @@ describe("Auth and CORS transport", () => {
         n === "SUPABASE_URL"
           ? "https://own.example.invalid"
           : n === "AUTH_JWT_ISSUER"
-          ? undefined
-          : "synthetic-key",
+            ? undefined
+            : "synthetic-key",
       fake,
     );
     expect(await p.authenticate(req)).toEqual({ userId: u, sessionId: s });
@@ -524,8 +535,8 @@ describe("Auth and CORS transport", () => {
         n === "SUPABASE_URL"
           ? "https://own.example.invalid"
           : n === "AUTH_JWT_ISSUER"
-          ? undefined
-          : "synthetic-key",
+            ? undefined
+            : "synthetic-key",
       vi.fn().mockResolvedValue(Response.json({ id: u })),
     );
     await expect(p.authenticate(req)).rejects.toMatchObject({
@@ -539,7 +550,7 @@ describe("Auth and CORS transport", () => {
           headers: { Origin: "https://evil.example.invalid" },
         }),
         () => "https://allowed.example.invalid",
-      )
+      ),
     ).toThrow(AppError);
   });
   it("approved preflight allows only explicit origin", () => {

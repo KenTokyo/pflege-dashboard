@@ -184,3 +184,10 @@ You plan, brief, dispatch, verify, grade and send work back. You do not build th
 - the decision you need from me
 
 Make it so good that people in the room forget it's a demo and ask when they can use it. Calm, precise, trustworthy, with just enough graffiti to make it unforgettable. Do it right bro, I believe in you!
+
+
+## Vorrangige Nutzerkorrektur vom 06.10.2026
+
+Original: „iregndwie muss das gehei hc kann das nicht machen ich möchte auch keine edge functions“.
+
+Die ältere Pflicht zu Supabase Edge Functions entfällt. Stattdessen übernimmt ein normaler lokaler Node-Server Sitzung und KI-Streaming mit den bestehenden Sicherheits-, Bestätigungs-, Audit- und Budgetregeln. Supabase bleibt für Auth, Daten und Storage. Beide ursprünglichen Agenten verbinden die aktuelle Phase-1-App mit dem Server; ein gemeinsamer lokaler Start vermeidet zusätzliche Einrichtungsschritte. Keine Edge-Bereitstellung, keine eigenmächtige Kontoanlage und keine Budgeterhöhung. Das echte Nutzer-/KI-Gate bleibt erforderlich.

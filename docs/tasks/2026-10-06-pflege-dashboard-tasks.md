@@ -66,7 +66,7 @@ Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoan
 - [x] Geprüftes App-Schema auf dem eigenen Hosted-Projekt angewendet. Orchestrator liest sichere persistierte Belege: TLS verschlüsselt/verifiziert, App-Struktur entspricht lokal, ein Demo-Workspace und null Auth-Konten. Backend meldet fiktiven Seed und privaten Bucket; Systembesitz erhalten.
 - [x] Backend-Lieferung samt vollständigem Abschlussbericht gelesen. Orchestrator führt den ganzen eigenen Supabase-Lauf unabhängig aus: sechs Migrationen + Seed, 434 SQL, 22 echte Parallelprüfungen, 26 echte Edge-HTTP, 47 Unit/Mock, strikter TypeScript-/Deno-Check und frische Typgenerierung bestanden. Stop/Cleanup bestätigt null eigene Prozesse und Ports 56421/56422/56428 geschlossen. Kein echter angemeldeter KI-Nutzertest.
 - [x] Frontend-Sitzungsabschluss vollständig geliefert und erneut vom Orchestrator geprüft: `npm run check` mit 101 Tests, Strict-Typecheck, Lint, Build, Bundle und Quelle bestanden. Gemeinsamer Bericht `docs/gates/2026-10-06-phase1.md`; Backend lokal in `2e8a129` gesichert.
-- [ ] Hosted-Edge-Deployment: mangels Management-Autorisierung/Toolfunktion offen. Keine Provider-Schlüssel, kein angelegtes Auth-Konto, Nullbudget erhalten. Agenten erledigen eigene Prüfung und Nacharbeit selbst.
+- [x] Historischer Hosted-Edge-Deployschritt durch jüngste Nutzerkorrektur aufgehoben: keine Edge Functions, normaler Node-Server. Keine Provider-Schlüssel, kein angelegtes Auth-Konto, Nullbudget erhalten. Agenten erledigen eigene Prüfung und Nacharbeit selbst.
 - [x] Frontend liefert Tagwerk-App und 44 synthetische Bildnachweise. Orchestrator führt `npm run check` selbst aus: strikte Typen, Lint, 87 Tests, Build, Bundle-/Quellprüfung bestanden; Dashboard/Antwort in beiden Themes tatsächlich angesehen. Kein echter Login-/KI-Gate-Pass.
 - [x] Derselbe Frontend-Agent schließt hängende Abmeldung und alte Auth-/Workspace-/Touch-/Schreibresultate selbst vollständig: sofortiger lokaler Logout, begrenzter Widerruf, Generation/Abbruch/Cache-Bereinigung. 14 neue Tests und fünf gezielt erkannte Rückbauten; keine erneuten Bilder nötig, Layout erhalten.
 - [x] Vertrag/Typen verbunden; Frontend-Checks, echter lokaler Supabase-/RLS-/Parallel-/Edge-Lauf und Hosted-Struktur unabhängig durch den Orchestrator geprüft. Beide Themes anhand tatsächlicher PNGs angesehen. Angemeldeter End-to-End-Login/KI-Stream ausdrücklich nicht bestanden; keine Konten oder Providercalls.
@@ -97,3 +97,14 @@ Ergebnis: Nicht begonnen. Pfade: `docs/`, `supabase/seed.sql`, `src/`.
 - [ ] Abschließender lokaler Commit, keine Veröffentlichung und kein Push.
 
 Ergebnis: Nicht begonnen. Pfade: `docs/`, `src/`, `backend/`.
+
+
+## Nutzerkorrektur 2026-10-06: lokaler Server ohne Edge Functions
+
+- [x] Supabase-Plugin live verbunden: eigenes Projekt ACTIVE_HEALTHY, Frankfurt; keine deployed Functions. Browseranschluss weiterhin `available:false`.
+- [x] Edge-Deployment vor Ausführung gestoppt; Nutzerkorrektur hat Vorrang vor bisherigen Edge-Anforderungen.
+- [x] Ursprünglicher Backend-Agent: normaler lokaler Node-Server, bestehendes Supabase, sicherer Sitzungs-/RPC-/Streamanschluss, echter HTTP-/DB-Nachweis ohne Auth-Konto oder Providerkosten.
+- [x] Ursprünglicher Frontend-Agent: gleicher Tagwerk-Auftritt, `/api`-Anschluss, gemeinsamer Start und Build, vorhandene Sitzungsregressionstests erhalten.
+- [x] Orchestrator: Vertrag zusammenführen, Prüfungen unabhängig ausführen, Regeln/Gate aktualisieren und lokal committen, niemals pushen.
+
+Ergebnis: Node-Anschluss ohne Edge Functions geliefert. Orchestrator prüft 105 Frontendtests, 21 Proxy-, 14 Prozessprüfungen, 484 SQL, 80 Backendtests und 39 echte Hosted-Node-HTTP/SQL-/Static-Prüfungen unabhängig erfolgreich. Abschließender gemeinsamer dev/start-Lauf durch Frontend-Agenten ebenfalls bestanden und bereinigt. Phase-1-Nutzergate bleibt bis echtem Nutzerlogin und bewusst freigegebener KI-Konfiguration offen. Pfade: `backend/`, `src/`, `docs/gates/2026-10-06-phase1.md`.

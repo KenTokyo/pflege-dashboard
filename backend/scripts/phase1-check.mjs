@@ -93,18 +93,11 @@ try {
     await step("scripts/supabase-safe.mjs", ["test"]);
     await step("scripts/concurrency.mjs");
     await step("scripts/phase1-concurrency.mjs");
-    await step("scripts/edge-smoke.mjs");
+    await step("node_modules/typescript/bin/tsc", ["-p", "tsconfig.build.json"]);
+    await step("scripts/node-smoke.mjs");
+    await step("scripts/node-database-check.mjs");
     await step("scripts/supabase-safe.mjs", ["types"]);
     await step("scripts/schema-baseline.mjs");
-    await step(
-      "check",
-      [
-        "../supabase/functions/chat-stream/index.ts",
-        "../supabase/functions/session/index.ts",
-      ],
-      180_000,
-      path.join(backend, "node_modules/.bin/deno"),
-    );
     await step("node_modules/typescript/bin/tsc", ["--noEmit"]);
     await step("node_modules/vitest/vitest.mjs", [
       "run",
@@ -159,8 +152,8 @@ if (!failure && evidence.scope === "phase1") {
       "utf8",
     ),
   );
-  evidence.edgeHttp = JSON.parse(
-    await readFile(path.join(backend, ".local/edge-smoke.json"), "utf8"),
+  evidence.nodeHttp = JSON.parse(
+    await readFile(path.join(backend, ".local/node-smoke-local.json"), "utf8"),
   );
   evidence.parallel = JSON.parse(
     await readFile(

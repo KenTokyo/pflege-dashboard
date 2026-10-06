@@ -74,12 +74,16 @@ export function databaseError(message: unknown): AppError {
 }
 export const uuid = (value: unknown): value is string =>
   typeof value === "string" &&
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-    .test(value);
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 export async function readJson(
   request: Request,
 ): Promise<Record<string, unknown>> {
-  if (!request.headers.get("content-type")?.includes("application/json")) {
+  if (
+    request.headers.get("content-type")?.split(";")[0].trim().toLowerCase() !==
+    "application/json"
+  ) {
     throw new AppError("VALIDATION_FAILED", 400);
   }
   const reader = request.body?.getReader();

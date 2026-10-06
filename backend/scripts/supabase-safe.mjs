@@ -16,7 +16,7 @@ const cli = path.join(backend, 'node_modules', '.bin', 'supabase');
 const action = process.argv[2];
 const runtimeOnly = process.argv.includes('--runtime-only');
 const actions = {
-  start: ['start', '--runtime', 'native', '--exclude', 'realtime,studio,mail,analytics,pooler'],
+  start: ['start', '--runtime', 'native', '--exclude', 'realtime,studio,mail,analytics,pooler,functions'],
   status: ['status', '--output-format', 'json'],
   reset: ['db', 'reset', '--local', '--yes'],
   test: ['test', 'db', '--local'],
@@ -31,12 +31,12 @@ await mkdir(mirror, { recursive: true, mode: 0o700 });
 await mkdir(runtimeHome, { recursive: true, mode: 0o700 });
 // Supabase executes in an owned mirror with NO root .env. Only our SQL/config/test files are copied.
 await mkdir(path.join(mirror, 'supabase'), { recursive: true });
-for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests', 'functions']) {
+for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests']) {
   await rm(path.join(mirror, 'supabase', entry), { recursive: true, force: true });
   await cp(path.join(root, 'supabase', entry), path.join(mirror, 'supabase', entry), { recursive: true });
 }
-// Only harmless local origins; provider keys are never loaded from root or another project.
-await writeFile(path.join(mirror,'supabase/functions/.env'),'ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173\n',{mode:0o600});
+// Retire only the owned old mirror; no Edge runtime participates in the Node product.
+await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});
 const config = await readFile(path.join(mirror, 'supabase', 'config.toml'), 'utf8');
 if (!config.includes('project_id = "pflege-dashboard-phase0"')) throw new Error('Falsche lokale Projektidentität.');
 if (runtimeOnly) {

@@ -46,7 +46,7 @@ export async function fingerprint(client, phase0Only = true) {
     "select pg_get_triggerdef(t.oid) as definition from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and not t.tgisinternal order by c.relname,t.tgname",
   )).rows;
   const functionPrivileges = phase0Only ? [] : (await client.query(
-    "select n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' as name,has_function_privilege('anon',p.oid,'EXECUTE') as anon,has_function_privilege('authenticated',p.oid,'EXECUTE') as authenticated,has_function_privilege('service_role',p.oid,'EXECUTE') as service from pg_proc p join pg_namespace n on n.oid=p.pronamespace where (n.nspname||'.'||p.proname)=any($1) and p.prokind='f' order by n.nspname,p.proname,pg_get_function_identity_arguments(p.oid)",
+    "select n.nspname||'.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' as name,has_function_privilege('anon',p.oid,'EXECUTE') as anon,has_function_privilege('authenticated',p.oid,'EXECUTE') as authenticated,has_function_privilege('service_role',p.oid,'EXECUTE') as service,case when to_regrole('pflege_backend') is null then false else has_function_privilege('pflege_backend',p.oid,'EXECUTE') end as node from pg_proc p join pg_namespace n on n.oid=p.pronamespace where (n.nspname||'.'||p.proname)=any($1) and p.prokind='f' order by n.nspname,p.proname,pg_get_function_identity_arguments(p.oid)",
     [functionNames],
   )).rows;
   return JSON.stringify({

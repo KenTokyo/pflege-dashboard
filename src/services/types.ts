@@ -98,7 +98,7 @@ export interface ChatPort {
   stream(request: ChatRequestV1, handlers: StreamHandlers): Promise<void>;
 }
 
-/** Serverseitige App-Sitzung (POST /functions/v1/session). Kein Heartbeat, nur bei echter Interaktion. */
+/** Serverseitige App-Sitzung (POST /api/session, eigener Node-Server). Kein Heartbeat, nur bei echter Interaktion. */
 export interface SessionPort {
   touch(workspaceId: string): Promise<SessionResult>;
   /** Mit `via` gegen eine bereits abgetrennte Sitzung (Abmeldung); `signal` begrenzt die Dauer. */
