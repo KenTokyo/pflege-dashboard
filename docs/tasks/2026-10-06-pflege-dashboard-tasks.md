@@ -66,7 +66,8 @@ Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoan
 - [x] Geprüftes App-Schema auf dem eigenen Hosted-Projekt angewendet. Orchestrator liest sichere persistierte Belege: TLS verschlüsselt/verifiziert, App-Struktur entspricht lokal, ein Demo-Workspace und null Auth-Konten. Backend meldet fiktiven Seed und privaten Bucket; Systembesitz erhalten.
 - [ ] Phase-1-RPC-/Edge-Prüfungen und Frontend-Anbindung abschließend liefern. Native Edge Functions laufen tatsächlich; letzter gelesener Zwischenbeleg ist bestanden (407 SQL, 22 Parallelprüfungen, 26 Edge-HTTP, 44 Unit/Mock). Backend ergänzt den Abschlussbericht; noch keine gemeinsame Gate-Abnahme.
 - [ ] Hosted-Edge-Deployment: mangels Management-Autorisierung/Toolfunktion offen. Keine Provider-Schlüssel, kein angelegtes Auth-Konto, Nullbudget erhalten. Agenten erledigen eigene Prüfung und Nacharbeit selbst.
-- [ ] Login, Sitzung/Timeout, App-Hülle, beide Themes, Dashboard mit Seed, Streaming-Chat auf einem Modell, Audit-Schreiben.
+- [x] Frontend liefert Tagwerk-App und 44 synthetische Bildnachweise. Orchestrator führt `npm run check` selbst aus: strikte Typen, Lint, 87 Tests, Build, Bundle-/Quellprüfung bestanden; Dashboard/Antwort in beiden Themes tatsächlich angesehen. Kein echter Login-/KI-Gate-Pass.
+- [ ] Notwendigen Sitzungsanschluss vollständig schließen: Derselbe Frontend-Agent prüft und behebt hängende Auth-Abmeldung und verspätete Ergebnisse älterer Auth-/Workspace-/Touch-Aufrufe selbst, samt Regression. Gemeinsamer Implementierungs-Meilenstein erst nach diesem Abschluss.
 - [ ] Vertrag vor Datenanbindung prüfen; Typen, Lint, Tests, RLS und Node-Smoke sowie beide Themes prüfen.
 - [ ] Gate: Nutzer kann sich selbst anmelden und in beiden Themes eine echte Unterhaltung führen.
 
