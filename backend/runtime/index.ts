@@ -1,7 +1,7 @@
-import { loadConfiguration } from "./config.ts";
-import { createDatabase } from "./database.ts";
-import { platform } from "./platform.ts";
-import { createAppServer } from "./server.ts";
+import { loadConfiguration } from "./config.js";
+import { createDatabase } from "./database.js";
+import { platform } from "./platform.js";
+import { createAppServer } from "./server.js";
 let close: (() => Promise<void>) | undefined;
 let stopping = false;
 let shutdownWork: Promise<void> | undefined;

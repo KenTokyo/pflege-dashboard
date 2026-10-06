@@ -1,11 +1,11 @@
-import { AppError, errorPayload, readJson, uuid } from "./errors.ts";
-import { cors, type Environment, type Platform } from "./platform.ts";
+import { AppError, errorPayload, readJson, uuid } from "./errors.js";
+import { cors, type Environment, type Platform } from "./platform.js";
 import {
   type Context,
   OpenAIProvider,
   DeepSeekProvider,
   type Provider,
-} from "./provider.ts";
+} from "./provider.js";
 export type Dependencies = {
   env: Environment;
   platform: Platform;

@@ -1,4 +1,4 @@
-import { AppError } from "./errors.ts";
+import { AppError } from "./errors.js";
 export type Context = {
   model: {
     registryId: string;

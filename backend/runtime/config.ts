@@ -3,8 +3,8 @@ import { parseEnv } from "node:util";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PoolConfig } from "pg";
-import type { Environment } from "./platform.ts";
-import { SUPABASE_CA } from "./supabase-ca.ts";
+import type { Environment } from "./platform.js";
+import { SUPABASE_CA } from "./supabase-ca.js";
 export const PROJECT_REF = "ttbfpqveexmlqxkzwlmz";
 const names = [
   "VITE_SUPABASE_URL",

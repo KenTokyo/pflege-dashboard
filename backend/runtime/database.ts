@@ -1,6 +1,6 @@
 import { Pool, type PoolClient, type PoolConfig } from "pg";
-import { AppError, databaseError, uuid } from "./errors.ts";
-import type { Rpc } from "./platform.ts";
+import { AppError, databaseError, uuid } from "./errors.js";
+import type { Rpc } from "./platform.js";
 type Validator = (value: unknown) => boolean;
 const id: Validator = uuid;
 const text: Validator = (v) => typeof v === "string" && v.length <= 100000;

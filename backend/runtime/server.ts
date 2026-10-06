@@ -4,9 +4,9 @@ import { createReadStream } from "node:fs";
 import { realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import { pipeline } from "node:stream/promises";
-import { AppError, errorPayload } from "./errors.ts";
-import { chatHandler, sessionHandler, type Dependencies } from "./handler.ts";
-import { cors } from "./platform.ts";
+import { AppError, errorPayload } from "./errors.js";
+import { chatHandler, sessionHandler, type Dependencies } from "./handler.js";
+import { cors } from "./platform.js";
 export type ServerOptions = {
   host: string;
   port: number;

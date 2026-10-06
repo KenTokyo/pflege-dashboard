@@ -1,9 +1,9 @@
 import { attachDatabasePool, waitUntil } from "@vercel/functions";
-import { cloudConfiguration } from "./config.ts";
-import { createDatabase } from "./database.ts";
-import { AppError, errorPayload } from "./errors.ts";
-import { chatHandler, sessionHandler, type Dependencies } from "./handler.ts";
-import { cors, platform, type Environment } from "./platform.ts";
+import { cloudConfiguration } from "./config.js";
+import { createDatabase } from "./database.js";
+import { AppError, errorPayload } from "./errors.js";
+import { chatHandler, sessionHandler, type Dependencies } from "./handler.js";
+import { cors, platform, type Environment } from "./platform.js";
 export const DEMO_ORIGIN = "https://pflege-dashboard-puce.vercel.app";
 export function cloudEnvironment(
   source: Record<string, string | undefined>,

@@ -147,3 +147,25 @@ npm --prefix backend run check:phase1 -- --upgrade
 Beleg: `backend/.local/upgrade-result.json`, ergänzend aktuelles `phase1-result.json` und `runtime-cleanup.json`. Null eigene Supabase-Prozesse; Ports 56421/56422/56428 geschlossen. Abschließender eigener Node-Port **59897**, PID **9621**, geschlossen. Keine Hosted-Schreiboperation. Nur der Orchestrator wiederholt jetzt die Hosted-Übernahme.
 
 Zusätzliche eigene Dateien: `backend/scripts/upgrade-check.mjs`, gezielte Ergänzungen in `supabase-safe.mjs` und `phase1-check.mjs`. Upgradevergleich **4 → 9,6/10**: Fehlalarm behoben, vollständige neue Schema-/Drifterkennung durch reale positive und negative Kontrollen erhalten. Keine weitere Produktänderung, Migration oder neue Prüfrunde.
+
+## Vercel-Laufzeitfix — 06.10.2026
+
+Der veröffentlichte Stand `c94ed1c` war Build-Ready, aber alle API-Einstiege endeten vor Handlerbeginn mit `ERR_MODULE_NOT_FOUND`: `api/*.js` importierte eine nicht ausgelieferte `backend/runtime/cloud.ts`. Dieser echte Live-Befund ersetzt keine bestandenen lokalen SQL-/Handlerprüfungen, zeigt aber die bislang offene Paketgrenze.
+
+Fix: API- und serverinterne relative Imports nennen ausdrücklich die ausgelieferten **`.js`-Dateien**. TypeScript löst diese beim Prüfen gegen die jeweiligen `.ts`-Quelldateien auf. `api/tsconfig.json` setzt zusätzlich `rewriteRelativeImportExtensions:true`, ohne globale Lintausschlüsse. Keine Auth-/SQL-/Budget-/Provideränderung in diesem separat lieferbaren Fix.
+
+Produktionsnaher Nachweis: `backend/scripts/vercel-artifact-check.mjs` baut isolierte echte Node-Lambda-Pakete mit **@vercel/node 20.0.0 und 21.0.0**, TypeScript **6.0.3** wie im Vercel-Build. Dev-Metadaten dienen ausschließlich zum Überspringen von Download/Neuinstallation vorhandener Pakete; tatsächliches Compiler-/Tracing-/Lambda-Verfahren wird verwendet. Source-Spiegel enthält keine `.env` und physisch kopierte Pakete statt eines Source-Symlink-Fallbacks. Alle vier **gebauten** Einstiege werden aus dem tatsächlich ausgepackten Lambda-Artefakt mit gewöhnlichem Node **25.9.0** geladen, ohne tsx/Vitest/TypeScript-Laufzeit. Je Builder **20** Paket-/Antwortprüfungen plus **384** gesamte Pfad-/Integritätsaussagen bestanden: health200, session401,chat-stream401,not-found404, kompiliertes cloud.js vorhanden, kein Env-/Local-Paketinhalt. Die konkrete öffentliche Vercel-Builderversion war im Dashboard nicht angegeben; keine Behauptung, sie sei20/21.
+
+Gezielt außerdem Backend strict/build und **121 Tests**, Root-Lint bestanden. Keine SQL-Migration und kein erneuter Supabase-Reset erforderlich. Temporärer Source-/Artefaktbaum unmittelbar gelöscht; kein Server/Browser/Provider gestartet, keine Secrets gelesen oder ausgegeben. Nur ignorierte Paketbauer-Werkzeuge/Ergebnis-JSON bleiben für Wiederholung erhalten.
+
+```sh
+cd '/Users/kentoky/Documents/React Projects/pflege-dashboard'
+node backend/scripts/vercel-artifact-check.mjs
+node backend/scripts/vercel-artifact-check.mjs --builder20
+npm --prefix backend run typecheck
+npm --prefix backend run test
+npm --prefix backend run build
+npm run lint
+```
+
+Die beiden Paketbauer werden ausschließlich unter `backend/.local/vercel-builder*` installiert, nicht als Produktabhängigkeit. Ergebnisse: `backend/.local/vercel-artifact-vercel-builder-result.json` und `vercel-artifact-vercel-builder-20-result.json`. Runtime-Packpfad **2 → 9,5/10** für den jetzt tatsächlich ausgeführten Paketstand; echter neuer Vercel-Liveaufruf bleibt separat beim Orchestrator. Eigentum: `api/*.ts`, `api/tsconfig.json`, relative Imports in `backend/runtime/*.ts`, neuer Paketprüfer und dieser Bericht. Keine Gitmutation; Orchestrator veröffentlicht.

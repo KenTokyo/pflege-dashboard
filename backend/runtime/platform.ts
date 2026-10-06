@@ -1,4 +1,4 @@
-import { AppError, uuid } from "./errors.ts";
+import { AppError, uuid } from "./errors.js";
 export type Identity = { userId: string; sessionId: string };
 export type Rpc = (
   name: string,
