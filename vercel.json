@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "regions": ["fra1"],
+  "functions": {
+    "api/*.ts": {
+      "maxDuration": 180,
+      "supportsCancellation": true,
+      "excludeFiles": "{.env,.env.*,env.md,backend/.local/**,supabase/**,docs/**}"
+    }
+  },
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api(?:/.*)?", "dest": "/api/not-found" },
+    {
+      "src": "/((?!api(?:/|$)|assets(?:/|$)|.*\\.).*)",
+      "methods": ["GET", "HEAD"],
+      "dest": "/index.html"
+    }
+  ]
+}

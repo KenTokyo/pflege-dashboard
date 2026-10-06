@@ -768,13 +768,13 @@ isOneToOne: false
                   ]
                 },"workspace_budgets": {
                   Row: {
-                    "blocked": boolean,"created_at": string,"created_by": string,"currency": string,"id": string,"monthly_cap_microusd": number,"workspace_id": string
+                    "blocked": boolean,"created_at": string,"created_by": string,"currency": string,"id": string,"monthly_cap_microusd": number | null,"total_cap_microusd": number | null,"workspace_id": string
                   }
                   Insert: {
-                    "blocked"?: boolean,"created_at"?: string,"created_by": string,"currency"?: string,"id"?: string,"monthly_cap_microusd"?: number,"workspace_id": string
+                    "blocked"?: boolean,"created_at"?: string,"created_by": string,"currency"?: string,"id"?: string,"monthly_cap_microusd"?: number | null,"total_cap_microusd"?: number | null,"workspace_id": string
                   }
                   Update: {
-                    "blocked"?: boolean,"created_at"?: string,"created_by"?: string,"currency"?: string,"id"?: string,"monthly_cap_microusd"?: number,"workspace_id"?: string
+                    "blocked"?: boolean,"created_at"?: string,"created_by"?: string,"currency"?: string,"id"?: string,"monthly_cap_microusd"?: number | null,"total_cap_microusd"?: number | null,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -982,7 +982,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "actor_kind": "system"|"user","agent_mode": "answer_only"|"create","ai_provider": "openai"|"anthropic"|"mistral","attachment_scope": "workspace"|"owner","attachment_status": "pending"|"ready"|"rejected"|"deleted","document_kind": "letter"|"application"|"objection"|"respite"|"relief","document_status": "draft"|"reviewed"|"sent","hosting_region": "eu"|"us"|"unverified","membership_role": "member"|"admin","membership_status": "active"|"revoked","message_role": "user"|"assistant"|"system"|"tool","message_status": "pending"|"streaming"|"completed"|"interrupted"|"failed","model_status": "planned"|"operational"|"retired","proposal_kind": "document"|"task"|"note"|"handover","proposal_status": "pending"|"confirmed"|"rejected"|"expired"|"stale","reservation_status": "reserved"|"settled"|"held"|"released","task_priority": "low"|"normal"|"high"|"urgent","task_status": "open"|"in_progress"|"done"|"cancelled"
+            "actor_kind": "system"|"user","agent_mode": "answer_only"|"create","ai_provider": "openai"|"anthropic"|"mistral"|"deepseek","attachment_scope": "workspace"|"owner","attachment_status": "pending"|"ready"|"rejected"|"deleted","document_kind": "letter"|"application"|"objection"|"respite"|"relief","document_status": "draft"|"reviewed"|"sent","hosting_region": "eu"|"us"|"unverified","membership_role": "member"|"admin","membership_status": "active"|"revoked","message_role": "user"|"assistant"|"system"|"tool","message_status": "pending"|"streaming"|"completed"|"interrupted"|"failed","model_status": "planned"|"operational"|"retired","proposal_kind": "document"|"task"|"note"|"handover","proposal_status": "pending"|"confirmed"|"rejected"|"expired"|"stale","reservation_status": "reserved"|"settled"|"held"|"released","task_priority": "low"|"normal"|"high"|"urgent","task_status": "open"|"in_progress"|"done"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1098,7 +1098,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "actor_kind": ["system", "user"],"agent_mode": ["answer_only", "create"],"ai_provider": ["openai", "anthropic", "mistral"],"attachment_scope": ["workspace", "owner"],"attachment_status": ["pending", "ready", "rejected", "deleted"],"document_kind": ["letter", "application", "objection", "respite", "relief"],"document_status": ["draft", "reviewed", "sent"],"hosting_region": ["eu", "us", "unverified"],"membership_role": ["member", "admin"],"membership_status": ["active", "revoked"],"message_role": ["user", "assistant", "system", "tool"],"message_status": ["pending", "streaming", "completed", "interrupted", "failed"],"model_status": ["planned", "operational", "retired"],"proposal_kind": ["document", "task", "note", "handover"],"proposal_status": ["pending", "confirmed", "rejected", "expired", "stale"],"reservation_status": ["reserved", "settled", "held", "released"],"task_priority": ["low", "normal", "high", "urgent"],"task_status": ["open", "in_progress", "done", "cancelled"]
+            "actor_kind": ["system", "user"],"agent_mode": ["answer_only", "create"],"ai_provider": ["openai", "anthropic", "mistral", "deepseek"],"attachment_scope": ["workspace", "owner"],"attachment_status": ["pending", "ready", "rejected", "deleted"],"document_kind": ["letter", "application", "objection", "respite", "relief"],"document_status": ["draft", "reviewed", "sent"],"hosting_region": ["eu", "us", "unverified"],"membership_role": ["member", "admin"],"membership_status": ["active", "revoked"],"message_role": ["user", "assistant", "system", "tool"],"message_status": ["pending", "streaming", "completed", "interrupted", "failed"],"model_status": ["planned", "operational", "retired"],"proposal_kind": ["document", "task", "note", "handover"],"proposal_status": ["pending", "confirmed", "rejected", "expired", "stale"],"reservation_status": ["reserved", "settled", "held", "released"],"task_priority": ["low", "normal", "high", "urgent"],"task_status": ["open", "in_progress", "done", "cancelled"]
           }
         }
 } as const

@@ -4,7 +4,7 @@ import path from "node:path";
 /** Schema only, no row content or secrets. Stable against generated constraint names. */
 export async function fingerprint(client, phase0Only = true) {
   const filter = phase0Only
-    ? "and table_name not in ('conversation_requests','session_activity','model_prices','chat_requests') and not(table_name='messages' and column_name='provider_response_model')"
+    ? "and table_name not in ('conversation_requests','session_activity','model_prices','chat_requests') and not(table_name='messages' and column_name='provider_response_model') and not(table_name='workspace_budgets' and column_name='total_cap_microusd')"
     : "";
   const tableFilter = phase0Only
     ? "and t.relname not in ('conversation_requests','session_activity','model_prices','chat_requests')"
@@ -15,9 +15,16 @@ export async function fingerprint(client, phase0Only = true) {
   const cols = (await client.query(
     `select table_name,column_name,data_type,udt_name,is_nullable,column_default,is_generated,generation_expression from information_schema.columns where table_schema='public' ${filter} order by table_name,ordinal_position`,
   )).rows;
+  // Phase-0 comparison excludes the explicitly later unlimited-budget nullable change.
+  // The full Phase-1 fingerprint below keeps the actual nullable value.
+  if (phase0Only) for (const col of cols) {
+    if (col.table_name === "workspace_budgets" && col.column_name === "monthly_cap_microusd") col.is_nullable = "NO";
+  }
   const constraints = (await client.query(
     `select t.relname as table_name,pg_get_constraintdef(c.oid,true) as definition from pg_constraint c join pg_class t on t.oid=c.conrelid join pg_namespace n on n.oid=t.relnamespace where n.nspname='public' ${tableFilter} order by t.relname,pg_get_constraintdef(c.oid,true)`,
-  )).rows;
+  )).rows.filter((constraint) => !(phase0Only &&
+    constraint.table_name === "workspace_budgets" &&
+    constraint.definition === "CHECK (total_cap_microusd >= 0)"));
   const policies = (await client.query(
     `select tablename,policyname,roles,cmd,qual,with_check from pg_policies where schemaname='public' ${policyFilter} order by tablename,policyname`,
   )).rows;

@@ -1,4 +1,4 @@
-/** Verbindlicher Anschluss v1.2; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
+/** Verbindlicher Anschluss v1.3; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
 import type { Database } from "./database.types.js";
 export const PHASE1_API = {
   session: "/api/session",
@@ -61,7 +61,7 @@ export type Phase1Error = {
 };
 export type ChatModel = {
   registryId: string;
-  provider: "openai";
+  provider: "openai" | "deepseek";
   providerModelId: string;
   displayName: string;
   region: "eu" | "us" | "unverified";

@@ -195,3 +195,7 @@ Die ältere Pflicht zu Supabase Edge Functions entfällt. Stattdessen übernimmt
 ## Zusätzlicher Prüfauftrag vom 06.10.2026
 
 Der Nutzer beauftragt nach dem technischen Node-Abschluss einen vollständigen Anforderungsabgleich, Randfallprüfungen und bei Bedarf Oberflächentests. Aktuelle Grenze: höchstens zwei GPT-6.1 Sol mit `reasoningEffort: xhigh` gleichzeitig und zusätzlich bei Bedarf Claude Opus 5.5 mit `effort: high` für die Oberfläche. Die ursprünglichen Bereichsinhaber beheben belegte Fehler selbst; ein zusätzlicher unabhängiger Sol prüft die Querverbindungen. Dieser Prüfauftrag hebt keine Phase-Gates, Konto- oder Kostengrenzen auf. Der vollständige Originaltext und die laufenden Prüfschritte stehen im bestehenden Aufgabenpaar unter `docs/tasks/`.
+
+## Fortsetzung: Vercel und DeepSeek, 06.10.2026
+
+Der Nutzer verlangt für die Vorführung am 07.10.2026 Login und echten Chat auf seiner bereits veröffentlichten Vercel-Anwendung. Normale Vercel Node Functions übernehmen den bisherigen Node-Weg; Supabase bleibt Auth/DB/Storage, keine Edge Functions. Standardmodell: DeepSeek V4.1 Flash (`deepseek-flash`). Die zunächst gewählten 5 USD sind ausdrücklich durch „ersmtal keine limits bei deepseek“ ersetzt: kein App-Ausgabenlimit. Der Nutzer hat den Demo-Zugang selbst angelegt und den DeepSeek-Key geschützt bei Vercel hinterlegt. Technischer Stand und verbleibendes Online-Gate: `docs/gates/2026-10-06-vercel-demo.md`. Keine vorgezogene Behauptung der Erstellungs-/Export-/Upload-Funktionen aus Phase 2.

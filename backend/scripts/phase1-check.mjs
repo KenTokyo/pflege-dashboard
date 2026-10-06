@@ -86,12 +86,15 @@ async function step(
 }
 let failure;
 try {
-  await step("scripts/supabase-safe.mjs", ["start"], 600_000);
-  await step("scripts/supabase-safe.mjs", ["reset"], 300_000);
+  const upgrade = process.argv.includes("--upgrade");
+  await step("scripts/supabase-safe.mjs", ["start", ...(upgrade ? ["--phase1-base"] : [])], 600_000);
+  await step("scripts/supabase-safe.mjs", ["reset", ...(upgrade ? ["--phase1-base"] : [])], 300_000);
+  if (upgrade) await step("scripts/upgrade-check.mjs");
   await step("scripts/runtime-probe.mjs");
   if (!process.argv.includes("--schema-only")) {
     await step("scripts/supabase-safe.mjs", ["test"]);
     await step("scripts/context-historical-repro.mjs");
+    await step("scripts/demo-setup-check.mjs");
     await step("scripts/concurrency.mjs");
     await step("scripts/phase1-concurrency.mjs");
     await step("node_modules/typescript/bin/tsc", ["-p", "tsconfig.build.json"]);

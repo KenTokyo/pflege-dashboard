@@ -64,15 +64,18 @@ export function rpcQuery(name: string, args: Record<string, unknown>) {
     values: spec.map(([key]) => args[key]),
   };
 }
-export function createDatabase(config: PoolConfig) {
+export function createDatabase(
+  config: PoolConfig,
+  availableProviders?: readonly string[],
+) {
   const pool = new Pool({
-    ...config,
     max: 4,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 3000,
     statement_timeout: 10000,
     query_timeout: 12000,
     application_name: "pflege_node_phase1",
+    ...config,
   });
   pool.on("error", () => {}); // Never log SQL, URLs or credentials.
   const rpc: Rpc = async (name, args, outer) => {
@@ -102,6 +105,12 @@ export function createDatabase(config: PoolConfig) {
       await client.query("SET LOCAL search_path = ''");
       await client.query("SET LOCAL statement_timeout = '10s'");
       await client.query("SET LOCAL lock_timeout = '3s'");
+      if (name === "edge_chat_prepare" && availableProviders !== undefined) {
+        await client.query(
+          "SELECT pg_catalog.set_config('pflege.available_providers', $1, true)",
+          [JSON.stringify(availableProviders)],
+        );
+      }
       const result = await client.query(query); // Unnamed, transaction-pooler compatible.
       await client.query("COMMIT");
       return result.rows[0]?.result;

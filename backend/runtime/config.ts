@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { PoolConfig } from "pg";
 import type { Environment } from "./platform.ts";
+import { SUPABASE_CA } from "./supabase-ca.ts";
 export const PROJECT_REF = "ttbfpqveexmlqxkzwlmz";
 const names = [
   "VITE_SUPABASE_URL",
@@ -12,6 +13,7 @@ const names = [
   "PGSSLROOTCERT",
   "PGSSLMODE",
   "OPENAI_API_KEY",
+  "DEEPSEEK_API_KEY",
   "ALLOWED_ORIGINS",
   "HOST",
   "PORT",
@@ -29,6 +31,57 @@ export type Configuration = {
   port: number;
   staticDir?: string;
 };
+/** Cloud uses only server process variables: never .env, certificate paths or local listeners. */
+export function cloudConfiguration(
+  source: Record<string, string | undefined>,
+): Configuration {
+  const values = { ...source };
+  const url = new URL(values.SUPABASE_URL ?? values.VITE_SUPABASE_URL ?? "");
+  const key =
+    values.SUPABASE_PUBLISHABLE_KEY ?? values.VITE_SUPABASE_PUBLISHABLE_KEY;
+  if (
+    url.origin !== `https://${PROJECT_REF}.supabase.co` ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !key
+  )
+    throw new Error("CONFIG_OWN_PROJECT");
+  const connection = ownConnection(values.DATABASE_URL);
+  values.SUPABASE_URL = url.origin;
+  values.SUPABASE_PUBLISHABLE_KEY = key;
+  return {
+    env: (name) => values[name],
+    database: {
+      connectionString: connection.toString(),
+      ssl: { ca: SUPABASE_CA, rejectUnauthorized: true },
+      max: 4,
+      idleTimeoutMillis: 5000,
+    },
+    host: "127.0.0.1",
+    port: 5174,
+  };
+}
+function ownConnection(value: string | undefined) {
+  const connection = new URL(value ?? "");
+  if (
+    !["postgres:", "postgresql:"].includes(connection.protocol) ||
+    connection.pathname !== "/postgres" ||
+    !connection.password ||
+    !(
+      (connection.hostname.endsWith(".pooler.supabase.com") &&
+        decodeURIComponent(connection.username) ===
+          `postgres.${PROJECT_REF}`) ||
+      (connection.hostname === `db.${PROJECT_REF}.supabase.co` &&
+        decodeURIComponent(connection.username) === "postgres")
+    )
+  )
+    throw new Error("CONFIG_OWN_DATABASE");
+  for (const key of [...connection.searchParams.keys()])
+    if (key.startsWith("ssl")) connection.searchParams.delete(key);
+  return connection;
+}
 export async function loadConfiguration(): Promise<Configuration> {
   const envPath = path.join(ROOT, ".env");
   const info = await lstat(envPath);
@@ -55,22 +108,7 @@ export async function loadConfiguration(): Promise<Configuration> {
     !values.VITE_SUPABASE_PUBLISHABLE_KEY
   )
     throw new Error("CONFIG_OWN_PROJECT");
-  const connection = new URL(values.DATABASE_URL ?? "");
-  if (
-    !["postgres:", "postgresql:"].includes(connection.protocol) ||
-    connection.pathname !== "/postgres" ||
-    !(
-      (connection.hostname.endsWith(".pooler.supabase.com") &&
-        decodeURIComponent(connection.username) ===
-          `postgres.${PROJECT_REF}`) ||
-      connection.hostname === `db.${PROJECT_REF}.supabase.co`
-    ) ||
-    !connection.password
-  )
-    throw new Error("CONFIG_OWN_DATABASE");
-  // URI SSL parameters override pg.ssl; delete them before applying the verified official CA.
-  for (const key of [...connection.searchParams.keys()])
-    if (key.startsWith("ssl")) connection.searchParams.delete(key);
+  const connection = ownConnection(values.DATABASE_URL);
   if (
     !values.PGSSLROOTCERT ||
     !["verify-full", "verify-ca", "require"].includes(values.PGSSLMODE ?? "")

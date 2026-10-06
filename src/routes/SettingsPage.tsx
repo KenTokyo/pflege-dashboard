@@ -131,7 +131,7 @@ function ModelList({ models, defaultId }: { models: ModelRow[]; defaultId: strin
                 {m.id === defaultId ? <span className="std">Standard</span> : null}
               </p>
               <p className="small muted">
-                {m.provider === 'openai' ? 'OpenAI' : m.provider === 'anthropic' ? 'Anthropic' : 'Mistral AI'}
+                {m.provider === 'openai' ? 'OpenAI' : m.provider === 'anthropic' ? 'Anthropic' : m.provider === 'deepseek' ? 'DeepSeek' : 'Mistral AI'}
                 {m.supports_tools === true ? ' · Werkzeuge' : ''}
                 {m.supports_vision === true ? ' · Bilder' : ''}
               </p>

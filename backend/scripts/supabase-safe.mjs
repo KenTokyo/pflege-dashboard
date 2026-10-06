@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile, cp, rm, chmod } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, cp, rm, chmod, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
@@ -15,6 +15,8 @@ const runtimeHome = path.join(tmpdir(), 'pflege-dashboard-supabase-57aea064-phas
 const cli = path.join(backend, 'node_modules', '.bin', 'supabase');
 const action = process.argv[2];
 const runtimeOnly = process.argv.includes('--runtime-only');
+const phase1Base = process.argv.includes('--phase1-base');
+if (phase1Base && !['start','reset'].includes(action)) throw new Error('--phase1-base gilt nur für den gezielten Acht-zu-zehn-Upgradeprüflauf.');
 const actions = {
   start: ['start', '--runtime', 'native', '--exclude', 'realtime,studio,mail,analytics,pooler,functions'],
   status: ['status', '--output-format', 'json'],
@@ -34,6 +36,11 @@ await mkdir(path.join(mirror, 'supabase'), { recursive: true });
 for (const entry of ['config.toml', 'seed.sql', 'migrations', 'tests']) {
   await rm(path.join(mirror, 'supabase', entry), { recursive: true, force: true });
   await cp(path.join(root, 'supabase', entry), path.join(mirror, 'supabase', entry), { recursive: true });
+}
+// Preserve all real source files; only the isolated test mirror uses the historical eight.
+if (phase1Base) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
+  if (['20261006160000_deepseek_provider.sql','20261006161000_deepseek_demo_cap.sql'].includes(name))
+    await rm(path.join(mirror,'supabase/migrations',name));
 }
 // Retire only the owned old mirror; no Edge runtime participates in the Node product.
 await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});

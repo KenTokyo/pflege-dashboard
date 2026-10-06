@@ -11,5 +11,10 @@
     "allowImportingTsExtensions": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
-  "include": ["../types/**/*.ts", "tests/*.typecheck.ts", "runtime/**/*.ts"]
+  "include": [
+    "../types/**/*.ts",
+    "tests/*.typecheck.ts",
+    "runtime/**/*.ts",
+    "../api/**/*.ts"
+  ]
 }

@@ -2,7 +2,7 @@ import { AppError } from "./errors.ts";
 export type Context = {
   model: {
     registryId: string;
-    provider: "openai";
+    provider: "openai" | "deepseek";
     providerModelId: string;
     displayName: string;
     region: string;
@@ -38,7 +38,10 @@ export async function* sseData(
     while (true) {
       if (signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
       const part = await reader.read();
-      if (part.done) break;
+      if (part.done) {
+        if (signal.aborted) throw new AppError("REQUEST_ABORTED", 409);
+        break;
+      }
       buffer += decoder.decode(part.value, { stream: true });
       if (buffer.length > 1000000) throw new AppError("PROVIDER_FAILED", 502);
       let match: RegExpExecArray | null;
@@ -177,5 +180,134 @@ export class OpenAIProvider implements Provider {
         throw new AppError("PROVIDER_FAILED", 502);
     }
     if (!finished) throw new AppError("PROVIDER_FAILED", 502);
+  }
+}
+
+/** Official DeepSeek Chat Completions SSE; no tools, retries or fallback. */
+export class DeepSeekProvider implements Provider {
+  constructor(
+    private key: string,
+    private fetcher: typeof fetch = fetch,
+  ) {}
+  async *stream(
+    context: Context,
+    signal: AbortSignal,
+  ): AsyncGenerator<ProviderPart> {
+    if (context.model.provider !== "deepseek" || !this.key)
+      throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
+    const response = await this.fetcher(
+      "https://api.deepseek.com/chat/completions",
+      {
+        method: "POST",
+        redirect: "error",
+        signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.key}`,
+        },
+        body: JSON.stringify({
+          model: context.model.providerModelId,
+          messages: [
+            { role: "system", content: context.instructions },
+            ...context.input,
+          ],
+          thinking: { type: "disabled" },
+          max_tokens: context.maxOutputTokens,
+          stream: true,
+          stream_options: { include_usage: true },
+        }),
+      },
+    );
+    if (
+      !response.ok ||
+      !response.body ||
+      !response.headers.get("content-type")?.includes("text/event-stream")
+    ) {
+      await response.body?.cancel();
+      throw new AppError("PROVIDER_FAILED", 502);
+    }
+    let terminal = false,
+      done = false,
+      observed: string | undefined,
+      consistent = true;
+    for await (const data of sseData(response.body, signal)) {
+      if (data === "[DONE]") {
+        done = true;
+        break;
+      }
+      let event: any;
+      try {
+        event = JSON.parse(data);
+      } catch {
+        throw new AppError("PROVIDER_FAILED", 502);
+      }
+      if (
+        terminal ||
+        !event ||
+        typeof event !== "object" ||
+        event.error ||
+        typeof event.model !== "string" ||
+        event.model.length < 1 ||
+        event.model.length > 300
+      )
+        throw new AppError("PROVIDER_FAILED", 502);
+      observed ??= event.model;
+      consistent &&= observed === event.model;
+      if (
+        !Array.isArray(event.choices) ||
+        event.choices.length !== 1 ||
+        event.choices[0]?.index !== 0
+      )
+        throw new AppError("PROVIDER_FAILED", 502);
+      const choice = event.choices[0],
+        delta = choice.delta;
+      const ending =
+        choice.finish_reason !== null && choice.finish_reason !== undefined;
+      if (ending) {
+        const usage = event.usage;
+        if (
+          !Number.isSafeInteger(usage?.prompt_tokens) ||
+          usage.prompt_tokens < 0 ||
+          !Number.isSafeInteger(usage?.completion_tokens) ||
+          usage.completion_tokens < 0
+        )
+          throw new AppError("PROVIDER_FAILED", 502);
+        // Even failed/mismatched terminals carry known usage to conservative SQL finalization.
+        yield {
+          usage: {
+            inputTokens: usage.prompt_tokens,
+            outputTokens: usage.completion_tokens,
+            model: event.model,
+          },
+        };
+        if (
+          choice.finish_reason !== "stop" ||
+          !consistent ||
+          event.model !== context.model.providerModelId ||
+          usage.prompt_tokens > context.inputTokenBound ||
+          usage.completion_tokens > context.maxOutputTokens ||
+          delta?.content ||
+          delta?.tool_calls?.length ||
+          delta?.reasoning_content
+        )
+          throw new AppError("PROVIDER_FAILED", 502);
+        terminal = true;
+      } else {
+        if (
+          !delta ||
+          typeof delta !== "object" ||
+          delta.tool_calls?.length ||
+          delta.reasoning_content ||
+          event.usage
+        )
+          throw new AppError("PROVIDER_FAILED", 502);
+        if (delta.content !== null && delta.content !== undefined) {
+          if (typeof delta.content !== "string")
+            throw new AppError("PROVIDER_FAILED", 502);
+          if (delta.content) yield { text: delta.content };
+        }
+      }
+    }
+    if (!terminal || !done) throw new AppError("PROVIDER_FAILED", 502);
   }
 }

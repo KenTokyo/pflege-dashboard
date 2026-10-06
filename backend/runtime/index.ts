@@ -25,7 +25,10 @@ try {
   const config = await loadConfiguration();
   // A signal received while configuration was loading must not create a later pool/server.
   if (!stopping) {
-    const database = createDatabase(config.database);
+    const database = createDatabase(config.database, [
+      ...(config.env("OPENAI_API_KEY") ? ["openai"] : []),
+      ...(config.env("DEEPSEEK_API_KEY") ? ["deepseek"] : []),
+    ]);
     close = database.close;
     await database.verify();
     // Verification may complete after shutdown has already closed the pool.

@@ -119,3 +119,19 @@ Ergebnis: Nicht begonnen. Pfade: `docs/`, `src/`, `backend/`.
 - [x] Orchestrator: Vertrag zusammenführen, Prüfungen unabhängig ausführen, Regeln/Gate aktualisieren und lokal committen, niemals pushen.
 
 Ergebnis: Node-Anschluss ohne Edge Functions geliefert. Orchestrator prüft 105 Frontendtests, 21 Proxy-, 14 Prozessprüfungen, 484 SQL, 80 Backendtests und 39 echte Hosted-Node-HTTP/SQL-/Static-Prüfungen unabhängig erfolgreich. Abschließender gemeinsamer dev/start-Lauf durch Frontend-Agenten ebenfalls bestanden und bereinigt. Phase-1-Nutzergate bleibt bis echtem Nutzerlogin und bewusst freigegebener KI-Konfiguration offen. Pfade: `backend/`, `src/`, `docs/gates/2026-10-06-phase1.md`.
+
+
+## Fortsetzung 06.10.2026: Livevorführung über Vercel
+
+Ziel: echter Login und DeepSeek-Chat auf pflege-dashboard-puce.vercel.app.
+
+- [x] Browser-Plugin verbunden, bestehende Vercel- und App-Tabs gelesen. Live-Commit 24de236.
+- [x] Livefehler unabhängig per HTTP bestätigt: POST /api/session und /api/chat-stream liefern 404.
+- [x] Hosted-DB gelesen: 0 Auth-Konten, 0 zugeordnete Profile, 0 Mitgliedschaften, 0 aktive Modelle; Budget 0. Lokale Providerkeys fehlen (nur Namens-/Vorhandenheitsprüfung).
+- [x] Ursprünglichen Backend-Agenten 01a11063-220c-7bc1-8ab7-7ca1c68286a8 mit vollständigem Vercel-/DeepSeek-Auftrag fortgesetzt. Keine neuen Chats.
+- [x] Nutzer hat bestätigten test@test.de angelegt; normaler Demo-Zugang zugeordnet. DEEPSEEK_API_KEY in Vercel gespeichert, Wert ungelesen. Nutzerwahl: kein App-Ausgabenlimit.
+- [x] Vercel Node Functions/DeepSeek-Adapter unabhängig lokal abgenommen: 131 Frontendtests, 121 Backendtests, 525 SQL- und 12 Upgradeprüfungen. Zwei Migrationen und DeepSeek-Standard/NULL-Budgets Hosted angewendet; voller Schemaabgleich und 33 Hosted-Prüfungen bestanden.
+- [ ] Geprüfte Bereitstellung samt geschützten Serverwerten und echtem Login-/Chatablauf abnehmen.
+- [ ] Schlussbericht mit tatsächlich erreichten Nachweisen und verbleibenden Grenzen.
+
+Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .gitignore-Änderung erhalten.

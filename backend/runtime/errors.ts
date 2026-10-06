@@ -59,6 +59,7 @@ export function databaseError(message: unknown): AppError {
     REQUEST_INTERRUPTED: 409,
     MODEL_UNAVAILABLE: 422,
     PRICING_UNVERIFIED: 503,
+    PROVIDER_NOT_CONFIGURED: 503,
     RATE_LIMITED: 429,
     PARALLEL_LIMIT: 429,
     BUDGET_EXCEEDED: 429,

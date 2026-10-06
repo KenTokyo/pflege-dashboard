@@ -1,11 +1,17 @@
 import { AppError, errorPayload, readJson, uuid } from "./errors.ts";
 import { cors, type Environment, type Platform } from "./platform.ts";
-import { type Context, OpenAIProvider, type Provider } from "./provider.ts";
+import {
+  type Context,
+  OpenAIProvider,
+  DeepSeekProvider,
+  type Provider,
+} from "./provider.ts";
 export type Dependencies = {
   env: Environment;
   platform: Platform;
   provider?: Provider;
   timeoutMs?: number;
+  onStreamCompletion?: (completion: Promise<void>) => void;
 };
 function json(body: unknown, status: number, headers: Headers) {
   headers.set("Content-Type", "application/json");
@@ -107,14 +113,19 @@ export function chatHandler(deps: Dependencies) {
         request.signal,
       );
       const key = deps.env("OPENAI_API_KEY");
-      if (!replay && !key && !deps.provider) {
+      const deepseekKey = deps.env("DEEPSEEK_API_KEY");
+      if (!replay && !key && !deepseekKey && !deps.provider) {
         throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
       }
-      const provider = deps.provider ?? new OpenAIProvider(key!);
       const prepared =
         replay ??
         (await deps.platform.rpc("edge_chat_prepare", payload, request.signal));
       const context = prepared.context as Context;
+      const provider =
+        deps.provider ??
+        (context.model.provider === "deepseek"
+          ? new DeepSeekProvider(deepseekKey ?? "")
+          : new OpenAIProvider(key ?? ""));
       const controller = new AbortController();
       let cancelled = false;
       let output = "";
@@ -356,6 +367,7 @@ export function chatHandler(deps: Dependencies) {
               }
             }
           })();
+          deps.onStreamCompletion?.(completion);
         },
         pull() {
           wake?.();

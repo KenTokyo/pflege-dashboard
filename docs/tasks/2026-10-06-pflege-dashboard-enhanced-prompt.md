@@ -86,3 +86,28 @@ Gate 1 verlangt eine echte angemeldete Unterhaltung in beiden Themes. Vollständ
 ### Aktueller Vorrang: ohne Edge Functions
 
 Die jüngste Nutzeranweisung ersetzt die bisherige Edge-Pflicht: keine Supabase Edge Functions einrichten oder deployen. Supabase bleibt zwingend für Auth, Datenbank und Storage. Dieselben ursprünglichen Agenten stellen Phase 1 auf einen normalen lokalen Node-Server um. Er verwendet die vorhandene geschützte Projektkonfiguration ausschließlich serverseitig, prüft Supabase-Sitzungen und ruft die vorhandenen geprüften Datenbankfunktionen auf. Ein gemeinsamer lokaler Start verbindet App und Server; Browser spricht gleichursprünglich `/api/session` und `/api/chat-stream`. Keine zusätzlichen Hosting-, Konto- oder Token-Schritte an den Nutzer auslagern, soweit bestehender autorisierter Zugang genügt. Kein PAT beschaffen oder fremde Geheimnisse lesen. Keine neue Phase, keine Kontoanlage, keine Providerkosten oder Budgeterhöhung. Fehlender Nutzerlogin und KI-Schlüssel bleiben offen. Browserweg wurde live geprüft, ist hier weiter nicht verbunden; keine persönliche Chrome-/OS-Umgehung. Supabase-Plugin ist inzwischen verbunden, aber aufgrund Nutzerkorrektur kein Edge-Deployment.
+
+
+## Nutzerfortsetzung 06.10.2026: Vercel-Vorführung und DeepSeek
+
+### Unchanged original
+
+ich muss das porhekt morgen live vorstellen, wie ein pflgebedürtgier da sich eingloggt und mit dem chat interagiert, git ist hochgeldaen aber ich kann mich nicht einloggen, dass muss über vercel funktionieren, bitte prüfe ob alles klappt
+
+Deepseek v4.1 soll im hintergrund antworten, wo konfiguriert man das ?? also das soll das modell sein was quasi alles macht, db ausliest ....
+
+benutze bitte mein browser mit chatgpt plugin
+
+### Arbeitsauftrag
+
+Vorhandenes Vercel-Projekt pflege-dashboard und eigenes Supabase-Projekt prüfen, belegte Anschlussfehler für Login und echten Chat beheben. DeepSeek-V4.1-Flash als gewünschtes Modell anbinden; offizielle Modellkennung deepseek-flash prüfen. Nutzerbrowser ausschließlich über verbundenes Plugin verwenden, vorhandene Tabs erhalten. Ursprünglichen Backend-Bereichsinhaber fortsetzen; Orchestrator prüft und verbindet. Kein Ersatz durch simulierte Antworten. Kontoanlage/Passworteingabe verbleiben nach Projektregel beim Nutzer. Kostenlimit und Providersecret fehlen weiterhin, daher vor echter KI-Nutzung konkret klären. Vercel ist durch den aktuellen Auftrag das Hostingziel; keine Supabase Edge Functions. Kein Git-Push ohne Aufhebung der bestehenden expliziten Push-Sperre.
+
+### Weitere direkte Angaben desselben Nutzers
+
+- Demo-Adresse: „test at test .de“ → test@test.de.
+- Kostenfreigabe: „Maximal 5 US-Dollar“ auf die Frage nach dem Gesamtlimit für Test und Vorführung.
+- Schlüsselquelle: „in notetree-tanstack müsste ein deepseek key vorliegen ich gebe dir ansosnten einen“. Dies erlaubt ausschließlich die gezielte Suche/Übernahme eines DeepSeek-Keys aus diesem Projekt; keine Übernahme fremder sonstiger Secrets.
+
+### Vorrangige Kostenkorrektur
+
+Original: „ersmtal keine limits bei deepseek“. Die vorherige 5-USD-Grenze ist zurückgenommen. Für diesen Demo-Workspace DeepSeek ohne App-Ausgabenlimit konfigurieren, weiter tatsächliche Nutzung/Kosten aufzeichnen. Kein stiller hoher Ersatzgrenzwert. Keine Änderung von Providerkonto/Tarif/Guthaben.
