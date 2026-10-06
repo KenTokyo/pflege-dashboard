@@ -2,7 +2,22 @@
 
 Stand: 06.10.2026. Implementierungsordner: `/Users/kentoky/Documents/React Projects/pflege-dashboard`.
 
-## Tatsächlicher Stand und Anschlussblock
+## Aktualisierung: Browseranschluss in Codex bestätigt
+
+Am 06.10.2026 konnte Codex den bereits geöffneten Supabase-Tab über die Browser-Erweiterung tatsächlich lesen und bedienen. Die weiter unten dokumentierte Anschlussblockade betrifft den früheren TreeChat-Lauf und gilt nicht für diesen Codex-Chat.
+
+- Bestehende Sitzung: Organisation `kens projects`, Anzeige `FREE`; Formular zur Anlage eines neuen Projekts, noch kein nachgewiesen angelegtes Projekt.
+- Vorhandenen Namen `pflegedashboard` erhalten. Region von `Europe` auf `Central EU (Frankfurt)` geändert.
+- `Enable Data API` bleibt aktiv. `Automatically expose new tables` deaktiviert; `Enable automatic RLS` aktiviert. Dies sind vorbereitete Formularwerte, noch keine bereitgestellte Datenbank.
+- Passwortfeld leer. Die Browser-Werkzeugregel verlangt bei einem neuen Passwort die nutzerseitige Eingabe und Übermittlung. Nutzer wurde gebeten, das Passwort selbst sicher zu speichern und `Create new project` abzuschließen. Keine Geheimnisse ausgelesen, übertragen oder gespeichert.
+- Supabase-Erweiterung im Plugin-Verzeichnis gefunden und zur Verbindung angeboten. Noch keine bestätigte Installation/Autorisierung und kein erfolgreich ausgeführter MCP-Aufruf.
+- Kein zusätzlicher Browser, Server oder Prüfprozess gestartet; vorhandener Nutzer-Tab zur Übergabe erhalten.
+
+Nächste Schritte nach Rückmeldung: neues Projekt und Kennung prüfen, Frankfurt/Free bestätigen, öffentliche Registrierung ausschalten, MCP verbinden und mit einem echten Leseaufruf prüfen. Eine manuelle MCP-Konfiguration wird mit `project_ref` auf dieses Projekt begrenzt. Bestehende Migrationen erst nach Backend-Abnahme ausführen; Entwürfe und Seed wurden gelesen, aber noch nicht gegen Supabase ausgeführt. Keine RLS-Tests im Repository vorhanden. Kein Anwendungslogin angelegt.
+
+Quellen: [Supabase MCP](https://supabase.com/docs/guides/ai-tools/mcp), [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli). Die offizielle Supabase-Anbindung unterstützt OAuth ohne manuell kopierten Verwaltungsschlüssel. Konfigurationsvorbereitung allein beweist keine Verbindung.
+
+## Früherer TreeChat-Stand und Anschlussblock
 
 Der Hosting-Auftrag erlaubt ein neues Projekt `pflege-dashboard` in Frankfurt unter der bestehenden angemeldeten Sitzung. Diese Nutzerkorrektur ersetzt für diesen Auftrag die älteren Projektanlageverbote in [AGENTS.md](../AGENTS.md) und [Anforderungen](anforderungen.md). Neue Provider-Nutzerkonten, Login-Konten, kostenpflichtige Buchungen und Änderungen an bestehenden Projekten bleiben ausgeschlossen.
 

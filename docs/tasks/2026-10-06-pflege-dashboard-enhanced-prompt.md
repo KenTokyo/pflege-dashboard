@@ -29,6 +29,12 @@ nein nur wenn es geht mit supabase oder garnicht
 
 mit chatgpt browser use oder computer use das müsste gehen
 
+### Direkter Codex-Folgeauftrag 2026-10-06 (Original)
+
+hast du zugang zu meinem browser und könntest bitte supabase einrichten mit alles was dazu gehört, mcp usw...
+
+Fortsetzung: Den verfügbaren Browseranschluss für die tatsächliche Supabase-Einrichtung verwenden und den MCP-Anschluss einrichten und prüfen. Vorhandene Entwürfe erhalten. Keine vorgezogene App-/Designarbeit.
+
 ## Improved prompt
 
 Setze die vollständigen [Anforderungen](../anforderungen.md) als eigenständiges Projekt in `/Users/kentoky/Documents/React Projects/pflege-dashboard` um. Der aktuelle TreeChat liegt in `/Users/kentoky/Documents/React Projects/ki-pflegedashboard`; beide lokalen Unterchats erhalten den tatsächlichen Zielordner ausdrücklich. Der Orchestrator erstellt Arbeitsdokumentation, verteilt die Arbeit, prüft und bewertet sie; die Anwendung bauen ausschließlich die zwei beauftragten Unterchats.

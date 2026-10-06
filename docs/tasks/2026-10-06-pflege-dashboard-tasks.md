@@ -23,6 +23,20 @@
 
 Ergebnis: Vorbereitung lokal committed (`02c7ad8`); aktueller Entwurfsstand wird als unfertiger Zwischenstand gesichert. API-Vertrag v0.1 und geplante API-Typen wurden früh gelesen, Schema/Seed sind unvollständig geprüfte Entwürfe. Alle Agenten nach letzter Nutzergrenze gestoppt, echtes Supabase mangels Anschluss/Runtime nicht eingerichtet. Keine fertigen 24 Mock-PNGs, keine Phase-0-Abnahme, keine App-UI. Pfade: `docs/mocks/`, `docs/api-contract.md`, `supabase/`.
 
+## Supabase-Fortsetzung in Codex am 06.10.2026
+
+- [x] Direkten Folgeauftrag erfassen; vorhandene Anforderungen, Einrichtung und Migrationen lesen.
+- [x] Browser-Erweiterung erfolgreich mit vorhandenem Supabase-Projektanlage-Tab verbinden. Dies ersetzt für diesen Chat den früheren Werkzeugblock.
+- [x] Formular prüfen: vorhandener Name `pflegedashboard`, Organisation `kens projects` im Free-Tarif. Frankfurt auswählen; automatische Tabellenfreigabe deaktivieren und automatische RLS aktivieren.
+- [x] Supabase-Erweiterung finden und zur nutzerseitigen Verbindung anbieten; aktuellen OAuth-/MCP-Weg in offiziellen Quellen prüfen.
+- [ ] Nutzer schließt Passwort-Eingabe und Projektanlage ab; Werkzeugregel verlangt Übergabe bei neuen Zugangsdaten.
+- [ ] Projektkennung, Region und Tarif nach Anlage prüfen; öffentliche Registrierung ausschalten.
+- [ ] MCP-Verbindung autorisieren und mit echtem Leseaufruf prüfen; manuelle Verbindung projektspezifisch begrenzen.
+- [ ] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen.
+- [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
+
+Ergebnis: Browserzugriff funktioniert; Formular vorbereitet. Projektanlage, MCP und Datenbank sind noch nicht als eingerichtet nachgewiesen. Keine Geheimnisse gelesen oder gespeichert. Kein eigener Browser-/Serverprozess gestartet. Vorhandenen Nutzer-Tab erhalten. Pfade: `docs/supabase-provisioning.md`, `supabase/`, `.env.example`.
+
 ## Phase 1 – Fundament (nach Designwahl)
 
 - [ ] Login, Sitzung/Timeout, App-Hülle, beide Themes, Dashboard mit Seed, Streaming-Chat auf einem Modell, Audit-Schreiben.
