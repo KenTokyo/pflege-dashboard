@@ -1,0 +1,403 @@
+{
+  "browser": "Google Chrome for Testing 154.0.8037.92",
+  "shots": [
+    "login-dunkel.png",
+    "login-fehler-dunkel.png",
+    "dashboard-dunkel.png",
+    "gespraeche-dunkel.png",
+    "dokumente-dunkel.png",
+    "aufgaben-dunkel.png",
+    "chat-ohne-modell-dunkel.png",
+    "einstellungen-dunkel.png",
+    "abgemeldet-dunkel.png",
+    "chat-stream-dunkel.png",
+    "chat-antwort-dunkel.png",
+    "chat-anbieter-dunkel.png",
+    "chat-abriss-dunkel.png",
+    "login-hell.png",
+    "login-fehler-hell.png",
+    "dashboard-hell.png",
+    "gespraeche-hell.png",
+    "dokumente-hell.png",
+    "aufgaben-hell.png",
+    "chat-ohne-modell-hell.png",
+    "einstellungen-hell.png",
+    "abgemeldet-hell.png",
+    "chat-stream-hell.png",
+    "chat-antwort-hell.png",
+    "chat-anbieter-hell.png",
+    "chat-abriss-hell.png",
+    "telefon-login-dunkel.png",
+    "telefon-dashboard-dunkel.png",
+    "telefon-dashboard-unten-dunkel.png",
+    "telefon-gespraeche-dunkel.png",
+    "telefon-chat-dunkel.png",
+    "telefon-einstellungen-dunkel.png",
+    "telefon-login-hell.png",
+    "telefon-dashboard-hell.png",
+    "telefon-dashboard-unten-hell.png",
+    "telefon-gespraeche-hell.png",
+    "telefon-chat-hell.png",
+    "telefon-einstellungen-hell.png",
+    "tablet-login-dunkel.png",
+    "tablet-dashboard-dunkel.png",
+    "tablet-dashboard-unten-dunkel.png",
+    "tablet-gespraeche-dunkel.png",
+    "tablet-chat-dunkel.png",
+    "tablet-einstellungen-dunkel.png"
+  ],
+  "audits": [
+    {
+      "name": "login-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "login-fehler-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "dashboard-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "gespraeche-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "dokumente-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "aufgaben-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-ohne-modell-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "einstellungen-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "abgemeldet-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-stream-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-antwort-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-anbieter-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-abriss-dunkel",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "login-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "login-fehler-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "dashboard-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "gespraeche-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "dokumente-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "aufgaben-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-ohne-modell-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "einstellungen-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "abgemeldet-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-stream-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-antwort-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-anbieter-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "chat-abriss-hell",
+      "scrollW": 1280,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-login-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-dashboard-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-dashboard-unten-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-gespraeche-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-chat-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-einstellungen-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-login-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-dashboard-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-dashboard-unten-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-gespraeche-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-chat-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "telefon-einstellungen-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-login-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-dashboard-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-dashboard-unten-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-gespraeche-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-chat-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
+      "name": "tablet-einstellungen-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    }
+  ],
+  "idle": [
+    {
+      "where": "dashboard-dunkel",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "chat-ohne-modell-dunkel",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "chat-antwort-dunkel",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "dashboard-hell",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "chat-ohne-modell-hell",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "chat-antwort-hell",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    }
+  ],
+  "problems": [],
+  "console": [],
+  "cleanup": {
+    "browserPid": 81601,
+    "watcherPid": 81643
+  }
+}

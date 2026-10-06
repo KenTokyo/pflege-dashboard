@@ -1,0 +1,71 @@
+/*
+ * Tagwerk – gemeinsames semantisches Tokensystem (Quelle: docs/mocks/tools/tokens.mjs, Richtung „tagwerk“).
+ * Dunkel ist Standard, Hell gleichwertig. Komponenten verwenden nur diese Namen, nie Rohfarben.
+ * Kontraste (AA) prüft tools/check-source.mjs für beide Themes.
+ */
+:root {
+  --font-body: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
+  --fs-base: 15px;
+  --fs-small: 13px;
+  --fs-h1: 28px;
+  --fs-h2: 17px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --row-h: 44px;
+  --control-h: 42px;
+  --icon-stroke: 1.9;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  color-scheme: dark;
+  --bg: #13110f;
+  --surface: #1c1916;
+  --surface2: #25211d;
+  --sunken: #171512;
+  --border: #36302a;
+  --border-strong: #73695c;
+  --text: #f5f0e8;
+  --text-muted: #bab0a3;
+  --accent: #7d93ff;
+  --on-accent: #0a1030;
+  --accent-text: #a3b3ff;
+  --accent-soft: rgba(125, 147, 255, 0.15);
+  --danger: #ff8a7f;
+  --danger-soft: rgba(255, 138, 127, 0.13);
+  --warning: #f4be55;
+  --warning-soft: rgba(244, 190, 85, 0.13);
+  --success: #66d196;
+  --success-soft: rgba(102, 209, 150, 0.13);
+  --marker: #ff7a45;
+  --focus: #a3b3ff;
+  --banner-bg: #2c1a10;
+  --banner-text: #ffc9a8;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+:root[data-theme='hell'] {
+  color-scheme: light;
+  --bg: #f5f1ea;
+  --surface: #fffdf9;
+  --surface2: #efe9df;
+  --sunken: #faf7f1;
+  --border: #e0d7c9;
+  --border-strong: #8a7f70;
+  --text: #1e1a15;
+  --text-muted: #5f5547;
+  --accent: #2f4fdb;
+  --on-accent: #ffffff;
+  --accent-text: #2a47c7;
+  --accent-soft: rgba(47, 79, 219, 0.09);
+  --danger: #b3261b;
+  --danger-soft: rgba(179, 38, 27, 0.08);
+  --warning: #875000;
+  --warning-soft: rgba(214, 145, 20, 0.14);
+  --success: #196c3f;
+  --success-soft: rgba(25, 108, 63, 0.09);
+  --marker: #e2531d;
+  --focus: #2f4fdb;
+  --banner-bg: #ffe9da;
+  --banner-text: #6b2a08;
+  --shadow: 0 1px 2px rgba(40, 28, 14, 0.06), 0 10px 26px rgba(40, 28, 14, 0.06);
+}

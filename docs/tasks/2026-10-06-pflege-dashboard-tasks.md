@@ -57,7 +57,7 @@ Die direkte Nutzer-Nachricht „Bitte mach mit deiner Aufgabe weiter.“ wurde i
 
 Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoanlage, Browser- oder Env-Arbeit. Ein separat dokumentierter Hosting-Fortsetzungsstand ist kein Nachweis des lokalen Schema-Gates. Keine App-Oberfläche vor der Designwahl.
 
-## Phase 1 – Fundament (Tagwerk gewählt, aktiv)
+## Phase 1 – Fundament (Implementierung geliefert, Nutzer-Gate offen)
 
 - [x] Designwahl und jüngste Arbeitsteilung im selben Arbeitsauftrag und in den Projektregeln festhalten; Phase-0-Meilenstein `689e735` erhalten.
 - [x] Dieselben ursprünglichen Frontend-/Backend-Unterchats mit je einem vollständigen Phase-1-Auftrag fortgesetzt; Modelle und Optionenschlüssel live bestätigt, Modelle erhalten. Hosting-Unterchat nicht neu gestartet.
@@ -65,14 +65,14 @@ Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoan
 - [x] Backend veröffentlicht frisch generierte Phase-1-DB-Typen mit 25 Tabellen und den beiden neuen Gesprächs-RPCs. Orchestrator liest die sechs Browser-RPCs in `BackendDatabase` und verknüpft den Stand mit demselben Frontend-Chat; dessen aktueller Lauf wird nicht unterbrochen.
 - [x] Geprüftes App-Schema auf dem eigenen Hosted-Projekt angewendet. Orchestrator liest sichere persistierte Belege: TLS verschlüsselt/verifiziert, App-Struktur entspricht lokal, ein Demo-Workspace und null Auth-Konten. Backend meldet fiktiven Seed und privaten Bucket; Systembesitz erhalten.
 - [x] Backend-Lieferung samt vollständigem Abschlussbericht gelesen. Orchestrator führt den ganzen eigenen Supabase-Lauf unabhängig aus: sechs Migrationen + Seed, 434 SQL, 22 echte Parallelprüfungen, 26 echte Edge-HTTP, 47 Unit/Mock, strikter TypeScript-/Deno-Check und frische Typgenerierung bestanden. Stop/Cleanup bestätigt null eigene Prozesse und Ports 56421/56422/56428 geschlossen. Kein echter angemeldeter KI-Nutzertest.
-- [ ] Frontend-Sitzungsabschluss liefern und gemeinsame Implementierung samt aktueller Datenanbindung abschließend sichern.
+- [x] Frontend-Sitzungsabschluss vollständig geliefert und erneut vom Orchestrator geprüft: `npm run check` mit 101 Tests, Strict-Typecheck, Lint, Build, Bundle und Quelle bestanden. Gemeinsamer Bericht `docs/gates/2026-10-06-phase1.md`; Backend lokal in `2e8a129` gesichert.
 - [ ] Hosted-Edge-Deployment: mangels Management-Autorisierung/Toolfunktion offen. Keine Provider-Schlüssel, kein angelegtes Auth-Konto, Nullbudget erhalten. Agenten erledigen eigene Prüfung und Nacharbeit selbst.
 - [x] Frontend liefert Tagwerk-App und 44 synthetische Bildnachweise. Orchestrator führt `npm run check` selbst aus: strikte Typen, Lint, 87 Tests, Build, Bundle-/Quellprüfung bestanden; Dashboard/Antwort in beiden Themes tatsächlich angesehen. Kein echter Login-/KI-Gate-Pass.
-- [ ] Notwendigen Sitzungsanschluss vollständig schließen: Derselbe Frontend-Agent prüft und behebt hängende Auth-Abmeldung und verspätete Ergebnisse älterer Auth-/Workspace-/Touch-Aufrufe selbst, samt Regression. Gemeinsamer Implementierungs-Meilenstein erst nach diesem Abschluss.
-- [ ] Vertrag vor Datenanbindung prüfen; Typen, Lint, Tests, RLS und Node-Smoke sowie beide Themes prüfen.
+- [x] Derselbe Frontend-Agent schließt hängende Abmeldung und alte Auth-/Workspace-/Touch-/Schreibresultate selbst vollständig: sofortiger lokaler Logout, begrenzter Widerruf, Generation/Abbruch/Cache-Bereinigung. 14 neue Tests und fünf gezielt erkannte Rückbauten; keine erneuten Bilder nötig, Layout erhalten.
+- [x] Vertrag/Typen verbunden; Frontend-Checks, echter lokaler Supabase-/RLS-/Parallel-/Edge-Lauf und Hosted-Struktur unabhängig durch den Orchestrator geprüft. Beide Themes anhand tatsächlicher PNGs angesehen. Angemeldeter End-to-End-Login/KI-Stream ausdrücklich nicht bestanden; keine Konten oder Providercalls.
 - [ ] Gate: Nutzer kann sich selbst anmelden und in beiden Themes eine echte Unterhaltung führen.
 
-Ergebnis: Phase 1 durch Nutzerwahl freigegeben. Tagwerk-Mocks sind Designreferenz; echter lokaler Supabase-Phase-0-Prüflauf bestanden. Anmeldung und KI-Nutzertest brauchen nutzerseitiges Konto, Provider-Secrets und freigegebenes Budget. Keine Agenten-Kontoanlage, kein vorgetäuschter Chat. Pfade: `src/`, `supabase/functions/`, `docs/api-contract.md`.
+Ergebnis: Phase-1-Implementierung einschließlich notwendiger Sitzungsnacharbeit geliefert und lokal gesichert; Tagwerk-App, 101 Frontendtests, echte lokale Supabase-Dienste und Hosted-App-Schema belegt. Nutzer-Gate bleibt offen: Hosted-Edge-Deployment, Konto/Mitgliedschaft, Provider-Secrets, überprüftes Modell/Preise und bewusst freigegebenes Budget fehlen. Beide ursprünglichen Agenten warten, keine Phase 2. Pfade: `src/`, `supabase/functions/`, `docs/gates/2026-10-06-phase1.md`.
 
 ## Phase 2 – Sachbearbeiter
 

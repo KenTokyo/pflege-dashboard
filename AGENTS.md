@@ -4,7 +4,7 @@ Lies vollständig `docs/anforderungen.md`, dann `/Users/kentoky/Documents/React 
 
 ## Auftrag und aktuelles Gate
 
-Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwendungsteile aus NoteTree übernehmen. Phase 0 ist abgeschlossen und lokal mit `689e735` gesichert. Der Nutzer hat am 06.10.2026 ausdrücklich gewählt: „tagwerk sieht am besten aus damit weitermachen“. Phase 1 ist jetzt aktiv: Tagwerk als echte Anwendung mit Anmeldung, Sitzung, beiden Themes, Dashboard aus Supabase und Streaming-Chat auf einem Modell. Die 24 Designbilder und drei Bewegungsfolgen bleiben als Referenz erhalten. Phase 2 beginnt erst nach dem Phase-1-Gate.
+Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwendungsteile aus NoteTree übernehmen. Phase 0 ist abgeschlossen und lokal mit `689e735` gesichert. Der Nutzer hat am 06.10.2026 ausdrücklich gewählt: „tagwerk sieht am besten aus damit weitermachen“. Phase-1-Implementierung ist geliefert und geprüft: Tagwerk als echte Anwendung mit Anmeldung, Sitzung, beiden Themes, Dashboard aus Supabase und Streaming-Chat-Schnittstelle. Der echte angemeldete Nutzer-/KI-Test bleibt offen: Hosted-Edge-Endpunkte sind noch nicht deployed, Konto/Mitgliedschaft und Provider-/Modell-/Preis-/Budgetfreigabe fehlen. Beide ursprünglichen Agenten warten; keine selbständige neue Phase. Die 24 Designbilder und drei Bewegungsfolgen bleiben als Referenz erhalten. Phase 2 beginnt erst nach dem Phase-1-Gate.
 
 ## Arbeitsteilung
 

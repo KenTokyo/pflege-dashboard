@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de" data-theme="dunkel">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Pflege-Dashboard</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      // Theme vor dem ersten Zeichnen setzen: gespeicherte Wahl, sonst Systemeinstellung.
+      (function () {
+        var t = null;
+        try { t = localStorage.getItem('pflege-dashboard:theme'); } catch (e) {}
+        if (t !== 'hell' && t !== 'dunkel') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'hell' : 'dunkel';
+        }
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Das Pflege-Dashboard benötigt JavaScript.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
