@@ -62,7 +62,8 @@ Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoan
 - [x] Designwahl und jüngste Arbeitsteilung im selben Arbeitsauftrag und in den Projektregeln festhalten; Phase-0-Meilenstein `689e735` erhalten.
 - [x] Dieselben ursprünglichen Frontend-/Backend-Unterchats mit je einem vollständigen Phase-1-Auftrag fortgesetzt; Modelle und Optionenschlüssel live bestätigt, Modelle erhalten. Hosting-Unterchat nicht neu gestartet.
 - [x] Verbindlicher Phase-1-Anschluss v1.0 veröffentlicht und vom Orchestrator gelesen: sechs Metadaten-RPCs, Session- und Streaming-Vertrag sowie `types/phase1.ts`. An denselben Frontend-Unterchat weitergegeben. Status ausdrücklich Umsetzung, kein bestandener Lauf.
-- [ ] Backend liefert tatsächlich umgesetzte/geprüfte RPCs und frisch generierte DB-Typen; Frontend verbindet diesen Stand. Agenten übernehmen eigene Prüfung und Nacharbeit.
+- [x] Backend veröffentlicht frisch generierte Phase-1-DB-Typen mit 25 Tabellen und den beiden neuen Gesprächs-RPCs. Orchestrator liest die sechs Browser-RPCs in `BackendDatabase` und verknüpft den Stand mit demselben Frontend-Chat; dessen aktueller Lauf wird nicht unterbrochen.
+- [ ] Phase-1-RPC-/Edge-/Hosted-Prüfungen und Frontend-Anbindung vollständig liefern. Backend meldet erste Phase-0-Regression 295/295; daraus folgt noch kein Phase-1-Gate. Agenten übernehmen eigene Prüfung und Nacharbeit.
 - [ ] Login, Sitzung/Timeout, App-Hülle, beide Themes, Dashboard mit Seed, Streaming-Chat auf einem Modell, Audit-Schreiben.
 - [ ] Vertrag vor Datenanbindung prüfen; Typen, Lint, Tests, RLS und Node-Smoke sowie beide Themes prüfen.
 - [ ] Gate: Nutzer kann sich selbst anmelden und in beiden Themes eine echte Unterhaltung führen.
