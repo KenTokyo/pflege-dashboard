@@ -74,4 +74,8 @@ Supabase-Sicherheitsadvisor: drei erwartete INFO-Hinweise zu serverinternen Tabe
 
 Im Browser ist inzwischen eine gespeicherte DEEPSEEK_API_KEY-Zeile im eigenen Vercel-Projekt sichtbar; Eingabedialog geschlossen. Nur Speicherstatus gelesen, Schlüsselwert weder geöffnet noch ausgegeben. Schlüsseleingabe erledigt; Gültigkeit/Guthaben vor echtem Modellaufruf noch nicht bewiesen.
 
-Noch offen: Veröffentlichung des neuen Codes (bestehende ausdrückliche Git-Push-Sperre), nutzerseitiger Login und echter DeepSeek-Chat auf Vercel. Kein eigener Prüfbrowser gestartet; Nutzer-Tabs erhalten. Backend-Bereichsinhaber abgeschlossen/idle, alle eigenen Prüfprozesse beendet.
+Noch offen: Abnahme der neuen Vercel-Veröffentlichung, nutzerseitiger Login und echter DeepSeek-Chat auf Vercel. Kein eigener Prüfbrowser gestartet; Nutzer-Tabs erhalten. Backend-Bereichsinhaber abgeschlossen/idle, alle eigenen Prüfprozesse beendet.
+
+## Git-Freigabe und Veröffentlichung
+
+Nutzer hat den Upload ausdrücklich bestätigt und anschließend die generelle Push-Sperre aufgehoben. Commit `c94ed1c` erfolgreich nach `origin/main` hochgeladen. Aktive Projektvorgaben und Aufgaben entsprechend bereinigt; Vercel-Abnahme läuft.

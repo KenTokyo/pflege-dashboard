@@ -18,7 +18,7 @@
 - [x] Bis zur Klärung bzw. tatsächlichem Supabase-Anschluss auch Frontend unterbrechen. Alle drei aktuellen Unterchats sind `interrupted`; kein eigenständiger Neustart. Eigenen Prüfbrowserstand kontrolliert: laufender Testbrowser gehört nach CWD-Prüfung zum fremden NoteTree-Projekt und bleibt unangetastet; kein eigener Pflege-Dashboard-Browser-/PostgreSQL-Prozess vorhanden.
 - [x] Frontend: 24 vollständige PNGs aus statischen HTML-Mocks, drei Bewegungsfolgen, kurze Vorstellung je Richtung.
 - [x] Nach jüngster Nutzerkorrektur erledigen und prüfen die Agenten ihre Bereiche selbstständig; Orchestrator führt Lieferungen, Vertrag und Ergebnisbelege zusammen. Erste unabhängige Prüfungen und frühere Nacharbeit sind im Verlauf erhalten.
-- [x] Gemeinsamen Phase-0-Meilenstein zur lokalen Sicherung zusammenführen; Gate-Bericht `docs/gates/2026-10-06-phase0-designwahl.md`. Commit erfolgt vor der Übergabe im Hauptchat, kein Push.
+- [x] Gemeinsamen Phase-0-Meilenstein zur Sicherung zusammenführen; Gate-Bericht `docs/gates/2026-10-06-phase0-designwahl.md`. Commit erfolgt vor der Übergabe im Hauptchat.
 - [x] Nutzer wählt am 06.10.2026 **Tagwerk**: „tagwerk sieht am besten aus damit weitermachen“. Phase 1 ist freigegeben.
 
 Historischer Zwischenstand vor ausdrücklicher Fortsetzung: Vorbereitung lokal committed (`02c7ad8`); damaliger Entwurfsstand wurde als unfertiger Zwischenstand gesichert. API-Vertrag v0.1 und geplante API-Typen wurden früh gelesen, Schema/Seed sind unvollständig geprüfte Entwürfe. Alle Agenten nach letzter Nutzergrenze gestoppt, echtes Supabase mangels Anschluss/Runtime nicht eingerichtet. Keine fertigen 24 Mock-PNGs, keine Phase-0-Abnahme, keine App-UI. Pfade: `docs/mocks/`, `docs/api-contract.md`, `supabase/`.
@@ -81,7 +81,7 @@ Historischer Zwischenstand vor der Node-Umstellung: Tagwerk-App, 101 Frontendtes
 - [x] Ursprünglicher Backend-Sol behebt Stream-Widerruf, Auth-Störung, Start/Stop, Verbrauch bei Modellabweichung und Kontextreihenfolge/-aufgaben. Native Abnahme: acht Migrationen, 501 SQL, damals 92 Tests, 22 Parallelfälle, 18 PG und 31 HTTP. Nach abschließendem 2,5s-Handlerfix erneut 93 Tests, Typen/Build und 39 Hosted-/Static-Prüfungen unabhängig bestanden. Achte Migration additiv auf eigenem Hosted-Projekt, keine Konten/Kosten.
 - [x] Ursprünglicher Frontend-Opus behebt 13 Funde samt abschließendem Zwei-Paar-Sortierfall. 131 Tests, 38 Vorher-/38 Nachher-Bilder und 28 echte nicht angemeldete Browserprüfungen bestanden. Alle eigenen Browser/Server beendet.
 - [x] Orchestrator prüft Quelländerungen und Lieferungen, führt native Supabase-, finale Frontend- und Hosted-/Static-Gesamtprüfungen unabhängig erfolgreich aus. Vier endgültige Nachher-Bilder tatsächlich angesehen; eigene Prozesse beendet und Bericht abgeschlossen.
-- [x] Geprüften Zusatzprüfungsstand mit Berichten, Regressionen und Bildbelegen lokal als Meilenstein sichern; niemals pushen. Dieser Checklistenstand ist Teil desselben lokalen Abschluss-Commits.
+- [x] Geprüften Zusatzprüfungsstand mit Berichten, Regressionen und Bildbelegen als Meilenstein sichern. Dieser Checklistenstand ist Teil desselben lokalen Abschluss-Commits.
 
 Ergebnis: Zusätzliche technische Abnahme bestanden; sämtliche bestätigten Funde behoben. Echte Anmeldung/KI bleibt ohne Konto/Mitgliedschaft/Provider- und Budgetfreigabe ungeprüft, Phase 2 nicht freigegeben. Pfade: `docs/gates/2026-10-06-phase1-audit.md`, `backend/`, `src/`.
 
@@ -105,7 +105,7 @@ Ergebnis: Nicht begonnen. Pfade: `docs/`, `supabase/seed.sql`, `src/`.
 
 - [ ] Beide ursprünglichen Unterchats verbessern alle eigenen Screens und Abläufe auf mehr als 9/10.
 - [ ] Orchestrator prüft erneut selbst, dokumentiert echte Nachweise und nicht geprüfte Gates.
-- [ ] Abschließender lokaler Commit, keine Veröffentlichung und kein Push.
+- [ ] Abschließender geprüfter Commit und Bereitstellung im beauftragten Projektumfang.
 
 Ergebnis: Nicht begonnen. Pfade: `docs/`, `src/`, `backend/`.
 
@@ -116,7 +116,7 @@ Ergebnis: Nicht begonnen. Pfade: `docs/`, `src/`, `backend/`.
 - [x] Edge-Deployment vor Ausführung gestoppt; Nutzerkorrektur hat Vorrang vor bisherigen Edge-Anforderungen.
 - [x] Ursprünglicher Backend-Agent: normaler lokaler Node-Server, bestehendes Supabase, sicherer Sitzungs-/RPC-/Streamanschluss, echter HTTP-/DB-Nachweis ohne Auth-Konto oder Providerkosten.
 - [x] Ursprünglicher Frontend-Agent: gleicher Tagwerk-Auftritt, `/api`-Anschluss, gemeinsamer Start und Build, vorhandene Sitzungsregressionstests erhalten.
-- [x] Orchestrator: Vertrag zusammenführen, Prüfungen unabhängig ausführen, Regeln/Gate aktualisieren und lokal committen, niemals pushen.
+- [x] Orchestrator: Vertrag zusammenführen, Prüfungen unabhängig ausführen, Regeln/Gate aktualisieren und als Meilenstein committen.
 
 Ergebnis: Node-Anschluss ohne Edge Functions geliefert. Orchestrator prüft 105 Frontendtests, 21 Proxy-, 14 Prozessprüfungen, 484 SQL, 80 Backendtests und 39 echte Hosted-Node-HTTP/SQL-/Static-Prüfungen unabhängig erfolgreich. Abschließender gemeinsamer dev/start-Lauf durch Frontend-Agenten ebenfalls bestanden und bereinigt. Phase-1-Nutzergate bleibt bis echtem Nutzerlogin und bewusst freigegebener KI-Konfiguration offen. Pfade: `backend/`, `src/`, `docs/gates/2026-10-06-phase1.md`.
 

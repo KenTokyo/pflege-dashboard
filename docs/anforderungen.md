@@ -134,7 +134,7 @@ Care data is health data (Art. 9 GDPR). For the demo:
   - RLS policy tests
   - Edge Function tests with a mocked provider (streaming, tool calls, mode filter, audit log)
   - a Node smoke test of the whole chat → confirm → document flow against local Supabase
-- Project folder: `/Users/kentoky/Documents/React Projects/pflege-dashboard`. Run `git init` there and copy this file to `docs/anforderungen.md`. Commit per milestone, never push.
+- Project folder: `/Users/kentoky/Documents/React Projects/pflege-dashboard`. Run `git init` there and copy this file to `docs/anforderungen.md`. Commit per verified milestone. Push and deploy verified changes within the authorized project scope; the user removed the previous push restriction on 2026-10-06.
 - Deployment (phase 3): a static frontend on Vercel or Netlify plus hosted Supabase. Prepare everything. I do the account and project steps.
 
 ## 7. Order and gates

@@ -32,7 +32,7 @@ Die Freigabe ersetzt keine fehlende Werkzeugfunktion: aktuell ist der TreeChat-B
 
 Die vorhandene geschützte Projektkonfiguration darf für die autorisierte Anbindung dieses eigenen Pflege-Dashboard-Projekts verwendet werden, ohne Werte auszugeben. Geprüfte App-Migrationen dürfen nach bestandenem lokalem Backend-Gate auf genau dieses eigene neue Projekt übertragen werden; keine fremden Projekte, Konten, Tarifwechsel oder Datenlöschungen. Frontend verwendet ausschließlich öffentliche `VITE_SUPABASE_*`-Werte; Provider- und Datenbankgeheimnisse bleiben serverseitig. Fehlende Auth-Konten und Provider-Secrets bleiben eine echte Grenze für den angemeldeten KI-Nutzertest, keine Einladung zur Kontoanlage oder einem simulierten Produktchat.
 
-Der konkrete Projektauftrag `docs/anforderungen.md` hat Vorrang vor allgemeinen Git-Defaults: lokal pro Meilenstein committen, **niemals pushen**. Der Orchestrator führt die Meilenstein-Commits nach Prüfung aus. Unterchats stage/committen keine parallelen Dateien und verändern keine Git-Historie.
+Der konkrete Projektauftrag `docs/anforderungen.md` hat Vorrang vor allgemeinen Git-Defaults: pro geprüftem Meilenstein committen und für beauftragte Bereitstellungen ins bestehende Projekt-Repository pushen. Der Orchestrator führt die Meilenstein-Commits nach Prüfung aus. Unterchats stage/committen keine parallelen Dateien und verändern keine Git-Historie.
 
 ## Prüfung und Kommunikation
 
@@ -48,7 +48,7 @@ Der Nutzer verlangt jetzt ausdrücklich keine Edge Functions und möchte die Ein
 
 ## Aktueller Nutzerauftrag: Vercel-Vorführung vom 06.10.2026
 
-Der Nutzer verlangt für die Vorführung am 07.10.2026 funktionierenden Login und echten DeepSeek-Chat auf dem bereits selbst veröffentlichten Vercel-Projekt `pflege-dashboard` (`pflege-dashboard-puce.vercel.app`). Der bestehende Node-Server wird dafür als normale Vercel Node Functions angebunden; keine Supabase Edge Functions. Der aktuelle Hostingauftrag ersetzt die ältere reine Lokal-/Nichtveröffentlichungsgrenze für genau diese Anwendung. Die ausdrückliche Git-Push-Sperre bleibt ohne konkrete Aufhebung bestehen.
+Der Nutzer verlangt für die Vorführung am 07.10.2026 funktionierenden Login und echten DeepSeek-Chat auf dem bereits selbst veröffentlichten Vercel-Projekt `pflege-dashboard` (`pflege-dashboard-puce.vercel.app`). Der bestehende Node-Server wird dafür als normale Vercel Node Functions angebunden; keine Supabase Edge Functions. Der aktuelle Hostingauftrag ersetzt die ältere reine Lokal-/Nichtveröffentlichungsgrenze für genau diese Anwendung. Der Nutzer hat am 06.10.2026 die Git-Push-Sperre ausdrücklich aufgehoben. Geprüfte Änderungen dürfen im Rahmen des Projektauftrags hochgeladen und über das bestehende Vercel-Projekt veröffentlicht werden; dafür ist keine erneute Freigabe nötig.
 
 Der Nutzer hat test@test.de selbst in Supabase angelegt. Bestätigtes Konto und normale Demo-Mitgliedschaft sind inzwischen geprüft; keine Agenten-Kontoanlage oder Passworteingabe. Der Nutzer autorisiert ausdrücklich seinen vorhandenen Browser über das ChatGPT-Plugin. Die Verbindung ist nun vorhanden; frühere Browserblockaden sind historisch. Nutzer-Tabs erhalten, keine sichtbare Ersatz-App starten.
 
