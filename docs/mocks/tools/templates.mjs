@@ -8,7 +8,7 @@ const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
 const NAV = [
   { id: 'dashboard', label: 'Übersicht', icon: 'layout-dashboard', href: 'dashboard.html' },
-  { id: 'chat', label: 'Sachbearbeiter', icon: 'message-square-text', href: 'chat.html' },
+  { id: 'chat', label: 'Sachbearbeiter', short: 'Gespräche', icon: 'message-square-text', href: 'chat.html' },
   { id: 'dokumente', label: 'Dokumente', icon: 'file-text', href: '#' },
   { id: 'aufgaben', label: 'Aufgaben', icon: 'list-checks', href: '#', count: 5 },
   { id: 'einstellungen', label: 'Einstellungen', icon: 'settings', href: 'einstellungen.html' },
@@ -64,10 +64,10 @@ function brand(d, { withWs = false } = {}) {
   return `<a class="brand" href="dashboard.html" aria-label="Pflege-Dashboard, zur Übersicht">${brandMark(d.id)}<span class="brand-text"><span class="brand-name">Pflege-Dashboard</span>${withWs ? `<span class="brand-ws">${C.workspace.name}</span>` : ''}</span></a>`;
 }
 
-function navItems(active, { labels = true } = {}) {
+function navItems(active, { labels = true, short = false } = {}) {
   return NAV.map(
     (n) =>
-      `<li><a class="nav-item${n.id === active ? ' is-active' : ''}" href="${n.href}"${n.id === active ? ' aria-current="page"' : ''}${labels ? '' : ` aria-label="${n.label}" title="${n.label}"`}>${icon(n.icon, { size: 18 })}<span class="nav-label">${n.label}</span>${n.count && labels ? `<span class="nav-count" aria-label="${n.count} offen">${n.count}</span>` : ''}</a></li>`,
+      `<li><a class="nav-item${n.id === active ? ' is-active' : ''}" href="${n.href}"${n.id === active ? ' aria-current="page"' : ''}${labels ? '' : ` aria-label="${n.label}" title="${n.label}"`}>${icon(n.icon, { size: 18 })}<span class="nav-label">${short && n.short ? n.short : n.label}</span>${n.count && labels ? `<span class="nav-count" aria-label="${n.count} offen">${n.count}</span>` : ''}</a></li>`,
   ).join('');
 }
 
@@ -102,7 +102,7 @@ function shell(d, active, main, { compact = false } = {}) {
   } else {
     nav = `<nav class="nav nav-rail" aria-label="Hauptnavigation">
   ${brand(d)}
-  <ul class="nav-list">${navItems(active)}</ul>
+  <ul class="nav-list">${navItems(active, { short: true })}</ul>
   <div class="nav-foot">${themeToggle()}${avatar(C.user.initials)}</div>
 </nav>`;
   }
@@ -158,7 +158,7 @@ export function login(d) {
     side = `<section class="login-side" aria-label="Über das Produkt">
   ${spray({ w: 520, h: 420, n: 340, seed: 23, cls: 'g-spray login-spray', cx: 0.78, cy: 0.3 })}
   ${brand(d)}
-  <p class="login-claim">Pflege&shy;kram,<br>sauber erledigt.</p>
+  <p class="login-claim">Pflege&shy;anträge ohne Papier&shy;chaos.</p>
   ${tagLine({ w: 280, cls: 'g-tagline login-tag' })}
   <p class="login-sub">Ihr KI-Sachbearbeiter für Anträge, Fristen und Schreiben – rund um die Uhr, mit Bestätigung vor jedem Schritt.</p>
   ${points}
@@ -200,7 +200,7 @@ function personCard(d, r, i) {
 </article>`;
 }
 
-function askCard(d) {
+function askCard(d, extra = '') {
   return `<section class="card ask" aria-labelledby="ask-title">
   <div class="ask-head">
     <span class="ask-icon">${icon('message-square-text', { size: 20 })}</span>
@@ -208,11 +208,12 @@ function askCard(d) {
   </div>
   <form class="ask-form" action="#" onsubmit="return false">
     <label class="sr-only" for="ask-input">Ihre Frage</label>
-    <input id="ask-input" class="ask-input" type="text" placeholder="Zum Beispiel: Was muss in den Widerspruch?">
+    <input id="ask-input" class="ask-input" type="text" placeholder="${d.id === 'linie' ? 'Ihre Frage …' : d.id === 'tagwerk' ? 'Was muss in den Widerspruch?' : 'Zum Beispiel: Was muss in den Widerspruch?'}">
     <button class="btn btn-primary" type="submit">Fragen${icon('arrow-up', { size: 16 })}</button>
   </form>
   <div class="ask-prompts">${C.askPrompts.map((p) => `<button class="chip" type="button">${p}</button>`).join('')}</div>
   <p class="ask-meta"><span>${icon('pen-line', { size: 14 })}Modus: Auskunft + Erstellen</span><span>${icon('cpu', { size: 14 })}Claude Sonnet <span class="region">US</span></span></p>
+  ${extra}
 </section>`;
 }
 
@@ -238,9 +239,9 @@ function taskList(d) {
 
 function docList(d) {
   const rows = C.documents
-    .slice(0, d.id === 'linie' ? 4 : 3)
+    .slice(0, 3)
     .map(
-      (x) => `<li class="row doc">${icon('file-text', { size: 17, cls: 'row-icon' })}<span class="row-main"><span class="row-title">${x.title}</span><span class="row-sub">${x.who} · ${x.when}</span></span>${statusPill(x.status, x.statusLabel, d)}</li>`,
+      (x) => `<li class="row doc">${icon('file-text', { size: 17, cls: 'row-icon' })}<span class="row-main"><span class="row-title">${x.title}</span><span class="row-sub doc-sub">${statusPill(x.status, x.statusLabel, d)}<span>${x.who} · ${x.when}</span></span></span></li>`,
     )
     .join('');
   return `<section class="card list-card docs" aria-labelledby="docs-title">
@@ -267,14 +268,12 @@ export function dashboard(d) {
   <div><p class="eyebrow">${C.today.long}</p><h1>Guten Morgen, ${C.user.salutation}</h1></div>
   <div class="head-actions"><button class="btn btn-secondary" type="button">${icon('plus', { size: 16 })}Aufgabe</button><a class="btn btn-primary" href="chat.html">${icon('message-square-text', { size: 16 })}Sachbearbeiter fragen</a></div>
 </header>`;
-  const main = `${head}
-<div class="dash">
-  <div class="persons">${C.recipients.map((r, i) => personCard(d, r, i)).join('')}</div>
-  ${askCard(d)}
-  ${taskList(d)}
-  ${docList(d)}
-  ${convList(d, d.id === 'linie' ? 3 : 2)}
-</div>`;
+  const persons = `<div class="persons">${C.recipients.map((r, i) => personCard(d, r, i)).join('')}</div>`;
+  let parts;
+  if (d.id === 'klartext') parts = [askCard(d), persons, taskList(d), docList(d), convList(d, 2)];
+  else if (d.id === 'tagwerk') parts = [persons, askCard(d, convList(d, 2)), taskList(d), docList(d)];
+  else parts = [persons, askCard(d), taskList(d), docList(d), convList(d, 2)];
+  const main = `${head}\n<div class="dash">${parts.join('\n')}</div>`;
   return shell(d, 'dashboard', main);
 }
 
@@ -283,7 +282,7 @@ export function dashboard(d) {
 function convSidebar(d) {
   return `<aside class="conv-list" aria-label="Gespräche">
   <div class="conv-head"><h2>Gespräche</h2><button class="icon-btn" type="button" aria-label="Neues Gespräch">${icon('square-pen', { size: 18 })}</button></div>
-  <div class="input input-sm">${icon('search', { size: 16 })}<label class="sr-only" for="conv-search">Gespräche durchsuchen</label><input id="conv-search" type="search" placeholder="Gespräche durchsuchen"></div>
+  <div class="input input-sm">${icon('search', { size: 16 })}<label class="sr-only" for="conv-search">Gespräche durchsuchen</label><input id="conv-search" type="search" placeholder="Suchen"></div>
   <ul class="conv-items">${C.conversations
     .map(
       (c) => `<li><a class="conv-item${c.active ? ' is-active' : ''}" href="#"${c.active ? ' aria-current="true"' : ''}><span class="conv-title">${c.title}</span><span class="conv-when">${c.when}</span><span class="conv-who">${icon(c.who === 'Allgemein' ? 'messages-square' : 'user-round', { size: 13 })}${c.who}</span></a></li>`,
@@ -304,19 +303,13 @@ function letterPreview(x, { cls = '' } = {}) {
 
 function createdDoc(d) {
   const x = C.chat.created;
-  let mark = '';
-  if (d.id === 'klartext') mark = check({ size: 26, cls: 'g-check created-check' });
-  if (d.id === 'linie') mark = `<span class="created-ok">${icon('check', { size: 15 })}</span>`;
-  const preview = d.id === 'tagwerk' ? letterPreview(x, { cls: 'letter-mini' }) : '';
+  let mark = `<span class="created-ok">${icon('check', { size: 15 })}</span>`;
+  if (d.id === 'klartext') mark = check({ size: 30, cls: 'g-check created-check' });
   return `<div class="tool-result created" role="group" aria-label="Erstelltes Dokument">
-  <div class="created-head">${mark}<span class="created-kicker">Dokument erstellt · ${x.when}</span></div>
-  <div class="created-body">
-    ${icon('file-text', { size: 18, cls: 'created-icon' })}
-    <span class="row-main"><span class="row-title">${x.title}</span><span class="row-sub">${x.kind} an ${x.to} · Entwurf</span></span>
-    <a class="btn btn-secondary btn-sm" href="#">Öffnen</a>
-  </div>
-  ${preview}
-  ${d.id === 'tagwerk' ? stamp({ id: 'chat-stamp', cls: 'g-stamp created-stamp' }) : ''}
+  ${mark}
+  <span class="row-main"><span class="created-kicker">Dokument erstellt · ${x.kind} · ${x.when}</span><span class="row-title">${x.title}</span></span>
+  ${d.id === 'tagwerk' ? stamp({ id: 'chat-stamp', cls: 'g-stamp created-stamp', sub: '' }) : ''}
+  <a class="btn btn-secondary btn-sm" href="#">Öffnen</a>
 </div>`;
 }
 
@@ -328,17 +321,18 @@ function confirmCard(d) {
     <div><p class="confirm-kicker">Vorschlag · wartet auf Ihre Bestätigung</p><h3 id="confirm-q" class="confirm-q">${x.question}</h3></div>
     ${d.id === 'linie' ? '<span class="pill pill-entwurf">Entwurf</span>' : '<span class="tape">Entwurf</span>'}
   </header>
-  <div class="confirm-grid">
-    <dl class="confirm-facts">
-      <div><dt>Art</dt><dd>${x.type}</dd></div>
-      <div><dt>Für</dt><dd>${x.for}</dd></div>
-      <div><dt>An</dt><dd>${x.to}</dd></div>
-    </dl>
-    ${letterPreview(x, { cls: 'letter-preview' })}
+  <dl class="confirm-facts">
+    <div><dt>Art</dt><dd>${x.type}</dd></div>
+    <div><dt>Für</dt><dd>${x.for}</dd></div>
+    <div><dt>An</dt><dd>${x.to}</dd></div>
+  </dl>
+  <div class="letter letter-preview" aria-label="Vorschau des Entwurfs">
+    <p class="letter-subject">${x.subject}</p>
+    ${x.lines.slice(1).map((l) => `<p>${l}</p>`).join('')}
   </div>
   <footer class="confirm-foot">
     <p class="confirm-note">${icon('info', { size: 14 })}${x.note}</p>
-    <div class="confirm-actions"><button class="btn btn-ghost" type="button">Verwerfen</button><button class="btn btn-secondary" type="button">${icon('pencil', { size: 15 })}Bearbeiten</button><button class="btn btn-primary" type="button">${icon('check', { size: 16 })}Entwurf erstellen</button></div>
+    <div class="confirm-actions"><button class="btn btn-ghost btn-sm" type="button">Verwerfen</button><button class="btn btn-secondary btn-sm" type="button">${icon('pencil', { size: 15 })}Bearbeiten</button><button class="btn btn-primary btn-sm" type="button">${icon('check', { size: 16 })}Entwurf erstellen</button></div>
   </footer>
 </section>`;
 }
@@ -355,6 +349,8 @@ function docPanel(d) {
     <p class="paper-date">Bremen, ${C.today.short}</p>
     <p class="paper-subject">Bitte um Zusendung des Gutachtens<br><span>Versicherte: Ingrid Brandt</span></p>
     ${x.lines.map((l) => `<p>${l}</p>`).join('')}
+    <p>Für Rückfragen erreichen Sie mich unter der oben genannten Anschrift.</p>
+    <p>Mit freundlichen Grüßen<br>Sabine Keller</p>
   </div>
   <div class="doc-panel-actions"><a class="btn btn-secondary btn-sm" href="#">${icon('file-text', { size: 15 })}PDF</a><a class="btn btn-secondary btn-sm" href="#">${icon('file-text', { size: 15 })}DOCX</a><a class="btn btn-secondary btn-sm" href="#">Im Editor öffnen</a></div>
 </aside>`;
@@ -364,12 +360,12 @@ export function chat(d) {
   const ch = C.chat;
   const head = `<header class="thread-head">
   <div class="thread-title"><h1>${ch.title}</h1>
-    <a class="person-chip" href="#">${avatar('IB', 'avatar-xs tone-0')}${ch.person}<span class="muted">· ${ch.personMeta}</span></a>
+    <a class="person-chip" href="#">${avatar('IB', 'avatar-xs tone-0')}${ch.person}<span class="muted">· ${d.id === 'linie' ? 'Pflegegrad 3' : ch.personMeta}</span></a>
   </div>
   <div class="thread-tools">
     <span class="mode-chip" title="Modus ${ch.modeNote}">${icon('pen-line', { size: 14 })}${ch.mode}</span>
     <button class="model-btn" type="button" aria-haspopup="listbox" aria-label="Modell wählen, aktuell ${ch.model}, Region ${ch.modelRegion}">${icon('cpu', { size: 15 })}${ch.model}<span class="region">${ch.modelRegion}</span>${icon('chevron-down', { size: 15 })}</button>
-    <button class="btn btn-secondary btn-sm" type="button">${icon('headset', { size: 15 })}An Menschen übergeben</button>
+    <button class="btn btn-secondary btn-sm" type="button"${d.id === 'linie' ? ' aria-label="An Menschen übergeben" title="An Menschen übergeben"' : ''}>${icon('headset', { size: 15 })}${d.id === 'linie' ? 'Übergeben' : 'An Menschen übergeben'}</button>
   </div>
 </header>`;
   const msgs = `<div class="messages" role="log" aria-label="Verlauf">
@@ -377,7 +373,7 @@ export function chat(d) {
   <div class="msg msg-agent">
     <div class="msg-meta">${icon('message-square-text', { size: 14 })}<strong>KI-Sachbearbeiter</strong><span class="muted">· ${ch.model} · 09:38</span></div>
     ${ch.agentMessage.map((p) => `<p>${md(p)}</p>`).join('')}
-    <p class="sources">${icon('quote', { size: 13 })}Quellen: ${ch.sources.map((s) => `<a href="#">${s}</a>`).join(' · ')}</p>
+    <p class="sources">${icon('quote', { size: 13 })}Quellen: ${ch.sources.map((s) => `<a href="#">${s}</a>`).join('<span class="sep" aria-hidden="true">·</span>')}</p>
   </div>
   ${createdDoc(d)}
   ${confirmCard(d)}
@@ -416,11 +412,11 @@ export function einstellungen(d) {
 </section>`;
   const P = S.persona;
   const persona = `<section class="card set-card" aria-labelledby="s-persona">
-  <header class="card-head"><h2 id="s-persona">Persona und Systemprompt</h2><span class="ver">${P.version}</span></header>
+  <header class="card-head"><h2 id="s-persona">Persona und Systemprompt</h2><span class="ver">${P.version} · aktiv</span></header>
   <p class="persona-name">${P.name}<span class="muted small"> · ${P.changed}</span></p>
   <blockquote class="prompt">${P.excerpt}</blockquote>
   <div class="persona-foot">
-    <div class="versions" role="list" aria-label="Versionen">${P.versions.map((v) => `<span role="listitem" class="ver-chip${v.active ? ' is-on' : ''}">${v.v}<span class="muted"> · ${v.note}</span></span>`).join('')}</div>
+    <div class="versions" role="list" aria-label="Versionen">${P.versions.map((v) => `<span role="listitem" class="ver-chip${v.active ? ' is-on' : ''}">${v.v}<span class="muted">&nbsp;· ${v.note}</span></span>`).join('')}</div>
     <div class="persona-actions"><button class="btn btn-ghost btn-sm" type="button">${icon('rotate-ccw', { size: 15 })}Auf Standard zurücksetzen</button><button class="btn btn-secondary btn-sm" type="button">${icon('pencil', { size: 15 })}Bearbeiten</button></div>
   </div>
 </section>`;
@@ -429,7 +425,7 @@ export function einstellungen(d) {
   <ul class="model-rows">${S.models
     .map(
       (m) => `<li class="model-row${m.enabled ? '' : ' is-off'}">
-    <span class="model-radio${m.default ? ' is-on' : ''}" role="radio" aria-checked="${m.default ? 'true' : 'false'}" aria-label="${m.name} als Standard"></span>
+    <label class="model-radio${m.default ? ' is-on' : ''}"><input type="radio" name="std-model" value="${m.name}"${m.default ? ' checked' : ''}${m.enabled ? '' : ' disabled'}><span class="sr-only">${m.name} als Standard</span><span class="dot" aria-hidden="true"></span></label>
     <span class="model-main"><span class="model-name">${m.name}${m.default ? '<span class="std">Standard</span>' : ''}</span><span class="model-sub">${m.provider} · ${m.tools ? 'Werkzeuge' : ''}${m.vision ? ' · Bilder' : ' · ohne Bilder'}${m.pending ? ` · ${m.pending}` : ''}</span></span>
     <span class="region region-${m.region.toLowerCase()}" title="Hosting-Region (Planung)">${m.region}</span>
     ${toggle(m.enabled, `${m.name} aktiv`)}
@@ -476,10 +472,10 @@ export function motion(d) {
   ${letterPreview(C.chat.confirm, { cls: 'letter-preview' })}
 </div>`;
   } else {
-    stage = `<div class="m-card tool-result created">
-  <div class="created-head"><span class="created-kicker">Dokument erstellt · 09:41</span></div>
-  <div class="created-body">${icon('file-text', { size: 18, cls: 'created-icon' })}<span class="row-main"><span class="row-title">Widerspruch gegen Bescheid vom 12.09.2026</span><span class="row-sub">Brief an Pflegekasse Weserland · Entwurf</span></span></div>
-  ${letterPreview(C.chat.confirm, { cls: 'letter-mini' })}
+    stage = `<div class="m-card card m-doc">
+  <p class="created-kicker">Dokument erstellt · Brief · 09:41</p>
+  <p class="m-doc-title">Widerspruch gegen Bescheid vom 12.09.2026</p>
+  <div class="letter letter-preview"><p class="letter-subject">${C.chat.confirm.subject}</p>${C.chat.confirm.lines.map((l) => `<p>${l}</p>`).join('')}</div>
   ${stamp({ id: 'm-stamp', cls: 'g-stamp created-stamp anim-stamp', sub: '06.10.2026 · 09:41' })}
 </div>`;
   }

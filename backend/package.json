@@ -1,0 +1,23 @@
+{
+  "name": "pflege-dashboard-backend-phase0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:phase0": "node scripts/phase0-check.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "supabase:start": "node scripts/supabase-safe.mjs start",
+    "supabase:status": "node scripts/supabase-safe.mjs status",
+    "supabase:reset": "node scripts/supabase-safe.mjs reset",
+    "supabase:test": "node scripts/supabase-safe.mjs test",
+    "supabase:types": "node scripts/supabase-safe.mjs types",
+    "supabase:stop": "node scripts/supabase-safe.mjs stop"
+  },
+  "devDependencies": {
+    "pg": "8.23.1",
+    "supabase": "2.119.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.3",
+    "vitest": "5.0.3"
+  }
+}

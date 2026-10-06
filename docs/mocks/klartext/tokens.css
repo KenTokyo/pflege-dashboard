@@ -1,0 +1,65 @@
+/* Generiert aus tools/tokens.mjs – nicht von Hand ändern. Richtung: Klartext */
+:root {
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-display: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --fs-base: 15px;
+  --fs-small: 13px;
+  --fs-h1: 24px;
+  --fs-h2: 16px;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --row-h: 44px;
+  --control-h: 40px;
+  --icon-stroke: 1.6;
+  color-scheme: dark;
+  --bg: #0A1214;
+  --surface: #101B1E;
+  --surface2: #162428;
+  --sunken: #0D1619;
+  --border: #203137;
+  --border-strong: #5F787E;
+  --text: #E4EFF0;
+  --text-muted: #95ABB0;
+  --accent: #2FB3A3;
+  --on-accent: #03201C;
+  --accent-text: #63D6C7;
+  --accent-soft: rgba(47,179,163,0.15);
+  --danger: #FF8B7E;
+  --danger-soft: rgba(255,139,126,0.13);
+  --warning: #F1C452;
+  --warning-soft: rgba(241,196,82,0.13);
+  --success: #62D292;
+  --success-soft: rgba(98,210,146,0.13);
+  --marker: #F5D547;
+  --focus: #7FE5D8;
+  --banner-bg: #2A2410;
+  --banner-text: #F6DE86;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 10px 28px rgba(0,0,0,0.32);
+}
+:root[data-theme='hell'] {
+  color-scheme: light;
+  --bg: #F2F5F5;
+  --surface: #FFFFFF;
+  --surface2: #EDF2F2;
+  --sunken: #F5F8F8;
+  --border: #D4DEE0;
+  --border-strong: #7A8E92;
+  --text: #0F1F21;
+  --text-muted: #4B6064;
+  --accent: #0A6E64;
+  --on-accent: #FFFFFF;
+  --accent-text: #08665D;
+  --accent-soft: rgba(10,110,100,0.09);
+  --danger: #B42318;
+  --danger-soft: rgba(180,35,24,0.08);
+  --warning: #865200;
+  --warning-soft: rgba(214,160,20,0.15);
+  --success: #116F3E;
+  --success-soft: rgba(17,111,62,0.09);
+  --marker: #D9A300;
+  --focus: #0A6E64;
+  --banner-bg: #FFF5CC;
+  --banner-text: #5C4300;
+  --shadow: 0 1px 2px rgba(15,31,33,0.05), 0 8px 22px rgba(15,31,33,0.05);
+}

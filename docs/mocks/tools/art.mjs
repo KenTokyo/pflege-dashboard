@@ -47,13 +47,13 @@ export function check({ size = 28, cls = 'g-check', width = 3.2, color = 'var(--
 
 /** Stempel mit rauem Rand (SVG-Filter), Text bleibt echter Text. */
 export function stamp({ text = 'Erstellt', sub = '06.10.2026 · 09:38', cls = 'g-stamp', id = 'st' } = {}) {
-  return `<svg class="${cls}" viewBox="0 0 168 74" width="168" height="74" role="img" aria-label="Stempel: ${text}, ${sub}">
+  return `<svg class="${cls}" viewBox="0 0 168 74" width="168" height="74" role="img" aria-label="Stempel: ${text}${sub ? `, ${sub}` : ''}">
 <defs><filter id="${id}-rough" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs>
 <g filter="url(#${id}-rough)" fill="none" stroke="var(--marker)">
 <rect x="3" y="3" width="162" height="68" rx="9" stroke-width="3"/>
 <rect x="9" y="9" width="150" height="56" rx="5" stroke-width="1.4"/>
-<text x="84" y="40" text-anchor="middle" fill="var(--marker)" stroke="none" font-family="var(--font-display)" font-size="23" font-weight="800" letter-spacing="2.5">${text.toUpperCase()}</text>
-<text x="84" y="56" text-anchor="middle" fill="var(--marker)" stroke="none" font-family="var(--font-body)" font-size="10.5" font-weight="700" letter-spacing="0.6">${sub}</text>
+<text x="84" y="${sub ? 40 : 46}" text-anchor="middle" fill="var(--marker)" stroke="none" font-family="var(--font-display)" font-size="23" font-weight="800" letter-spacing="2.5">${text.toUpperCase()}</text>
+${sub ? `<text x="84" y="56" text-anchor="middle" fill="var(--marker)" stroke="none" font-family="var(--font-body)" font-size="10.5" font-weight="700" letter-spacing="0.6">${sub}</text>` : ''}
 </g></svg>`;
 }
 

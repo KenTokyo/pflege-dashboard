@@ -1,7 +1,15 @@
-/** Vertrag v0.1. HTTP-/SSE-Typen sind PLANNED Phase 1/2, keine laufende Engine. */
+/** Vertrag v0.2. HTTP-/SSE und neue Metadaten-RPCs sind PLANNED Phase 1/2. */
 export type UUID = string;
 export type AgentMode = 'answer_only' | 'create';
 export type DocumentStatus = 'draft' | 'reviewed' | 'sent';
+/** PLANNED Phase 1. No matching DB function is implemented in Phase 0. */
+export type CreateConversationArgs = {
+  p_workspace_id: UUID; p_title: string; p_care_recipient_id: UUID | null; p_idempotency_key: UUID;
+};
+/** PLANNED Phase 1; null removes the recipient association. */
+export type AssignConversationRecipientArgs = {
+  p_conversation_id: UUID; p_care_recipient_id: UUID | null; p_expected_revision: number;
+};
 export type ProposalKind = 'document' | 'task' | 'note' | 'handover';
 export type ModelSnapshot = {
   registryId: UUID; provider: 'openai' | 'anthropic' | 'mistral';

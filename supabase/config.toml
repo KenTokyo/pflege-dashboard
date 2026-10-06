@@ -69,3 +69,6 @@ enabled = false
 [analytics]
 enabled = false
 port = 56427
+
+[experimental]
+stack = true

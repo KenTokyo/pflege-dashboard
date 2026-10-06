@@ -8,7 +8,9 @@
     "build": "node tools/build.mjs",
     "check": "node tools/check-source.mjs",
     "render": "node tools/render.mjs",
-    "check:png": "node tools/check-png.mjs"
+    "check:png": "node tools/check-png.mjs",
+    "check:abort": "sh tools/abort-test.sh",
+    "all": "node tools/build.mjs && node tools/check-source.mjs && node tools/render.mjs && node tools/check-png.mjs"
   },
   "devDependencies": {
     "playwright-core": "1.63.0",

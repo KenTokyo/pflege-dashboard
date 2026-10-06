@@ -1,0 +1,80 @@
+/* Richtung „Linie“ – sehr dezent. Dichte Arbeitsfläche, Seitenleiste, ein einziger Friststrich. */
+body { letter-spacing: -0.003em; }
+h1, h2, h3 { letter-spacing: -0.012em; }
+.page-head h1 { font-weight: 600; }
+.card { box-shadow: none; }
+.card-head h2 { font-weight: 600; }
+
+/* Seitenleiste wie in ruhigen Arbeitswerkzeugen: 236px, Zeilen 34px */
+.nav-sidebar {
+  display: flex; flex-direction: column; gap: 2px; min-height: 0;
+  padding: 12px 10px; border-right: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 55%, var(--bg));
+}
+.nav-top { padding: 2px 4px 10px; }
+.nav-search {
+  display: flex; align-items: center; gap: 8px; height: 32px; margin: 0 2px 8px; padding: 0 10px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-muted); font-size: var(--fs-small);
+}
+.nav-search kbd { margin-left: auto; font: 600 12px var(--font-body); color: var(--text-muted); }
+.nav-sidebar .nav-list { display: flex; flex-direction: column; gap: 1px; }
+.nav-section { margin: 16px 10px 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.nav-people .nav-item { gap: 9px; }
+.nav-people .nav-meta { margin-left: auto; }
+.nav-foot { margin-top: auto; display: flex; align-items: center; gap: 10px; padding: 10px 6px 2px; border-top: 1px solid var(--border); }
+.nav-user { display: flex; flex-direction: column; min-width: 0; flex: 1; font-size: var(--fs-small); font-weight: 600; line-height: 1.3; }
+.nav-sidebar.is-compact { align-items: center; padding: 12px 8px; }
+.nav-sidebar.is-compact .brand-text, .nav-sidebar.is-compact .nav-label { display: none; }
+.nav-sidebar.is-compact .nav-item { width: 40px; height: 40px; padding: 0; justify-content: center; }
+.nav-sidebar.is-compact .nav-foot { flex-direction: column; border-top: 0; padding: 8px 0 0; }
+
+/* Dashboard: Personen + Einstieg oben, Fristenliste links unten */
+.ask { display: flex; flex-direction: column; }
+.ask-meta { margin-top: auto; padding-top: 12px; }
+.ask-prompts { display: none; }
+.ask-title { font-size: 17px; }
+.dl-underline { bottom: -7px; }
+.list-card { padding: 12px 16px; }
+.list-card .card-head { margin-bottom: 2px; }
+.row { padding: 5px 0; min-height: 44px; }
+.person { padding: 14px 16px; }
+
+/* Chat */
+.thread-tools { gap: 6px; }
+.confirm-note { font-size: 12.5px; }
+.confirm-actions { gap: 6px; }
+.doc-panel .paper { font-size: 12.5px; padding: 14px 16px; }
+
+/* Login: ruhiges Raster, kein Bild */
+.login-side {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 70%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-position: -1px -1px;
+  border-right: 1px solid var(--border);
+}
+.login-side::before { content: ''; position: absolute; inset: 0; background: radial-gradient(120% 90% at 30% 50%, transparent 0%, var(--bg) 78%); pointer-events: none; }
+.login-side > * { position: relative; }
+.login-claim { font-weight: 600; font-size: 32px; letter-spacing: -0.025em; }
+.login-underline { bottom: -6px; }
+.login-panel { background: var(--surface); }
+.login-points li > .i { color: var(--text-muted); }
+
+/* Nur Desktop: Raster und Abstände der Arbeitsfläche (schmale Ansichten regelt base.css) */
+@media (min-width: 1024px) {
+  .app-sidebar { grid-template-columns: 236px minmax(0, 1fr); }
+  .app-sidebar.app-compact { grid-template-columns: 60px minmax(0, 1fr); }
+  .dash {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-areas: 'persons persons ask' 'tasks tasks docs' 'tasks tasks convs';
+    grid-template-rows: auto auto 1fr;
+  }
+  .main { padding: 18px 26px 18px; }
+  .page-head { margin-bottom: 14px; }
+  .chat-layout.has-panel { grid-template-columns: 224px minmax(0, 1fr) 288px; }
+  .thread-head { padding: 7px 18px; gap: 8px 12px; }
+  .messages { padding: 8px 18px 4px; gap: 8px; }
+  .letter-preview { margin: 4px 0 6px 46px; }
+  .composer { padding: 6px 18px 8px; }
+}

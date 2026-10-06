@@ -10,15 +10,15 @@
 - [x] Eigenständigen Zielordner und Git-Repository anlegen; Anforderungen unverändert kopieren.
 - [x] Modelle/Optionen live prüfen und nach Nutzerkorrektur genau starten: `claudeAgent/claude-opus-5-5`, `effort: high`; `codex/gpt-6.1-sol`, `reasoningEffort: xhigh`. `capabilities` zeigte nur alte Favoriten; fehlender Eintrag war kein Beleg fehlender Startfähigkeit. Opus-Kennung im lokalen TreeChat-Modellregister zusätzlich geprüft, beide Startwerte vom Tool akzeptiert.
 - [x] Genau zwei lokale TreeChat-Unterchats mit vollständigem Phase-0-Brief aktiv: Frontend `agent-c2f0c080d724ad307a7f96d6f7c0dbfa`, Backend `agent-57aea06487987ff6370bde548102f71b`. Beide lokal, full-access, Abschlussmeldung aktiv. Die anfänglichen Läufe mit älteren Modellen wurden vor der Übernahme unterbrochen und archiviert. Nutzer erlaubt jetzt maximal vier, es werden hier nur zwei benötigt.
-- [ ] Backend: Schema, RLS, privater Storage, fiktiver Seed, lokales Supabase, generierte Typen und API-Vertrag.
+- [x] Backend: Schema, RLS, privater Storage, fiktiver Seed, lokales Supabase, generierte Typen und API-Vertrag. Nach ausdrücklicher Fortsetzung abgeschlossen; aktueller Bericht `docs/backend-pruefung.md`.
 - [x] Zusätzlichen Hosting-Unterchat nach ausdrücklicher Nutzerfreigabe starten: `agent-383586b96982be3fde65afc5600c333f`, GPT-6.1 Sol / xhigh. Insgesamt drei aktiv. Alter unterbrochener Backend-Lauf auf automatische Meldung gelesen; nur Pflichtdateilesen, keine Lieferung/Änderungen, bleibt gestoppt.
 - [ ] Hosted-Projekt/geschützte `.env`: blockiert. Hauptchat und Hosting-Unterchat bestätigen `available: false` / `BrowserHostUnavailable`, kein ChatGPT-Browser-Plugin-Connector. Vorlage/Anleitung liegen als Entwurf vor, sind nach letzter Nutzergrenze keine akzeptierte Ersatzlieferung.
 - [x] Nach Nutzergrenze „nur wenn es geht mit supabase oder garnicht“ Backend- und Hosting-Unterchat unterbrechen. Kein PostgreSQL-Ersatz. Keine Accounts/echte `.env`/Online-Projektanlage. Klärung, ob Designs unabhängig weitergehen oder das ganze Projekt stoppen soll, steht aus.
 - [x] Auf Wunsch ChatGPT Browser Use / Computer Use gezielt erneut im vollständigen Tool-Inventar suchen: beide nicht eingebunden, kein Tool-Such-/Nachladeanschluss; TreeChat `browser_status` erneut `available:false`. Der Online-Schritt bleibt unerledigt. Keine weitere Ersatzarbeit.
 - [x] Bis zur Klärung bzw. tatsächlichem Supabase-Anschluss auch Frontend unterbrechen. Alle drei aktuellen Unterchats sind `interrupted`; kein eigenständiger Neustart. Eigenen Prüfbrowserstand kontrolliert: laufender Testbrowser gehört nach CWD-Prüfung zum fremden NoteTree-Projekt und bleibt unangetastet; kein eigener Pflege-Dashboard-Browser-/PostgreSQL-Prozess vorhanden.
-- [ ] Frontend: 24 vollständige PNGs aus statischen HTML-Mocks, drei Bewegungsfolgen, kurze Vorstellung je Richtung.
-- [ ] Orchestrator prüft Berichte, Dateien, relevante Node-/SQL-Prüfungen und Bilder selbst. Nacharbeit an denselben Agenten.
-- [ ] Geprüften Phase-0-Meilenstein lokal committen; Gate-Bericht und Bilder im Hauptchat.
+- [x] Frontend: 24 vollständige PNGs aus statischen HTML-Mocks, drei Bewegungsfolgen, kurze Vorstellung je Richtung.
+- [x] Nach jüngster Nutzerkorrektur erledigen und prüfen die Agenten ihre Bereiche selbstständig; Orchestrator führt Lieferungen, Vertrag und Ergebnisbelege zusammen. Erste unabhängige Prüfungen und frühere Nacharbeit sind im Verlauf erhalten.
+- [x] Gemeinsamen Phase-0-Meilenstein zur lokalen Sicherung zusammenführen; Gate-Bericht `docs/gates/2026-10-06-phase0-designwahl.md`. Commit erfolgt vor der Übergabe im Hauptchat, kein Push.
 - [ ] Nutzer wählt Designrichtung. Bis dahin bleibt die App-UI ungebaut.
 
 Ergebnis: Vorbereitung lokal committed (`02c7ad8`); aktueller Entwurfsstand wird als unfertiger Zwischenstand gesichert. API-Vertrag v0.1 und geplante API-Typen wurden früh gelesen, Schema/Seed sind unvollständig geprüfte Entwürfe. Alle Agenten nach letzter Nutzergrenze gestoppt, echtes Supabase mangels Anschluss/Runtime nicht eingerichtet. Keine fertigen 24 Mock-PNGs, keine Phase-0-Abnahme, keine App-UI. Pfade: `docs/mocks/`, `docs/api-contract.md`, `supabase/`.
@@ -44,6 +44,18 @@ Fortsetzung nach direkter Nutzerfreigabe: Werte aus `env.md` geschützt in `.env
 - [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
 
 Ergebnis: Hosted-Projekt, `.env`, Auth-Grundeinstellungen und MCP funktionieren und wurden real geprüft. Anwendungstabellen noch nicht übernommen: paralleler Backend-Bericht nennt Storage-Migrationsfehler `must be owner of table objects`; Schema-/Seed-/RLS-Gate offen. Geheimnisse ausschließlich lokal gespeichert, nicht ausgegeben oder committed. Keine eigenen Browser-/Serverprozesse; DB-Verbindungen geschlossen, Nutzer-Tab erhalten. Browser-Finding: zwei Playwright-Linkklicks meldeten Timeouts trotz sichtbarem Link; frischer AX-Zustand und Klick auf dessen aktuelle Elementnummer funktionierten. Pfade: `docs/supabase-provisioning.md`, `docs/backend-runtime-pruefung.md`, `.env.example`.
+
+## Orchestrator-Fortsetzung: echtes lokales Supabase und Design-Nacharbeit
+
+Die direkte Nutzer-Nachricht „Bitte mach mit deiner Aufgabe weiter.“ wurde in beiden ursprünglichen Unterchats verifiziert. Die früheren Unterbrechungseinträge sind historisch; Frontend und Backend arbeiten wieder. Der Orchestrator hat keinen Ersatzchat gestartet.
+
+- [x] Echte native Supabase-Laufzeit nachweisen: CLI 2.119.0, Database/REST/Auth/Storage gesund, begrenzte HTTP-Prüfungen erfolgreich. Eigene Ressourcen anschließend vom Orchestrator unabhängig als beendet geprüft. [Begrenzter Gate-Bericht](../gates/2026-10-06-supabase-native.md).
+- [x] Erste 12 Designbilder tatsächlich ansehen; konkrete Nacharbeit an denselben Frontend-Unterchat geben. Chat-Bestätigungsaktionen und Einstellungsaktionen müssen vollständig sichtbar werden; weitere Inhalts- und Browserfunde sind Teil desselben Auftrags.
+- [x] Derselbe Backend-Unterchat behebt den tatsächlich belegten Storage-Migrationsfehler und vervollständigt den ursprünglichen Phase-0-Auftrag in echtem Supabase: Migrationen, Seed, Zugriffs-/RPC-/Storage-/Audit-Tests, generierte Typen und korrigierter Vertrag.
+- [x] Fertige Berichte und sichere Ergebnisbelege zusammenführen. Nutzerkorrektur: keine weiteren kleinteiligen Feedbacks; Agenten erledigen eigene Nacharbeit und Prüfung vollständig selbst.
+- [x] 24 PNGs und drei Bewegungsfolgen zur Auswahl zusammenführen; lokal committen und im Hauptchat vorlegen. Keine Oberfläche vor Nutzerwahl.
+
+Dieser Backend-Auftrag enthält keine Hosted-Migration, Provideraufrufe, Kontoanlage, Browser- oder Env-Arbeit. Ein separat dokumentierter Hosting-Fortsetzungsstand ist kein Nachweis des lokalen Schema-Gates. Keine App-Oberfläche vor der Designwahl.
 
 ## Phase 1 – Fundament (nach Designwahl)
 

@@ -1,0 +1,323 @@
+{
+  "title": "Pflege-Dashboard · Phase 0 · Designrichtungen",
+  "note": "Statische HTML-Mocks mit fiktiven Daten. Keine App, keine Anmeldung, keine Netzwerkaufrufe.",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "directions": [
+    {
+      "id": "linie",
+      "name": "Linie",
+      "graffiti": "sehr dezent",
+      "nav": "sidebar",
+      "fonts": {
+        "body": "'Inter Variable', 'Inter', system-ui, sans-serif",
+        "display": "'Inter Variable', 'Inter', system-ui, sans-serif",
+        "mono": "'Inter Variable', system-ui, sans-serif"
+      },
+      "pitch": "Linie ist die leiseste Richtung: ein grafitgraues Werkzeug im Stil moderner Arbeitsoberflächen. Dichte, präzise Listen mit Inter, eine klare Seitenleiste und ein kühles Iris-Violett für Aktionen. Graffiti gibt es nur als einen einzigen handgezogenen Friststrich unter der nächsten Frist und einen kleinen Haken beim erstellten Dokument. Für ein Publikum, das vor allem Ruhe, Tempo und Seriosität sehen soll."
+    },
+    {
+      "id": "klartext",
+      "name": "Klartext",
+      "graffiti": "ausgewogen",
+      "nav": "top",
+      "fonts": {
+        "body": "'IBM Plex Sans', system-ui, sans-serif",
+        "display": "'IBM Plex Sans', system-ui, sans-serif",
+        "mono": "'IBM Plex Mono', ui-monospace, monospace"
+      },
+      "pitch": "Klartext wirkt wie ein sehr gutes Amtsportal, nur freundlicher: IBM Plex Sans mit Plex Mono für Daten und Fristen, Petrol als Vertrauensfarbe und eine waagerechte Navigation mit großzügigem Raster. Graffiti setzt gezielte Akzente: ein gelber Markerkreis um die dringendste Zahl, ein Klebestreifen auf „Entwurf“ und ein Haken, der sich beim Erstellen eines Dokuments selbst zeichnet. Für eine Präsentation, die Fachlichkeit und Wärme zugleich zeigen soll."
+    },
+    {
+      "id": "tagwerk",
+      "name": "Tagwerk",
+      "graffiti": "etwas mutiger",
+      "nav": "rail",
+      "fonts": {
+        "body": "'Atkinson Hyperlegible Next', system-ui, sans-serif",
+        "display": "'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif",
+        "mono": "'Atkinson Hyperlegible Next', system-ui, sans-serif"
+      },
+      "pitch": "Tagwerk ist die mutigste der drei Richtungen und trotzdem ein Arbeitswerkzeug: warmes Papier und Tinte, Bricolage Grotesque für markante Überschriften und Atkinson Hyperlegible Next für sehr gut lesbaren Text. Kobaltblau führt die Aktionen, ein Signalorange gehört allein dem Graffiti. Sprühpunkte und ein eigener Tag am Login, ein Stempel „Erstellt“ beim bestätigten Dokument und ein Markerkreis um die Frist. Für einen Auftritt, an den man sich nach der Vorführung erinnert."
+    }
+  ],
+  "screens": [
+    {
+      "direction": "linie",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "dunkel",
+      "html": "linie/login.html?theme=dunkel",
+      "png": "linie/login-dunkel.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "hell",
+      "html": "linie/login.html?theme=hell",
+      "png": "linie/login-hell.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "dunkel",
+      "html": "linie/dashboard.html?theme=dunkel",
+      "png": "linie/dashboard-dunkel.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "hell",
+      "html": "linie/dashboard.html?theme=hell",
+      "png": "linie/dashboard-hell.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "dunkel",
+      "html": "linie/chat.html?theme=dunkel",
+      "png": "linie/chat-dunkel.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "hell",
+      "html": "linie/chat.html?theme=hell",
+      "png": "linie/chat-hell.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "dunkel",
+      "html": "linie/einstellungen.html?theme=dunkel",
+      "png": "linie/einstellungen-dunkel.png"
+    },
+    {
+      "direction": "linie",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "hell",
+      "html": "linie/einstellungen.html?theme=hell",
+      "png": "linie/einstellungen-hell.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "dunkel",
+      "html": "klartext/login.html?theme=dunkel",
+      "png": "klartext/login-dunkel.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "hell",
+      "html": "klartext/login.html?theme=hell",
+      "png": "klartext/login-hell.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "dunkel",
+      "html": "klartext/dashboard.html?theme=dunkel",
+      "png": "klartext/dashboard-dunkel.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "hell",
+      "html": "klartext/dashboard.html?theme=hell",
+      "png": "klartext/dashboard-hell.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "dunkel",
+      "html": "klartext/chat.html?theme=dunkel",
+      "png": "klartext/chat-dunkel.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "hell",
+      "html": "klartext/chat.html?theme=hell",
+      "png": "klartext/chat-hell.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "dunkel",
+      "html": "klartext/einstellungen.html?theme=dunkel",
+      "png": "klartext/einstellungen-dunkel.png"
+    },
+    {
+      "direction": "klartext",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "hell",
+      "html": "klartext/einstellungen.html?theme=hell",
+      "png": "klartext/einstellungen-hell.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "dunkel",
+      "html": "tagwerk/login.html?theme=dunkel",
+      "png": "tagwerk/login-dunkel.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "login",
+      "screenTitle": "Login",
+      "theme": "hell",
+      "html": "tagwerk/login.html?theme=hell",
+      "png": "tagwerk/login-hell.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "dunkel",
+      "html": "tagwerk/dashboard.html?theme=dunkel",
+      "png": "tagwerk/dashboard-dunkel.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "dashboard",
+      "screenTitle": "Dashboard",
+      "theme": "hell",
+      "html": "tagwerk/dashboard.html?theme=hell",
+      "png": "tagwerk/dashboard-hell.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "dunkel",
+      "html": "tagwerk/chat.html?theme=dunkel",
+      "png": "tagwerk/chat-dunkel.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "chat",
+      "screenTitle": "Chat",
+      "theme": "hell",
+      "html": "tagwerk/chat.html?theme=hell",
+      "png": "tagwerk/chat-hell.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "dunkel",
+      "html": "tagwerk/einstellungen.html?theme=dunkel",
+      "png": "tagwerk/einstellungen-dunkel.png"
+    },
+    {
+      "direction": "tagwerk",
+      "screen": "einstellungen",
+      "screenTitle": "Einstellungen",
+      "theme": "hell",
+      "html": "tagwerk/einstellungen.html?theme=hell",
+      "png": "tagwerk/einstellungen-hell.png"
+    }
+  ],
+  "motion": [
+    {
+      "direction": "linie",
+      "name": "Friststrich",
+      "what": "Ein Markerstrich zieht sich unter die Widerspruchsfrist.",
+      "durationMs": 420,
+      "loops": false,
+      "reducedMotion": "kurze Einblendung (150 ms) des Endzustands",
+      "html": "linie/motion/index.html",
+      "frames": [
+        {
+          "t": 0,
+          "png": "linie/motion/frame-1-0ms.png"
+        },
+        {
+          "t": 140,
+          "png": "linie/motion/frame-2-140ms.png"
+        },
+        {
+          "t": 280,
+          "png": "linie/motion/frame-3-280ms.png"
+        },
+        {
+          "t": 420,
+          "png": "linie/motion/frame-4-420ms.png"
+        }
+      ]
+    },
+    {
+      "direction": "klartext",
+      "name": "Haken beim Erstellen",
+      "what": "Die Bestätigung kippt in „Erstellt“, ein Markerhaken zeichnet sich.",
+      "durationMs": 600,
+      "loops": false,
+      "reducedMotion": "kurze Einblendung (150 ms) des Endzustands",
+      "html": "klartext/motion/index.html",
+      "frames": [
+        {
+          "t": 0,
+          "png": "klartext/motion/frame-1-0ms.png"
+        },
+        {
+          "t": 200,
+          "png": "klartext/motion/frame-2-200ms.png"
+        },
+        {
+          "t": 400,
+          "png": "klartext/motion/frame-3-400ms.png"
+        },
+        {
+          "t": 600,
+          "png": "klartext/motion/frame-4-600ms.png"
+        }
+      ]
+    },
+    {
+      "direction": "tagwerk",
+      "name": "Stempel „Erstellt“",
+      "what": "Ein Stempel landet mit kurzem Überschwingen auf dem bestätigten Dokument.",
+      "durationMs": 560,
+      "loops": false,
+      "reducedMotion": "kurze Einblendung (150 ms) des Endzustands",
+      "html": "tagwerk/motion/index.html",
+      "frames": [
+        {
+          "t": 0,
+          "png": "tagwerk/motion/frame-1-0ms.png"
+        },
+        {
+          "t": 187,
+          "png": "tagwerk/motion/frame-2-187ms.png"
+        },
+        {
+          "t": 373,
+          "png": "tagwerk/motion/frame-3-373ms.png"
+        },
+        {
+          "t": 560,
+          "png": "tagwerk/motion/frame-4-560ms.png"
+        }
+      ]
+    }
+  ]
+}

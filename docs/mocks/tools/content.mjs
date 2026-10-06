@@ -51,8 +51,9 @@ export const recipients = [
 ];
 
 export const tasks = [
-  { title: 'Widerspruch an die Pflegekasse senden', who: 'Ingrid Brandt', due: '15.10.', left: '9 Tage', level: 'hoch', kind: 'Frist aus Bescheid', urgent: true },
+  // Sortiert nach Dringlichkeit (Fälligkeit). Die Widerspruchsfrist bleibt zusätzlich hervorgehoben.
   { title: 'Arztbericht bei Dr. Albers anfordern', who: 'Ingrid Brandt', due: '09.10.', left: '3 Tage', level: 'hoch', kind: 'Für die Begründung' },
+  { title: 'Widerspruch an die Pflegekasse senden', who: 'Ingrid Brandt', due: '15.10.', left: '9 Tage', level: 'hoch', kind: 'Frist aus Bescheid', urgent: true },
   { title: 'Antrag Verhinderungspflege einreichen', who: 'Werner Brandt', due: '20.10.', left: '14 Tage', level: 'mittel', kind: 'Eigene Planung' },
   { title: 'Rechnung Alltagshilfe September einreichen', who: 'Werner Brandt', due: '31.10.', left: '25 Tage', level: 'normal', kind: 'Entlastungsbetrag' },
   { title: 'Pflegetagebuch für die Begutachtung ergänzen', who: 'Ingrid Brandt', due: 'laufend', left: '', level: 'normal', kind: 'Notiz' },
@@ -86,12 +87,10 @@ export const chat = {
   modeNote: 'für dieses Gespräch',
   model: 'Claude Sonnet',
   modelRegion: 'US',
-  userMessage:
-    'Die Kasse hat die Höherstufung auf Pflegegrad 4 abgelehnt. Der Bescheid hängt an. Können Sie einen Widerspruch vorbereiten?',
+  userMessage: 'Die Kasse lehnt Pflegegrad 4 ab. Können Sie einen Widerspruch vorbereiten?',
   attachment: { name: 'Bescheid_Pflegekasse_12-09-2026.pdf', meta: 'PDF · 2 Seiten' },
   agentMessage: [
-    'Ja, gern. Laut Rechtsbehelfsbelehrung auf Seite 2 endet die Frist am **15.10.2026**. Bitte prüfen Sie dieses Datum selbst.',
-    'Das Gutachten zur Begutachtung liegt Ihnen noch nicht vor. Dafür habe ich zuerst eine Anforderung erstellt.',
+    'Gern. Laut Bescheid (S. 2) endet die Frist am **15.10.2026**, bitte prüfen. Zuerst habe ich das Gutachten angefordert.',
   ],
   sources: ['Bescheid vom 12.09.2026, S. 2', 'Pflegekasse / Pflegestützpunkt'],
   created: {
@@ -113,9 +112,9 @@ export const chat = {
     subject: 'Widerspruch gegen den Bescheid vom 12.09.2026',
     lines: [
       'Sehr geehrte Damen und Herren,',
-      'hiermit lege ich im Namen meiner Mutter Widerspruch gegen den Bescheid vom 12.09.2026 ein. Die Begründung reiche ich nach Erhalt des Gutachtens nach.',
+      'hiermit lege ich für meine Mutter Widerspruch gegen den Bescheid vom 12.09.2026 ein. Die Begründung folgt nach Erhalt des Gutachtens.',
     ],
-    note: 'Es wird nur ein Entwurf gespeichert. Versendet wird nichts.',
+    note: 'Nur Entwurf – nichts wird versendet.',
   },
   honesty: 'Keine Rechts- oder Medizinberatung. Fristen und Beträge nur aus Ihren Unterlagen.',
   composer: 'Nachricht an den Sachbearbeiter …',
@@ -124,17 +123,17 @@ export const chat = {
 export const settings = {
   modes: [
     { id: 'auskunft', title: 'Nur Auskunft', text: 'Beantwortet Fragen. Erstellt nichts.' },
-    { id: 'erstellen', title: 'Auskunft + Erstellen', text: 'Schlägt Briefe, Aufgaben und Notizen vor. Nur nach Ihrer Bestätigung.' },
+    { id: 'erstellen', title: 'Auskunft + Erstellen', text: 'Schlägt Briefe und Aufgaben vor – erst nach Bestätigung.' },
   ],
   activeMode: 'erstellen',
-  serverNote: 'Wird auf dem Server durchgesetzt. Im Modus „Nur Auskunft“ erhält das Modell keine Erstell-Werkzeuge.',
+  serverNote: 'Serverseitig durchgesetzt: Bei „Nur Auskunft“ erhält das Modell keine Erstell-Werkzeuge.',
   chatOverride: 'Einzelne Gespräche dürfen abweichen',
   persona: {
     name: 'Sachbearbeiter, sachlich und höflich',
     version: 'Version 3',
-    changed: 'geändert am 02.10.2026 von Sabine Keller',
+    changed: 'geändert am 02.10.2026',
     excerpt:
-      'Sie sind ein höflicher, genauer Sachbearbeiter für Pflegefragen. Sie siezen. Sie geben keine verbindliche Rechts- oder Medizinberatung, sagen offen, wenn Sie unsicher sind, und nennen die zuständige Stelle.',
+      'Sie sind ein höflicher, genauer Sachbearbeiter für Pflegefragen und siezen. Keine verbindliche Rechts- oder Medizinberatung. Bei Unsicherheit sagen Sie es und nennen die zuständige Stelle.',
     versions: [
       { v: 'Version 3', note: 'aktiv', active: true },
       { v: 'Version 2', note: '24.09.2026' },
@@ -164,7 +163,7 @@ export const login = {
   submit: 'Anmelden',
   forgot: 'Passwort vergessen?',
   access: 'Zugänge vergibt Ihre Verwaltung. Eine Selbstregistrierung gibt es nicht.',
-  timeout: 'Nach 30 Minuten ohne Aktivität werden Sie abgemeldet.',
+  timeout: 'Nach 15 Minuten ohne Aktivität werden Sie abgemeldet.',
   points: [
     { icon: 'calendar-clock', title: 'Fristen im Blick', text: 'Widerspruchsfristen und Termine nach Dringlichkeit.' },
     { icon: 'message-square-text', title: 'KI-Sachbearbeiter', text: 'Rund um die Uhr erreichbar. Erstellt nur nach Bestätigung.' },

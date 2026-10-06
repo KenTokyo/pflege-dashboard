@@ -5,7 +5,7 @@
 // - unsichtbar (headless), höchstens 1280×720, genau ein Browser gleichzeitig
 // - keine Flags, die Bildrate oder Hintergrund-Drosselung aufheben
 // - try/finally, externes Zeitlimit, Signalbereinigung, PID-Nachweis
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, realpathSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
@@ -80,16 +80,26 @@ function childPids(pid) {
 
 /**
  * Startet genau einen unsichtbaren Prüfbrowser, führt `work(browser, info)` aus
- * und räumt in jedem Fall auf. Gibt das Ergebnis von `work` und einen Bereinigungsnachweis zurück.
+ * und räumt in jedem Fall auf. Scheitert, wenn PID oder Flags nicht nachweisbar sind
+ * oder nach dem Aufräumen noch ein eigener Prozess lebt.
+ * Zwei Abbruchsicherungen: ein interner Timer und ein externer Wächterprozess
+ * (eigene Prozessgruppe), der Browsergruppe und Node-Prozess auch bei blockierter Event-Loop beendet.
  */
 export async function withTestBrowser(work, { timeoutMs = 180_000, label = 'mocks' } = {}) {
   const info = resolveTestBrowser();
+  const before = new Set(listTestBrowserPids());
   let browser = null;
   let pid = null;
   let family = [];
   let flagCheck = null;
+  let watcher = null;
 
   const hardKill = () => {
+    if (pid) {
+      try {
+        process.kill(-pid, 'SIGKILL'); // ganze Prozessgruppe des Browsers
+      } catch {}
+    }
     for (const p of [...family, pid].filter(Boolean)) {
       try {
         process.kill(p, 'SIGKILL');
@@ -99,16 +109,19 @@ export async function withTestBrowser(work, { timeoutMs = 180_000, label = 'mock
   const onSignal = (sig) => {
     console.error(`[${label}] Signal ${sig}: beende Prüfbrowser`);
     hardKill();
+    try { process.kill(-watcher.pid, 'SIGKILL'); } catch {}
     process.exit(130);
   };
   process.once('SIGINT', onSignal);
   process.once('SIGTERM', onSignal);
-  const watchdog = setTimeout(() => {
+  const timer = setTimeout(() => {
     console.error(`[${label}] Zeitlimit ${timeoutMs} ms überschritten: beende Prüfbrowser`);
     hardKill();
+    try { process.kill(-watcher.pid, 'SIGKILL'); } catch {}
     process.exit(124);
   }, timeoutMs);
 
+  let failure = null;
   try {
     browser = await chromium.launch({
       executablePath: info.bin,
@@ -117,36 +130,95 @@ export async function withTestBrowser(work, { timeoutMs = 180_000, label = 'mock
       args: [`--window-size=${MAX_W},${MAX_H}`],
       timeout: 30_000,
     });
-    pid = browser.process?.()?.pid ?? null;
-    if (!pid) {
-      // playwright-core gibt den Prozess nur über die interne Verbindung frei; per Profilsuche ermitteln.
-      pid = findOwnBrowserPid();
-    }
-    family = pid ? collectFamily(pid) : [];
+    pid = findOwnBrowserPid();
+    if (!pid) throw new Error('Browser-PID nicht nachweisbar – Lauf abgebrochen.');
+    const pgid = Number(execFileSync('ps', ['-o', 'pgid=', '-p', String(pid)], { encoding: 'utf8' }).trim());
+    // Externer Wächter: eigene Prozessgruppe, unabhängig von der Event-Loop dieses Prozesses.
+    watcher = startWatcher({ browserPid: pid, browserGroup: pgid === pid, nodePid: process.pid, seconds: Math.ceil(timeoutMs / 1000) + 5 });
+    family = collectFamily(pid);
     flagCheck = verifyFlags(pid);
-    console.log(`[${label}] Prüfbrowser ${info.version} (Nutzer-Chrome ${info.userVersion}) PID ${pid}`);
+    if (!flagCheck.ok || !flagCheck.headless) throw new Error(`Flagprüfung negativ: ${JSON.stringify(flagCheck)}`);
+    console.log(`[${label}] Prüfbrowser ${info.version} (Nutzer-Chrome ${info.userVersion}) PID ${pid}, Gruppe ${pgid}, Wächter ${watcher.pid}`);
+    if (process.env.HANG_TEST_MS) {
+      // Nur für den Abbruchnachweis: Event-Loop absichtlich blockieren.
+      const until = Date.now() + Number(process.env.HANG_TEST_MS);
+      console.log(`[${label}] HANG_TEST: blockiere Event-Loop ${process.env.HANG_TEST_MS} ms`);
+      while (Date.now() < until) {}
+    }
     const result = await work(browser, info);
-    return { result, info, pid, flagCheck };
+    return { result, info, pid, flagCheck, watcherPid: watcher.pid };
+  } catch (err) {
+    failure = err;
+    throw err;
   } finally {
     family = pid ? [...new Set([...family, ...collectFamily(pid)])] : family;
     try {
       if (browser) await Promise.race([browser.close(), new Promise((r) => setTimeout(r, 10_000))]);
     } catch {}
     await new Promise((r) => setTimeout(r, 400));
-    const left = [...family, pid].filter((p) => p && pidAlive(p));
+    let left = [...family, pid].filter((p) => p && pidAlive(p));
     if (left.length) {
       console.error(`[${label}] Nachzügler ${left.join(',')}: SIGKILL`);
       hardKill();
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 400));
     }
-    const still = [...family, pid].filter((p) => p && pidAlive(p));
-    clearTimeout(watchdog);
+    // Auch neue, nicht zugeordnete Chrome-for-Testing-Prozesse dieses Laufs zählen als Rest.
+    const strays = listTestBrowserPids().filter((p) => !before.has(p) && isDescendantOf(p, process.pid));
+    const still = [...new Set([...family, pid, ...strays].filter((p) => p && pidAlive(p)))];
+    await stopWatcher(watcher);
+    clearTimeout(timer);
     process.removeListener('SIGINT', onSignal);
     process.removeListener('SIGTERM', onSignal);
+    const watcherGone = watcher ? (watcher.exitCode !== null || watcher.signalCode !== null) && !pidAlive(watcher.pid) : true;
     console.log(
-      `[${label}] Bereinigung: Browser-PID ${pid} + ${family.length} Kindprozesse beendet, noch aktiv: ${still.length ? still.join(',') : 'keine'}`,
+      `[${label}] Bereinigung: Browser-PID ${pid} + ${family.length} Kindprozesse beendet, noch aktiv: ${still.length ? still.join(',') : 'keine'}, Wächter beendet: ${watcherGone ? 'ja' : 'nein'}`,
     );
+    if ((still.length || !watcherGone) && !failure) {
+      throw new Error(`Bereinigung unvollständig: ${still.join(',')} ${watcherGone ? '' : `Wächter ${watcher.pid}`}`);
+    }
   }
+}
+
+function startWatcher({ browserPid, browserGroup, nodePid, seconds }) {
+  const killBrowser = browserGroup ? `kill -KILL -- -${browserPid} 2>/dev/null; kill -KILL ${browserPid} 2>/dev/null` : `pkill -KILL -P ${browserPid} 2>/dev/null; kill -KILL ${browserPid} 2>/dev/null`;
+  const script = `sleep ${seconds}; echo "[wächter] Zeitlimit: beende Browser ${browserPid} und Node ${nodePid}" >&2; ${killBrowser}; kill -TERM ${nodePid} 2>/dev/null; sleep 2; kill -KILL ${nodePid} 2>/dev/null`;
+  const child = spawn('/bin/sh', ['-c', script], { detached: true, stdio: ['ignore', 'ignore', 'inherit'] });
+  child.unref();
+  return child;
+}
+
+async function stopWatcher(w) {
+  if (!w || !w.pid) return;
+  if (w.exitCode !== null || w.signalCode !== null) return;
+  const exited = new Promise((r) => w.once('exit', r));
+  try {
+    process.kill(-w.pid, 'SIGKILL'); // sh und sein sleep (eigene Prozessgruppe)
+  } catch {}
+  try {
+    process.kill(w.pid, 'SIGKILL');
+  } catch {}
+  await Promise.race([exited, new Promise((r) => setTimeout(r, 2000))]);
+}
+
+function listTestBrowserPids() {
+  try {
+    return execFileSync('pgrep', ['-f', 'Google Chrome for Testing'], { encoding: 'utf8' }).split('\n').filter(Boolean).map(Number);
+  } catch {
+    return [];
+  }
+}
+
+function isDescendantOf(p, ancestor) {
+  let cur = p;
+  for (let i = 0; i < 12 && cur > 1; i++) {
+    try {
+      cur = Number(execFileSync('ps', ['-o', 'ppid=', '-p', String(cur)], { encoding: 'utf8' }).trim());
+    } catch {
+      return false;
+    }
+    if (cur === ancestor) return true;
+  }
+  return false;
 }
 
 function collectFamily(root) {

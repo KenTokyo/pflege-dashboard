@@ -15,7 +15,7 @@ const targets = (process.argv.slice(2).length ? process.argv.slice(2) : ['https:
 
 await withTestBrowser(
   async (browser) => {
-    const ctx = await browser.newContext({ viewport: { width: Number(process.env.VW || 1280), height: 720 }, deviceScaleFactor: 1 });
+    const ctx = await browser.newContext({ viewport: { width: Math.min(1280, Math.max(320, Number(process.env.VW) || 1280)), height: 720 }, deviceScaleFactor: 1 });
     try {
       const page = await ctx.newPage();
       for (const t of targets) {

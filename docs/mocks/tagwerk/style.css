@@ -1,0 +1,80 @@
+/* Richtung „Tagwerk“ – etwas mutiger. Schmale Leiste, markante Überschriften, Stempel und Sprühpunkte. */
+h1, h2, h3, .brand-name { font-family: var(--font-display); letter-spacing: -0.02em; }
+.page-head h1 { font-weight: 750; font-size: var(--fs-h1); }
+.card-head h2 { font-weight: 700; font-size: var(--fs-h2); }
+.card { border-radius: var(--radius); }
+.btn { font-weight: 700; }
+
+/* Schmale Leiste mit Beschriftung unter den Icons */
+.app-rail { grid-template-columns: 96px minmax(0, 1fr); }
+.nav-rail {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 0;
+  padding: 14px 8px; border-right: 1px solid var(--border); background: var(--surface);
+}
+.nav-rail .brand { margin-bottom: 14px; }
+.nav-rail .brand-text { display: none; }
+.nav-rail .nav-list { display: flex; flex-direction: column; gap: 4px; }
+.nav-rail .nav-item { flex-direction: column; justify-content: center; gap: 4px; width: 84px; min-height: 56px; padding: 6px 0; border-radius: 12px; font-size: 12px; font-weight: 650; text-align: center; }
+.nav-rail .nav-item.is-active { background: var(--accent-soft); color: var(--accent-text); }
+.nav-rail .nav-label { white-space: nowrap; overflow: visible; line-height: 1.15; letter-spacing: -0.005em; }
+.nav-rail .nav-count { display: none; }
+.nav-rail .nav-foot { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* Dashboard: Personen links oben, großer Einstieg mit Gesprächen rechts */
+.person-name { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.dl-date { font-family: var(--font-display); font-size: 20px; font-weight: 750; }
+.dl-circle { width: calc(100% + 34px); height: calc(100% + 22px); }
+.ask { background: var(--surface); border-width: 1.5px; border-color: var(--text); padding: 16px 18px 12px; }
+.ask-title { font-size: 21px; font-weight: 750; }
+.ask-icon { background: var(--text); color: var(--bg); border-radius: 10px; }
+.ask-form { margin: 12px 0 8px; }
+.ask-meta, .ask-prompts { display: none; }
+.ask .convs { margin-top: 10px; padding: 8px 0 0; border: 0; border-top: 1px dashed var(--border-strong); border-radius: 0; background: transparent; }
+.ask .convs .card-head { margin-bottom: 0; }
+.ask .convs .row { min-height: 40px; padding: 5px 0; }
+.tasks .row, .docs .row { min-height: 46px; padding: 5px 0; }
+.list-card { padding: 14px 18px; }
+.list-card .card-head { margin-bottom: 2px; }
+.person { padding: 14px 16px; }
+.docs .tape { margin-right: 6px; }
+
+/* Chat: Dokument mit Stempel */
+.created { padding: 8px 14px; }
+.confirm { border-width: 1.5px; }
+.created-stamp { flex: none; width: 118px; height: 52px; transform: rotate(-7deg); }
+
+/* Einstellungen */
+.mode-underline { bottom: -6px; height: 8px; }
+.mode-card.is-on .mode-title { margin-bottom: 7px; }
+
+/* Login: Tinte, Sprühpunkte, eigener Tag */
+.login-side { background: var(--surface2); border-right: 1.5px solid var(--text); gap: 18px; }
+.login-spray { position: absolute; right: -40px; top: -30px; width: 520px; height: 420px; opacity: .9; }
+.login-side .brand-mark { width: 40px; height: 40px; }
+.login-side .brand-name { font-size: 18px; }
+.login-claim { font-size: 46px; line-height: 1.05; font-weight: 800; letter-spacing: -0.035em; max-width: 520px; }
+.login-tag { width: 280px; height: 30px; margin-top: -10px; }
+.login-points li > .i { color: var(--marker); }
+.login-panel { background: var(--bg); }
+.login-title { font-size: 28px; font-weight: 800; }
+
+@media (max-width: 760px) {
+  .created-stamp { margin: 0 0 0 auto; }
+  .login-claim { font-size: 34px; }
+  .login-spray { width: 360px; height: 290px; }
+}
+
+/* Nur Desktop: Raster und Abstände der Arbeitsfläche (schmale Ansichten regelt base.css) */
+@media (min-width: 1024px) {
+  .dash {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-areas: 'persons persons ask' 'tasks tasks docs';
+    grid-template-rows: auto 1fr;
+  }
+  .main { padding: 18px 30px 18px; }
+  .page-head { margin-bottom: 14px; }
+  .chat-layout { grid-template-columns: 256px minmax(0, 1fr); }
+  .created-stamp { flex: none; width: 118px; height: 52px; margin: -6px 4px -6px auto; transform: rotate(-7deg); }
+  .thread-head { padding: 7px 20px; }
+  .login { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); }
+}

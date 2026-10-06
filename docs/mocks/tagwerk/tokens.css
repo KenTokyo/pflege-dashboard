@@ -1,0 +1,65 @@
+/* Generiert aus tools/tokens.mjs – nicht von Hand ändern. Richtung: Tagwerk */
+:root {
+  --font-body: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --fs-base: 15px;
+  --fs-small: 13px;
+  --fs-h1: 28px;
+  --fs-h2: 17px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --row-h: 44px;
+  --control-h: 42px;
+  --icon-stroke: 1.9;
+  color-scheme: dark;
+  --bg: #13110F;
+  --surface: #1C1916;
+  --surface2: #25211D;
+  --sunken: #171512;
+  --border: #36302A;
+  --border-strong: #73695C;
+  --text: #F5F0E8;
+  --text-muted: #BAB0A3;
+  --accent: #7D93FF;
+  --on-accent: #0A1030;
+  --accent-text: #A3B3FF;
+  --accent-soft: rgba(125,147,255,0.15);
+  --danger: #FF8A7F;
+  --danger-soft: rgba(255,138,127,0.13);
+  --warning: #F4BE55;
+  --warning-soft: rgba(244,190,85,0.13);
+  --success: #66D196;
+  --success-soft: rgba(102,209,150,0.13);
+  --marker: #FF7A45;
+  --focus: #A3B3FF;
+  --banner-bg: #2C1A10;
+  --banner-text: #FFC9A8;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 30px rgba(0,0,0,0.35);
+}
+:root[data-theme='hell'] {
+  color-scheme: light;
+  --bg: #F5F1EA;
+  --surface: #FFFDF9;
+  --surface2: #EFE9DF;
+  --sunken: #FAF7F1;
+  --border: #E0D7C9;
+  --border-strong: #8A7F70;
+  --text: #1E1A15;
+  --text-muted: #5F5547;
+  --accent: #2F4FDB;
+  --on-accent: #FFFFFF;
+  --accent-text: #2A47C7;
+  --accent-soft: rgba(47,79,219,0.09);
+  --danger: #B3261B;
+  --danger-soft: rgba(179,38,27,0.08);
+  --warning: #875000;
+  --warning-soft: rgba(214,145,20,0.14);
+  --success: #196C3F;
+  --success-soft: rgba(25,108,63,0.09);
+  --marker: #E2531D;
+  --focus: #2F4FDB;
+  --banner-bg: #FFE9DA;
+  --banner-text: #6B2A08;
+  --shadow: 0 1px 2px rgba(40,28,14,0.06), 0 10px 26px rgba(40,28,14,0.06);
+}

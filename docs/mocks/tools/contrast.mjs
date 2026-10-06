@@ -10,6 +10,9 @@ function lum(c) {
   const [r, g, b] = parse(c).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
+function mixWhite(hex, p) {
+  return '#' + parse(hex).map((v) => Math.round((v * p + (1 - p)) * 255).toString(16).padStart(2, '0')).join('');
+}
 export function ratio(a, b) {
   const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
   return (x + 0.05) / (y + 0.05);
@@ -45,12 +48,16 @@ export function contrastReport() {
         const r = ratio(t[fg], t[bg]);
         rows.push({ dir: d.id, theme, fg, bg, ratio: Math.round(r * 100) / 100, min, ok: r >= min, why });
       }
+      // Klebeband „Entwurf“: fester dunkler Text auf Markerfarbe, 80 % mit Weiß gemischt (assets/base.css .tape)
+      const tape = mixWhite(t.marker, 0.8);
+      const rt = ratio('#1A1712', tape);
+      rows.push({ dir: d.id, theme, fg: 'tapeText', bg: 'tape', ratio: Math.round(rt * 100) / 100, min: 4.5, ok: rt >= 4.5, why: 'Klebeband-Text' });
     }
   }
   return rows;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const rows = contrastReport();
   const bad = rows.filter((r) => !r.ok);
   for (const r of rows) {

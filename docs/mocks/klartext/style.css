@@ -1,0 +1,87 @@
+/* Richtung „Klartext“ – ausgewogen. Waagerechte Navigation, Plex, Petrol, gelber Marker. */
+.page-head h1 { font-weight: 600; letter-spacing: -0.01em; }
+.card-head h2 { font-weight: 600; }
+.eyebrow { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .02em; }
+
+/* Obere Leiste */
+.app-top { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+.nav-top-bar {
+  display: flex; align-items: center; gap: 18px; height: 58px; padding: 0 28px;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.nav-top-bar .brand { flex: none; margin-right: 2px; }
+.ws-pill { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; font-size: var(--fs-small); color: var(--text-muted); white-space: nowrap; }
+.nav-top-bar .nav-list { display: flex; gap: 2px; }
+.nav-top-bar .nav-item { height: 36px; min-height: 0; padding: 0 11px; gap: 8px; }
+.nav-top-bar .nav-item.is-active { background: var(--accent-soft); color: var(--accent-text); }
+.nav-top-bar .nav-count { margin-left: 2px; background: var(--surface2); color: var(--text); border-radius: 999px; padding: 0 7px; line-height: 19px; }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.nav-top-bar .nav-user { display: flex; align-items: center; gap: 8px; margin-left: 6px; }
+.nav-user-name { font-size: var(--fs-small); font-weight: 600; white-space: nowrap; }
+
+/* Dashboard: Einstieg als Band, darunter drei Spalten */
+.persons { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 12px; }
+.person { padding: 12px 16px; }
+.person .facts { display: flex; flex-wrap: wrap; gap: 2px 12px; margin-top: 6px; }
+.person .facts div { display: block; }
+.person .facts dt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.person .facts dd { font-size: var(--fs-small); color: var(--text-muted); font-weight: 500; }
+.person .facts dd .pg { color: var(--text); }
+.person .deadline { margin-top: 8px; padding: 7px 12px; }
+.person .dl-date { font-size: 16px; }
+.person .person-head .avatar-lg { width: 36px; height: 36px; font-size: 13px; }
+.ask {
+  display: grid; grid-template-columns: minmax(0, 330px) minmax(0, 1fr); gap: 8px 28px; align-items: center;
+  padding: 12px 20px; background: linear-gradient(90deg, var(--accent-soft), transparent 75%), var(--surface);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.ask-head { grid-column: 1; grid-row: 1; }
+.ask-form { grid-column: 2; grid-row: 1; margin: 0; }
+.ask-prompts { grid-column: 2; grid-row: 2; }
+.ask-meta { grid-column: 1; grid-row: 2; margin: 0; }
+.ask-title { font-size: 19px; }
+.t-left .num { font-family: var(--font-mono); font-size: 15px; }
+.t-circle { width: calc(100% + 22px); height: calc(100% + 12px); }
+.tasks .t-due { padding-right: 12px; }
+.tasks .row { min-height: 48px; }
+.list-card { padding: 12px 16px; }
+.list-card .card-head { margin-bottom: 2px; }
+.row { padding: 5px 0; }
+.ask .ask-head p { max-width: 260px; }
+.docs .tape { margin-right: 4px; }
+
+/* Chat */
+.conv-list { background: var(--surface); }
+.created-check { flex: none; width: 30px; height: 30px; }
+
+/* Einstellungen */
+.mode-card.is-on { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* Login: geteilte Fläche, Markerstreifen auf einem Wort */
+.login-side { background: linear-gradient(160deg, var(--accent-soft), transparent 70%), var(--surface); border-right: 1px solid var(--border); }
+.login-claim { font-weight: 600; font-size: 31px; }
+.mark-hl { background: linear-gradient(176deg, transparent 52%, color-mix(in srgb, var(--marker) 62%, transparent) 53%, color-mix(in srgb, var(--marker) 50%, transparent) 88%, transparent 89%); padding: 0 4px; margin: 0 -4px; border-radius: 3px; }
+.login-panel { background: var(--bg); }
+
+@media (max-width: 1023px) {
+  .ask { grid-template-columns: minmax(0, 1fr); }
+  .ask > * { grid-column: 1 !important; grid-row: auto !important; }
+  .persons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .persons { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Nur Desktop: Raster und Abstände der Arbeitsfläche (schmale Ansichten regelt base.css) */
+@media (min-width: 1024px) {
+  .dash {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-areas: 'ask ask ask' 'persons tasks docs' 'persons tasks convs';
+    grid-template-rows: auto auto 1fr;
+  }
+  .main { width: 100%; max-width: 1280px; margin: 0 auto; }
+  .main { padding: 18px 28px 18px; }
+  .page-head { margin-bottom: 14px; }
+  .chat-layout { grid-template-columns: 288px minmax(0, 1fr); }
+  .thread-head { padding: 7px 22px; }
+}

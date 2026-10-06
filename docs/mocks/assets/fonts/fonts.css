@@ -1,0 +1,15 @@
+/* Generiert aus tools/build.mjs. Alle Schriften lokal, Lizenz: SIL Open Font License 1.1 (siehe OFL.txt je Ordner). */
+@font-face { font-family: 'Inter Variable'; font-style: normal; font-display: block; font-weight: 100 900; src: url('./inter/inter-latin-wght-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: block; font-weight: 400; src: url('./plex-sans/ibm-plex-sans-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: block; font-weight: 500; src: url('./plex-sans/ibm-plex-sans-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: block; font-weight: 600; src: url('./plex-sans/ibm-plex-sans-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-display: block; font-weight: 700; src: url('./plex-sans/ibm-plex-sans-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: block; font-weight: 400; src: url('./plex-mono/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: block; font-weight: 500; src: url('./plex-mono/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: block; font-weight: 600; src: url('./plex-mono/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Bricolage Grotesque Variable'; font-style: normal; font-display: block; font-weight: 200 800; src: url('./bricolage/bricolage-grotesque-latin-wght-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-display: block; font-weight: 400; src: url('./atkinson/atkinson-hyperlegible-next-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-display: block; font-weight: 500; src: url('./atkinson/atkinson-hyperlegible-next-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-display: block; font-weight: 600; src: url('./atkinson/atkinson-hyperlegible-next-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-display: block; font-weight: 700; src: url('./atkinson/atkinson-hyperlegible-next-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Atkinson Hyperlegible Next'; font-style: normal; font-display: block; font-weight: 800; src: url('./atkinson/atkinson-hyperlegible-next-latin-800-normal.woff2') format('woff2'); }

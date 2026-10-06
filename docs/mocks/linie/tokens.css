@@ -1,0 +1,65 @@
+/* Generiert aus tools/tokens.mjs – nicht von Hand ändern. Richtung: Linie */
+:root {
+  --font-body: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter Variable', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Inter Variable', system-ui, sans-serif;
+  --fs-base: 14px;
+  --fs-small: 12.5px;
+  --fs-h1: 22px;
+  --fs-h2: 15px;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --row-h: 40px;
+  --control-h: 36px;
+  --icon-stroke: 1.75;
+  color-scheme: dark;
+  --bg: #0C0D10;
+  --surface: #14161A;
+  --surface2: #1B1E23;
+  --sunken: #101215;
+  --border: #24272E;
+  --border-strong: #666D7A;
+  --text: #E9EBEF;
+  --text-muted: #9EA4B0;
+  --accent: #5F5CE8;
+  --on-accent: #FFFFFF;
+  --accent-text: #A9A8FF;
+  --accent-soft: rgba(110,108,242,0.16);
+  --danger: #FF8A80;
+  --danger-soft: rgba(255,138,128,0.13);
+  --warning: #F3BC55;
+  --warning-soft: rgba(243,188,85,0.13);
+  --success: #5DD39B;
+  --success-soft: rgba(93,211,155,0.13);
+  --marker: #F3BC55;
+  --focus: #A9A8FF;
+  --banner-bg: #241C0E;
+  --banner-text: #F7D08A;
+  --shadow: 0 1px 0 rgba(255,255,255,0.03) inset, 0 8px 24px rgba(0,0,0,0.35);
+}
+:root[data-theme='hell'] {
+  color-scheme: light;
+  --bg: #F6F7F9;
+  --surface: #FFFFFF;
+  --surface2: #F1F2F5;
+  --sunken: #F6F7F9;
+  --border: #E1E4E9;
+  --border-strong: #878E9B;
+  --text: #15171C;
+  --text-muted: #585F6C;
+  --accent: #5452E0;
+  --on-accent: #FFFFFF;
+  --accent-text: #4744CF;
+  --accent-soft: rgba(84,82,224,0.10);
+  --danger: #C42B21;
+  --danger-soft: rgba(196,43,33,0.08);
+  --warning: #8A5800;
+  --warning-soft: rgba(214,145,20,0.13);
+  --success: #147A4B;
+  --success-soft: rgba(20,122,75,0.09);
+  --marker: #E3A11B;
+  --focus: #5452E0;
+  --banner-bg: #FFF3D6;
+  --banner-text: #634000;
+  --shadow: 0 1px 2px rgba(16,18,24,0.05), 0 6px 18px rgba(16,18,24,0.05);
+}

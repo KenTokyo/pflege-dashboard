@@ -133,12 +133,21 @@ returns boolean language sql stable security definer set search_path = '' as $$
       and p.kind='user' and p.user_id::text=p_owner and private.is_member(a.workspace_id)
       and case when p_write then a.created_by=private.current_actor(a.workspace_id)
           and a.status='pending' and p_owner=auth.uid()::text
-        else a.status='ready' and (a.visibility='workspace' or a.created_by=private.current_actor(a.workspace_id)) end)
+        else (a.status='ready' and (a.visibility='workspace' or a.created_by=private.current_actor(a.workspace_id)))
+          or (a.status='pending' and a.created_by=private.current_actor(a.workspace_id)) end)
 $$;
 revoke all on function private.storage_allowed(text,text,text,boolean) from public,anon;
 grant execute on function private.storage_allowed(text,text,text,boolean) to authenticated,service_role;
-alter table storage.objects enable row level security;
-alter table storage.buckets enable row level security;
+-- Supabase owns these tables and already enables RLS. Policy creation is supported;
+-- ALTER TABLE / changing ownership is neither needed nor allowed.
+do $$ begin
+  if not exists(select 1 from pg_catalog.pg_class c join pg_catalog.pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='storage' and c.relname='objects' and c.relrowsecurity) or
+    not exists(select 1 from pg_catalog.pg_class c join pg_catalog.pg_namespace n on n.oid=c.relnamespace
+    where n.nspname='storage' and c.relname='buckets' and c.relrowsecurity) then
+    raise exception 'Supabase Storage RLS must already be enabled';
+  end if;
+end $$;
 create policy care_private_read on storage.objects for select to authenticated
   using(private.storage_allowed(bucket_id,name,owner_id,false));
 create policy care_private_upload on storage.objects for insert to authenticated

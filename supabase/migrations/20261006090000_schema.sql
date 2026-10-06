@@ -26,7 +26,7 @@ create type public.reservation_status as enum ('reserved','settled','held','rele
 
 create table public.workspaces (
   id uuid primary key default gen_random_uuid(),
-  workspace_id uuid generated always as (id) stored unique,
+  workspace_id uuid generated always as (id) stored not null unique,
   created_by uuid not null,
   created_at timestamptz not null default now(),
   name text not null check (length(name) between 1 and 120),
@@ -184,7 +184,8 @@ create table public.audit_log (
   conversation_id uuid, message_id uuid, model_id uuid,
   action text not null, tool_name text, target_table text, target_id uuid,
   outcome text not null check (outcome in ('success','denied','failed')),
-  request_id uuid, metadata jsonb not null default '{}' check (jsonb_typeof(metadata) = 'object')
+  request_id uuid, metadata jsonb not null default '{}' check (jsonb_typeof(metadata) = 'object'),
+  check (message_id is null or conversation_id is not null)
 );
 create table public.tool_proposals (
   id uuid primary key default gen_random_uuid(), workspace_id uuid not null, created_by uuid not null,
@@ -215,7 +216,8 @@ create table public.cost_reservations (
   amount_microusd bigint not null check (amount_microusd >= 0),
   price_snapshot jsonb not null check (jsonb_typeof(price_snapshot) = 'object'),
   status public.reservation_status not null default 'reserved', settled_at timestamptz,
-  unique (workspace_id,request_id)
+  unique (workspace_id,request_id),
+  unique (id,workspace_id,model_id,request_id,month)
 );
 create table public.usage_ledger (
   id uuid primary key default gen_random_uuid(), workspace_id uuid not null, created_by uuid not null,
@@ -263,13 +265,14 @@ end $$;
 alter table public.document_versions add foreign key (document_id,workspace_id) references public.documents(id,workspace_id);
 alter table public.attachments add foreign key (message_id,conversation_id,workspace_id) references public.messages(id,conversation_id,workspace_id);
 alter table public.audit_log add foreign key (conversation_id,workspace_id) references public.conversations(id,workspace_id);
-alter table public.audit_log add foreign key (message_id,workspace_id) references public.messages(id,workspace_id);
+alter table public.audit_log add foreign key (message_id,conversation_id,workspace_id) references public.messages(id,conversation_id,workspace_id);
 alter table public.audit_log add foreign key (model_id,workspace_id) references public.ai_models(id,workspace_id);
 alter table public.tool_proposals add foreign key (conversation_id,workspace_id) references public.conversations(id,workspace_id);
 alter table public.tool_proposals add foreign key (message_id,conversation_id,workspace_id) references public.messages(id,conversation_id,workspace_id);
 alter table public.cost_reservations add foreign key (model_id,workspace_id) references public.ai_models(id,workspace_id);
 alter table public.usage_ledger add foreign key (model_id,workspace_id) references public.ai_models(id,workspace_id);
-alter table public.usage_ledger add foreign key (reservation_id,workspace_id) references public.cost_reservations(id,workspace_id);
+alter table public.usage_ledger add foreign key (reservation_id,workspace_id,model_id,request_id,month)
+  references public.cost_reservations(id,workspace_id,model_id,request_id,month);
 create index on public.tasks(workspace_id,status,due_at);
 create index on public.messages(workspace_id,conversation_id,created_at);
 create index on public.documents(workspace_id,status,created_at);
