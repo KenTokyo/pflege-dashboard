@@ -31,11 +31,12 @@ Ergebnis: Vorbereitung lokal committed (`02c7ad8`); aktueller Entwurfsstand wird
 - [x] Supabase-Erweiterung finden und zur nutzerseitigen Verbindung anbieten; aktuellen OAuth-/MCP-Weg in offiziellen Quellen prüfen.
 - [ ] Nutzer schließt Passwort-Eingabe und Projektanlage ab; Werkzeugregel verlangt Übergabe bei neuen Zugangsdaten.
 - [ ] Projektkennung, Region und Tarif nach Anlage prüfen; öffentliche Registrierung ausschalten.
-- [ ] MCP-Verbindung autorisieren und mit echtem Leseaufruf prüfen; manuelle Verbindung projektspezifisch begrenzen.
+- [x] Supabase-Erweiterung installiert und autorisiert; MCP durch erfolgreiche Aufrufe von `list_organizations` und `list_projects` geprüft. Nur bestehendes `service-oalab` sichtbar, neues Pflege-Projekt fehlt noch.
+- [ ] Projektspezifischen Datenbankzugriff nach Anlage prüfen; gegebenenfalls manuelle Verbindung projektspezifisch begrenzen.
 - [ ] Benötigte Projektwerte geschützt lokal hinterlegen und echte Verbindung prüfen.
 - [ ] Backend-Gate abschließen, anschließend Migrationen und RLS gegen echtes Supabase prüfen.
 
-Ergebnis: Browserzugriff funktioniert; Formular vorbereitet. Projektanlage, MCP und Datenbank sind noch nicht als eingerichtet nachgewiesen. Keine Geheimnisse gelesen oder gespeichert. Kein eigener Browser-/Serverprozess gestartet. Vorhandenen Nutzer-Tab erhalten. Pfade: `docs/supabase-provisioning.md`, `supabase/`, `.env.example`.
+Ergebnis: Browserzugriff und MCP-Verbindung funktionieren; Formular vorbereitet. Neues Projekt laut MCP-Projektliste noch nicht angelegt; Datenbankeinrichtung und `.env` ausstehend. Keine Geheimnisse gelesen oder gespeichert. Kein eigener Browser-/Serverprozess gestartet. Vorhandenen Nutzer-Tab erhalten. Pfade: `docs/supabase-provisioning.md`, `supabase/`, `.env.example`.
 
 ## Phase 1 – Fundament (nach Designwahl)
 
