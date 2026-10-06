@@ -17,19 +17,19 @@ Stand: 06.10.2026. Ziel: den veröffentlichten Ablauf mit dem vom Nutzer angeleg
 | --- | --- | --- |
 | Anmeldung | Vorhandenes Demo-Konto gelangt in seinen Arbeitsbereich; verständliche Fehler statt leerer Seite | Bestanden laut Root-Livebeleg: Nutzer selbst angemeldet, Demo-Zugang aktiv |
 | Anmeldung speichern | Verständlich benannte, aufgrund des ausdrücklichen Nutzerwunschs vorausgewählte Option; Anzeige stimmt mit tatsächlicher 30-Tage-Regel überein | Root-Livebeleg plus SQL: aktiv, remember_session=true, Restdauer 30,00 Tage |
-| Startseite | Martha Beispielwald, Pflegegrad 3, zugehörige Kasse und zwei offene Aufgaben sichtbar | Offen |
+| Startseite | Martha Beispielwald, Pflegegrad 3, zugehörige Kasse und zwei offene Aufgaben sichtbar | Bestanden laut Root-Livebelegen auf 3d534ee: Person, Kasse, zwei Aufgaben und gespeicherter Entwurf sichtbar |
 | Fragenvorlagen | Dialog mit Themen und Beispielsätzen in Alltagssprache; Satz übernimmt sich als bearbeitbare Eingabe | Bestanden laut Root: fünf Kategorien mit je drei Optionen tatsächlich geöffnet und gezählt |
 | Entwurf erhalten | Vorhandene ungesendete Eingabe wird durch Vorlage nicht still überschrieben | Bestanden laut Root-DOM: Prefix, Leerzeile, vollständige Telefonatvorlage erhalten; nicht automatisch gesendet |
-| Personenbezug | Neues Gespräch ist sichtbar Martha zugeordnet | Offen |
-| Echte KI-Antwort | DeepSeek antwortet auf die gespeicherten Angaben und benennt das antwortende Modell | Noch offen: HTTP 401 durch falschen Anbieterweg erklärt; Umstellung auf OpenCode läuft, kein Schlüsseltausch mehr verlangt |
-| Folgefrage | Einfache Nachfrage bezieht sich auf die vorherige Antwort | Offen |
-| Neuladen | Anmeldung und abgeschlossene Unterhaltung bleiben im selben Tab erhalten | Anmeldung, derselbe Chat, Nutzernachricht und helles Design nach echtem Reload erhalten; abgeschlossene KI-Antwort noch nicht vorhanden |
-| Erneutes Öffnen | Soweit ohne Fokuswechsel unterstützt: neuer eigener Tab derselben Website übernimmt die gültige gespeicherte Sitzung; Test-Tab danach schließen | Offen |
-| Sitzungsende | Unabhängige Tests belegen Standard-/Speicherdauer und Entfernung nach Abmeldung; keine 30 Tage verstrichene Echtzeit behaupten | Offen |
-| Gesprächsliste | Neu angelegtes Gespräch auffindbar; Titel und Personenbezug stimmen | Offen |
-| Beide Designs | Startseite, Gespräch und Vorlagendialog in hellem und dunklem Design lesbar und bedienbar | Vorlagendialog hell/dunkel laut Root-Screenshots bestanden; vollständige übrige Ansichten separat offen |
+| Personenbezug | Neues Gespräch ist sichtbar Martha zugeordnet | Bestanden laut Root-Livebeleg auf 2295d70: neuer Chat Martha zugeordnet, echte Antwort verwendet ihre gespeicherten Angaben |
+| Echte KI-Antwort | DeepSeek antwortet auf die gespeicherten Angaben und benennt das antwortende Modell | Bestanden auf 7f9825b: vollständige 1119 Zeichen, korrekte Fakten, Modell deepseek-v4.1-flash, Anfrage und Nachricht completed, genau eine Nutzungsbuchung |
+| Folgefrage | Einfache Nachfrage bezieht sich auf die vorherige Antwort | Bestanden auf 7f9825b: vollständige 1041 Zeichen mit direktem Bezug und Benennung fehlender Unterlagen, completed, genau eine Nutzungsbuchung |
+| Neuladen | Anmeldung und abgeschlossene Unterhaltung bleiben im selben Tab erhalten | Bestanden nach tatsächlichem abschließendem Reload: Demo-Zugang sichtbar, zwei Antwortartikel, keine Fehlermeldung, Folgeantworttext und dunkles Design erhalten |
+| Erneutes Öffnen | Soweit ohne Fokuswechsel unterstützt: neuer eigener Tab derselben Website übernimmt die gültige gespeicherte Sitzung; Test-Tab danach schließen | Bestanden laut Root: neuer Tab nach erneuter Plugin-Verbindung im selben Profil automatisch angemeldet, beide Antworten und dunkles Design erhalten; Prüftab anschließend geschlossen |
+| Sitzungsende | Unabhängige Tests belegen Standard-/Speicherdauer und Entfernung nach Abmeldung; keine 30 Tage verstrichene Echtzeit behaupten | Einstellungen zeigen 30 Tage und Ende 05.11.2026 18:10; sofortige Entfernung bei Abmeldung nur als UI-Text beobachtet, nicht tatsächlich ausgeführt |
+| Gesprächsliste | Neu angelegtes Gespräch auffindbar; Titel und Personenbezug stimmen | Aktueller Vorführungs-Chat laut Root auf Übersicht sichtbar; Personenbezug separat bestätigt |
+| Beide Designs | Startseite, Gespräch und Vorlagendialog in hellem und dunklem Design lesbar und bedienbar | Übersicht, Vorlagendialog und erfolgreich abgeschlossener Chat hell/dunkel laut Root-Screenshots lesbar, jeweils 9/10 |
 | Schmale Ansicht | Nur soweit über die erlaubte bestehende Verbindung ohne Fokuswechsel unterstützt: Navigation, Dialog und Eingabe bedienbar | Nicht live nachgewiesen: Größenänderung wirkte nicht, ursprünglicher Zustand wiederhergestellt |
-| Ehrliche Grenzen | Keine vorgetäuschten Uploads, Exporte, Rechtsauskünfte oder gespeicherten Dokumente | Offen |
+| Ehrliche Grenzen | Keine vorgetäuschten Uploads, Exporte, Rechtsauskünfte oder gespeicherten Dokumente | Dokumentansicht öffnet tatsächlich gespeicherten fiktiven Entwurf; weist sichtbar darauf hin, dass nichts versandt wird; übrige Phase-2-Funktionen nicht als gebaut ausgegeben |
 
 Geplante erste Frage: „Was weißt du schon über Martha, und welche zwei Aufgaben stehen bei ihr an? Bitte erklär mir das ganz einfach.“ Danach: „Was sollte ich davon zuerst angehen? Verwende nur die hinterlegten Angaben und sag mir, wenn etwas fehlt.“
 
@@ -48,6 +48,8 @@ Commit `2b9bb8b`: Orchestrator meldet Live bereit, Vercel Ready und Einstiegspak
 Bei der anschließenden tatsächlichen Browserübernahme kann dieser Unteragent den vorhandenen App-Tab nicht beanspruchen: Er gehört bereits zur Browser-Sitzung des Orchestrators. Die erlaubte Browser-API bietet keine Übergabefunktion während dessen laufendem Turn. Deshalb noch keine DOM- oder Screenshotbeobachtung dieses Prüfchats; keine Appaktion ausgeführt. Orchestrator ist informiert und kann den Ablauf in der bereits verbundenen Sitzung weiterführen. Kein Umgehungsweg über Browser-Speicher, CDP oder andere Prozesse versucht.
 
 ## Konkrete Livebelege des Orchestrators
+
+Die folgenden Abschnitte bilden den Verlauf chronologisch ab. Frühere Fehlerstände sind historische Belege; für die aktuelle Abnahme gelten der positive Endbeleg auf `7f9825b` und die Übersicht oben.
 
 ### Neue Anmeldung, Hauptdomain, Deployment `2b9bb8b` – erster Einstieg
 
@@ -121,6 +123,32 @@ Nur Quellprüfung, keine neuen Tests oder Browseraktionen dieses Prüfchats:
 
 Vor der nächsten Liveabnahme zusammen prüfen: neue Providerkennung durch DB-Enum, Kontextvorbereitung, Verfügbarkeit und gemeinsame Typen; richtige Paarung von geschütztem Schlüssel und OpenCode-Endpunkt; aktuelle OpenCode-Modellkennung, Preisgrundlage und tatsächliche Stream-/Nutzungsdaten; Gesprächsstandard ohne versehentlich weiterwirkende Direktanbieter-Auswahl. Alte Antwort-Snapshots erhalten und keinen weiteren direkten DeepSeek-Versuch mit dem OpenCode-Schlüssel auslösen.
 
+### Erster tatsächlicher OpenCode-Stream – Datenbezug stimmt, Abschluss noch defekt
+
+Herkunft: Root-Livebelege zur Version `2295d70`, Vercel-Bereitstellung `9VgdW9FQHugV6sDtysHgnwb5eRVD` Ready, Bundle `CNhp63cW` entspricht geprüftem Stand. Dieser Prüfchat wertet die übermittelten Browser-, Log- und Datenbankbelege aus.
+
+- Nach Neuladen weiterhin angemeldet. Neues Gespräch `8b8bf5f8-5109-4b51-accf-38a1d7e79d7b` erfolgreich Martha zugeordnet.
+- Echte Anfrage `28d3bbff-84d0-472e-9ef4-fb45c87f740e`: Anbieter antwortet HTTP 200 mit tatsächlichem Stream, gemeldetes Modell `deepseek-v4.1-flash`.
+- Genutzter Anbieterweg ist OpenCode Go aus dem vorhandenen aktiven Abonnement. Nutzerkonto zeigt 0 Credits, Zusatznutzung ausgeschaltet; keine Aufladung, Tarifänderung oder Aktivierung von Zusatznutzung durchgeführt. Die vorherige Zen-Zuordnung ist damit hinsichtlich des konkreten verwendeten Produkts präzisiert.
+- Inhalt nennt korrekt Pflegegrad 3, Pflegekasse, Lenas hinterlegte Notiz, den vorhandenen Entwurf und die Aufgaben vom 13. und 20. Oktober. Beide Termine werden als manuelle fiktive Aufgabenplanung bezeichnet, nicht als berechnete Rechtsfristen.
+- Der Text endet unvollständig bei „…Menschen gep“, gespeichert mit Status `failed`. Das ist noch keine abgeschlossene Antwort.
+- Log meldete `TOKEN_BOUND`; Datenbank weist jedoch 725 Eingabe- und 275 Ausgabetokens bei Grenzen von 1.000.000/1.024 aus. Beide gemeldeten Werte liegen eindeutig innerhalb ihrer Grenzen.
+- Nutzungsbuchung: 548 Mikro-US-Dollar, als Schätzung markiert. `workspace.blocked=false`. Diese Buchung ist eine interne Schätzung und kein Nachweis einer zusätzlichen Abbuchung vom Abonnementkonto.
+- Backend-Bereichsinhaber repariert das pauschale Verwerfen von Inhalt im letzten Stream-Delta sowie die irreführende Fehlerdiagnose. Nach vorliegenden Zahlen ist dies kein belegtes Tokenlimitproblem; eine Erhöhung der Grenzen würde die diagnostizierte Parserursache nicht beheben.
+
+Einordnung: Authentifizierung bei OpenCode, echter Modellaufruf und sachlich korrekter Bezug auf die gespeicherten Demodaten sind erstmals belegt. Vollständiger Streamabschluss, erfolgreicher Speicherstatus, Folgefrage und Reload einer vollständig abgeschlossenen Antwort sind weiterhin offen. Keinen positiven Gesamtabschluss aus HTTP 200 oder dem Teiltext ableiten.
+
+### Nach erstem Parserfix: vollständiger Text, weiterer Abschlussfehler
+
+Herkunft: neue Root-Livebelege zur Version `3d534ee`, Vercel-Bereitstellung `Ahhrkuib4GsGrzayHFiU9Vbagook` Ready. Root meldet zuvor 180 bestandene Tests und 20 bestandene Vercel-Artefaktprüfungen. Dieser Unteragent hat diese Prüfungen nicht erneut ausgeführt.
+
+- Neue echte Anfrage `542e0382-5436-497f-a714-bdc9dad3e90c` im Gespräch `2d4c6f96-264c-428e-99da-35c80d877423`.
+- Vollständiger Antworttext mit 907 Zeichen vorhanden. Gemeldetes Modell korrekt `deepseek-v4.1-flash`.
+- Nutzungswerte: 725 Eingabe- und 292 Ausgabetokens. Interne Schätzung: 568 Mikro-US-Dollar; keine zusätzliche Abonnementabbuchung behauptet.
+- Trotz vollständig angekommenem Text endet die Anfrage mit `failed` und Diagnose `EVENT_ENVELOPE` nach dem Textabschluss. Backend-Bereichsinhaber bearbeitet diesen weiteren Streamabschlussfehler.
+
+Unabhängige Einordnung: Der erste Fehler beim letzten Textstück wurde im echten Ablauf erkennbar behoben. Ein vollständiger sichtbarer Text allein genügt aber nicht: Der tatsächliche Abschluss- und Speicherstatus ist weiterhin fehlerhaft. Deshalb weder „Chat funktioniert vollständig“ noch erfolgreicher Folgekontext behaupten. Die automatisierten Prüfungen deckten dieses tatsächliche Abschlussformat noch nicht hinreichend ab; der konkrete Livebeleg bleibt maßgeblich. Nach Reparatur müssen Status `completed`, erhaltene Nutzungswerte, vollständiger Text nach Reload und eine echte Folgeantwort zusammen nachgewiesen werden.
+
 ### Dialoglage, Tastatur und Bildschirmgröße
 
 - Der Root fand den Vorlagendialog visuell oben links. Das ist ein tatsächlicher Layoutbefund.
@@ -131,13 +159,61 @@ Vor der nächsten Liveabnahme zusammen prüfen: neue Providerkennung durch DB-En
 - Ein Browser-Größenoverride auf 1280 × 720 änderte das beobachtete DOM-Maß 1920 × 821 nicht. Der Override wurde zurückgesetzt.
 - Damit kein Nachweis einer schmalen oder mobilen Liveansicht. Keine Bildschirmnote für unbeobachtete Varianten und keine behauptete Einhaltung der angeforderten Testauflösung durch diesen wirkungslosen Override.
 
+### Übersicht, Aufgabenfilter und gespeicherte Dokumente
+
+Herkunft: weitere tatsächliche Root-Browserbelege auf `3d534ee`. Es wurde dabei kein weiterer Provideraufruf ausgelöst.
+
+- Übersicht in hellem und dunklem Design per Screenshot angesehen. Root-Bewertung 9/10: lesbar und ohne Überlauf. Dies ist eine übernommene Bildbewertung, keine eigene Screenshotprüfung dieses Unteragenten.
+- Sichtbar: Martha, 77 Jahre, Pflegegrad 3, Pflegekasse Beispielwald. Zwei Aufgaben: dringender Termin am 13.10. mit „noch 7 Tage“ sowie 20.10. mit „noch 14 Tage“. Diese Abstände stimmen mit dem Prüftag 06.10.2026 überein.
+- Der vorhandene Entwurf und der aktuelle Vorführungs-Chat sind in der Übersicht sichtbar.
+- Aufgabenseite: Klick auf „Dringend“ filtert tatsächlich auf genau die Widerspruchsaufgabe. Anschließend „Alle“ wiederhergestellt.
+- Dokumentseite: „Text anzeigen“ öffnet den tatsächlich gespeicherten fiktiven Entwurf. Die Auswahl „Entwurf“, „Geprüft“, „Versendet“ ist sichtbar; der Text erklärt, dass die App nichts versendet. Kein Dokumentstatus geändert.
+
+Unabhängige Einordnung: Übersicht und Aufgabenfilter erfüllen die belegten Vorführungsabläufe; der Datumsabgleich ist nachvollziehbar. Das Öffnen eines vorhandenen Dokuments belegt weder neue KI-Dokumenterstellung noch Export oder Versand. Die sichtbare Versandgrenze verhindert hier eine falsche Funktionsbehauptung.
+
+### Einstellungen, Laufzeitangaben und aktuell eingegrenztes Streamformat
+
+Herkunft: zusätzliche Root-Livebelege zur Oberfläche und bereinigte Providerdiagnose auf Version `71205d8`.
+
+- Einstellungen zeigen „DeepSeek V4.1 Flash · OpenCode Go“ als Standard und freigegeben. Der bisherige direkte DeepSeek-Anbieter steht auf „Außer Betrieb“.
+- Modus „Nur Auskunft“ sichtbar. Die Oberfläche erklärt ausdrücklich, dass keine Briefe, Aufgaben oder Notizen angelegt werden. Das ist mit der weiterhin begrenzten Phase-1-Funktion vereinbar.
+- Gespeicherte Sitzung sichtbar „bis zu 30 Tage“, konkretes Gültigkeitsende 05.11.2026, 18:10. Die sofortige Entfernung bei „Abmelden“ ist als Text erklärt; ein tatsächlicher Abmeldevorgang wurde bewusst nicht ausgeführt.
+- Der verbleibende Providerfehler ist auf eine zusätzliche reine Nutzungsnachricht nach den bereits im Abschlussblock enthaltenen Nutzungswerten eingegrenzt: Zustand `after_usage`, keine Antwortauswahl (`choices` leer), ausschließlich Standardfelder, keine unbekannten Felder. Backend-Bereichsinhaber korrigiert genau diese Verarbeitung.
+
+Unabhängige Einordnung: Die angezeigte aktive Anbieterroute und das deaktivierte Direktmodell passen zur reparierten Schlüsselzuordnung. Das erfasste zusätzliche Metadatenformat erklärt einen weiteren Parserabbruch, beweist für sich aber noch keinen erfolgreich abgeschlossenen Stream. Die gezielte Korrektur darf Nutzungswerte weder doppelt buchen noch nachträgliche widersprüchliche Modell-/Nutzungswerte still übernehmen. Dafür sind entsprechende Prüfungen und anschließend ein positiver tatsächlicher Liveabschluss erforderlich. Sichtbare Sitzungsinformationen ersetzen keinen ausgeführten Abmelde- oder Ablauftest.
+
+### Positiver vollständiger Liveablauf auf `7f9825b`
+
+Herkunft: tatsächliche Root-Browserbelege und zugehörige Datenbankabfragen. Vercel-Bereitstellung `AswXMTrdU78Q5sTsXmqoy4hbtzYS` Ready. Neues Gespräch `8c7a31ac-f659-4141-a3e0-1c24f79b3c01`.
+
+| Beleg | Erste Frage zu Martha und Aufgaben | Folgefrage: in drei einfache Schritte ordnen |
+| --- | --- | --- |
+| Anfrage | `b9cf6529-7a36-46e3-871e-136c79d5d425` | `846f65d9-79a2-4ca5-b93c-f6bbe59c2946` |
+| Antwortlänge | 1119 Zeichen, vollständig | 1041 Zeichen, vollständig |
+| Tatsächlich gemeldetes Modell | `deepseek-v4.1-flash` | `deepseek-v4.1-flash` |
+| Anfrage- und Nachrichtenstatus | `completed` | `completed` |
+| Eingabe-/Ausgabetokens | 725 / 357 | 1124 / 309 |
+| Interne Kostenschätzung | 646 Mikro-US-Dollar | 708 Mikro-US-Dollar |
+| Nutzungsbuchungen | Genau eine | Genau eine |
+
+- Erste Antwort verwendet die korrekten gespeicherten Daten und Termine einschließlich Berliner Zeit.
+- Die Folgeantwort greift das vorherige Anliegen direkt auf, ordnet es in drei verständliche Schritte und benennt fehlende Unterlagen. Damit ist mehr als eine isolierte Einzelantwort belegt.
+- Chat in hellem und dunklem Design tatsächlich per Screenshot angesehen: laut Root lesbar, kein Fehlerzustand, 9/10. Die Bewertung stammt aus Root-Screenshots, nicht aus einer eigenen Bildbetrachtung dieses Unteragenten.
+- Die Browser-Erweiterung wurde kurz getrennt und anschließend mit einer anderen Browser-ID im selben Profil neu verbunden. Die bisherigen App-Tabs waren danach nicht mehr vorhanden. Dies belegt keinen Neustart des Browsers; eine Ursache für das Fehlen der Tabs wird nicht unterstellt.
+- Root öffnete den eigenen Prüftab `1821542964`. Dort war „Demo-Zugang“ automatisch angemeldet, beide abgeschlossenen Antworten vollständig vorhanden und das dunkle Design erhalten. Neuer-Tab- und gespeicherter-Verlauf-Nachweis damit bestanden, ohne erneute Passwortübergabe.
+- Drei fehlgeschlagene Testgespräche wurden wiederherstellbar archiviert. Seed-Gespräch und erfolgreiches Vorführungsgespräch bleiben vorhanden. Keine dauerhafte Löschung behauptet.
+- Zusätzlicher tatsächlicher Reload danach abgeschlossen. Root-DOM-Beleg: Konto „Demo-Zugang“ genau einmal sichtbar, zwei Antwortartikel vorhanden, null Alerts, exakter Folgeantworttext „Drei einfache nächste Schritte:“ einmal vorhanden. Dunkles Design erhalten.
+
+Unabhängige Einordnung: Die erforderliche Kombination aus echter Modellantwort, korrektem Datenbezug, erfolgreichem Abschluss, unverfälschter Nutzungsbuchung, Folgeantwort und Wiederladen des gespeicherten Verlaufs in einem neuen Tab ist nun belegt. Die vorherigen Parserfehler verhindern diesen konkret geprüften Ablauf nicht mehr. Zwei einzelne Buchungen belegen keine Doppelbuchung dieser Antworten. Die Kostenzahlen bleiben interne Schätzungen, keine Behauptung über zusätzliche Rechnungsbeträge des Abonnements.
+
 ## Abschlussstand dieser unabhängigen Belegauswertung
 
-Die tatsächliche Anmeldung mit dem vom Nutzer selbst angelegten Konto, unmittelbare Sitzungserhaltung bei Reload, gespeicherte 30-Tage-Regel und die kategorisierten Vorlagen samt Erhaltung des vorhandenen Textes sind anhand der ausdrücklich benannten Root-Belege bestätigt. Zwei tatsächlich gesendete Chatversuche liefern keine erfolgreiche Modellantwort. Der inzwischen belegte Fehler war die Verwendung des direkten DeepSeek-Endpunkts für einen OpenCode-Schlüssel. Die passende Anbieteranbindung wird repariert; das Gesamtgate für einen funktionierenden Live-Chat bleibt bis zur echten Antwort offen.
+Der konkret beauftragte Desktop-Vorführungsablauf ist auf `7f9825b` anhand der transparent benannten Root-Belege erfolgreich durchlaufen: selbst angelegtes Konto, gespeicherte Anmeldung, Demodaten, Fragenvorlagen, echte DeepSeek-Antwort über OpenCode Go mit Datenbezug, verständliche Folgeantwort sowie vollständiger gespeicherter Verlauf im neu geöffneten Tab und nach anschließendem tatsächlichem Reload. Beide Antworten sind tatsächlich `completed`; die früheren Fehlerstände sind damit für diesen Ablauf überholt. Der abschließende DOM-Beleg enthält beide Antworten und keine Fehlermeldung.
 
-Der tatsächliche Nachtest der Dialogkorrektur ist in beiden Designs abgeschlossen. Nach Bereitstellung des OpenCode-Anschlusses muss derselbe vollständige KI-Ablauf weitergeführt werden; die frühere Aufforderung zum Schlüsseltausch entfällt. Zusätzlich offen: übrige Ansichten in beiden Designs vollständig, schmale Ansicht, Wiederöffnung in neuem Tab sowie echter Sitzungsende-/Abmeldetest innerhalb der vereinbarten Zugangsgrenzen. Vorhandene automatisierte Prüfungen ersetzen diese Livebelege nicht.
+Übersicht, Dialog und abgeschlossener Chat sind in beiden Designs geprüft; Aufgabenfilter und Anzeige des vorhandenen Entwurfs funktionieren. Grenzen: keine erfolgreiche schmale/mobile Liveprüfung, kein tatsächlicher Browserneustart, kein ausgeführter Abmelde-/Sitzungsablauftest und kein 30-Tage-Echtzeittest. Neue Dokumente, Exporte und Versand wurden nicht implementiert oder als geprüft behauptet. Diese Grenzen bleiben getrennt vom bestandenen Desktop-Login-/Chatablauf.
 
 ## Bereinigung
 
 Bisher keine eigenen Browser, Server oder Hintergrundprozesse gestartet.
 Dieser Unteragent hat keine Nutzer-Tabs verändert, keinen neuen Tab erstellt, keine Geheimnisse gelesen und keinen Commit ausgeführt. Der Root hat seinen temporären Größenoverride zurückgesetzt. Nutzer-Browsersitzung und Tabs bleiben erhalten.
+Nach Wiederverbindung nutzte der Root den neu angelegten Prüftab `1821542964` und schloss ihn nach dem abschließenden Reload. Danach ergab `browser.tabs.list()` eine leere Liste der eigenen Prüfsitzung. Kein eigener Browserprozess wurde gestartet. Dieser Prüfchat hat keine Tabaktion ausgeführt. Dokumentationsstand damit eingefroren; kein weiterer unveränderter Testlauf erforderlich.

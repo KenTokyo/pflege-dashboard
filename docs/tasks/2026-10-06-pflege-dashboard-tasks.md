@@ -131,8 +131,8 @@ Ziel: echter Login und DeepSeek-Chat auf pflege-dashboard-puce.vercel.app.
 - [x] Ursprünglichen Backend-Agenten 01a11063-220c-7bc1-8ab7-7ca1c68286a8 mit vollständigem Vercel-/DeepSeek-Auftrag fortgesetzt. Keine neuen Chats.
 - [x] Nutzer hat bestätigten test@test.de angelegt; normaler Demo-Zugang zugeordnet. DEEPSEEK_API_KEY in Vercel gespeichert, Wert ungelesen. Nutzerwahl: kein App-Ausgabenlimit.
 - [x] Vercel Node Functions/DeepSeek-Adapter unabhängig lokal abgenommen: 131 Frontendtests, 121 Backendtests, 525 SQL- und 12 Upgradeprüfungen. Zwei Migrationen und DeepSeek-Standard/NULL-Budgets Hosted angewendet; voller Schemaabgleich und 33 Hosted-Prüfungen bestanden.
-- [ ] Geprüfte Bereitstellung samt geschützten Serverwerten und echtem Login-/Chatablauf abnehmen.
-- [ ] Schlussbericht mit tatsächlich erreichten Nachweisen und verbleibenden Grenzen.
+- [x] Geprüfte Bereitstellung samt geschützten Serverwerten und echtem Login-/Chatablauf abgenommen; finaler Livebeleg 7f9825b im Gatebericht.
+- [x] Schlussbericht mit tatsächlich erreichten Nachweisen und verbleibenden Grenzen im Gatebericht dokumentiert.
 
 Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .gitignore-Änderung erhalten.
 
@@ -140,21 +140,21 @@ Arbeitspfade: backend/, api/, docs/vercel-demo-setup.md. Vorhandene fremde .giti
 
 - [x] Vercel-Laufzeitfehler ERR_MODULE_NOT_FOUND mit echtem Paketnachweis behoben und live mit erwarteten HTTP-Antworten geprüft.
 - [x] Alltagssprachlichen Dialog mit 15 Beispielanfragen in fünf Themen geliefert und unabhängig geprüft; Auswahl nur als bearbeitbarer Entwurf.
-- [ ] Bewusst gespeicherte Anmeldung, Wiederaufnahme und echtes Abmelden prüfen; kein Passwort speichern.
-- [ ] Unabhängige Live-Browserprüfung mit vorhandenem Nutzerkonto: echte DeepSeek-Antwort, Datenbezug, Verlauf/Neuladen und beide Themes.
+- [x] Gespeicherte Anmeldung, neuer Tab und Reload live bestanden; kein Passwort gespeichert. Echtes Abmelden bewusst nicht ausgeführt, um den Zugang zu erhalten; separat automatisiert geprüft.
+- [x] Root-Liveprüfung mit vorhandenem Nutzerkonto: echte DeepSeek-Antwort, Datenbezug, Folgefrage, Verlauf/Neuladen und beide Themes bestanden. Prüfchat bewertet die übermittelten Belege unabhängig.
 
 - [x] Tatsächlicher Nutzerlogin und Wiederaufnahme nach Neuladen bestanden, aktive gespeicherte Sitzung mit 30 Tagen bestätigt; kein Passwort gespeichert.
 - [x] Vorlagen live: 5×3 Auswahlmöglichkeiten, Entwurf erhalten, kein automatisches Senden.
 - [x] Echten Providerfehler eingegrenzt: DeepSeek weist Vercel-Schlüssel mit HTTP401 ab. Sichere Diagnose veröffentlicht (`f489365`).
-- [ ] Gültigen Schlüssel durch Nutzer geschützt in Vercel ersetzen, danach reale Antwort/Folgefrage/Verlauf abnehmen.
+- [x] Überholt: Schlüssel musste nicht ersetzt werden. OpenCode-Zuordnung korrigiert; echte Antwort, Folgefrage und Verlauf bestanden.
 
 ## Korrektur: tatsächlicher Anbieter OpenCode
 
 - [x] Nutzerherkunft geklärt: bestehender Schlüssel gehört OpenCode, nicht der direkten DeepSeek-API. Vorige pauschale Ungültigkeitsbehauptung zurückgenommen.
 - [x] Offizielle OpenCode-Dokumentation und öffentliche Modellliste bestätigen DeepSeek V4.1 Flash; im eigenen OpenCode-Konto ist dieses Modell bereits aktiviert. Keine Kontoeinstellung geändert.
-- [ ] Backend/Registry auf OpenCode Go im bestehenden Abo samt passender Modellkennung und Streamingformat korrigieren.
-- [ ] Frontend-Anzeigen/Vertrag prüfen, lokal unabhängig abnehmen und veröffentlichen.
-- [ ] Echte Vercel-Antwort, Folgefrage und gespeicherten Verlauf abnehmen.
+- [x] Backend/Registry auf OpenCode Go im bestehenden Abo samt passender Modellkennung und Streamingformat korrigiert.
+- [x] Frontend-Anzeigen/Vertrag geprüft, lokal unabhängig abgenommen und veröffentlicht.
+- [x] Echte Vercel-Antwort, Folgefrage und gespeicherten Verlauf abgenommen; beide Requests und Nachrichten completed, jeweils genau eine Verbrauchszeile.
 
 Die vorherige offene Aufforderung zum Schlüsselersatz ist überholt. Kein erneuter Key erforderlich allein wegen des früheren401 am falschen Anbieter.
 
