@@ -360,8 +360,9 @@ export class DeepSeekProvider implements Provider {
       observed: string | undefined,
       consistent = true;
     let finishReason: string | undefined;
-    let invalidTerminalDelta = false,
-      invalidFinishReason = false;
+    let invalidTerminalReason: DeepSeekDiagnostic["reason"] | undefined;
+    let terminalText = "";
+    let invalidFinishReason = false;
     const accepted =
       this.provider === "opencode"
         ? (context.acceptedResponseModelIds ?? [context.model.providerModelId])
@@ -469,11 +470,18 @@ export class DeepSeekProvider implements Provider {
             typeof choice.finish_reason === "string"
               ? choice.finish_reason
               : "invalid";
-          invalidTerminalDelta ||= Boolean(
-            delta?.content ||
-            delta?.tool_calls?.length ||
-            delta?.reasoning_content,
-          );
+          if (delta?.tool_calls?.length)
+            invalidTerminalReason ??= "UNEXPECTED_TOOLS";
+          else if (delta?.reasoning_content)
+            invalidTerminalReason ??= "UNEXPECTED_REASONING";
+          else if (delta?.content !== null && delta?.content !== undefined) {
+            if (
+              typeof delta.content !== "string" ||
+              (this.provider !== "opencode" && delta.content)
+            )
+              invalidTerminalReason ??= "CONTENT_SHAPE";
+            else terminalText += delta.content;
+          }
         }
         const usage = event.usage;
         // OpenAI-compatible gateways may put usage in a following choices:[] chunk.
@@ -495,7 +503,7 @@ export class DeepSeekProvider implements Provider {
         if (
           finishReason !== "stop" ||
           invalidFinishReason ||
-          invalidTerminalDelta ||
+          invalidTerminalReason ||
           !consistent ||
           !accepted.includes(event.model) ||
           usage.prompt_tokens > context.inputTokenBound ||
@@ -504,11 +512,13 @@ export class DeepSeekProvider implements Provider {
           this.fail(
             !consistent || !accepted.includes(event.model)
               ? "MODEL_MISMATCH"
-              : finishReason !== "stop"
+              : finishReason !== "stop" || invalidFinishReason
                 ? "FINISH_REASON"
-                : "TOKEN_BOUND",
+                : (invalidTerminalReason ?? "TOKEN_BOUND"),
             metadata,
           );
+        // Go may carry the final text in its stop chunk; emit once only after usage/safety validation.
+        if (terminalText) yield { text: terminalText };
         terminal = true;
       } else {
         if (

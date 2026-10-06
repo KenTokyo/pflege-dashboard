@@ -613,9 +613,9 @@ describe("OpenCode Go exact provider/model and gateway protocol", () => {
       collectOpenCode(events, kind !== "missingDone", trailers),
     ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
   });
-  it("terminal content violation still carries known model/tokens to failed finalization", async () => {
+  it("terminal tools violation still carries known model/tokens to failed finalization", async () => {
     const x = mock([
-      chunk({ content: "must not emit" }, "stop", "deepseek-flash", usage),
+      chunk({ tool_calls: [{}] }, "stop", "deepseek-flash", usage),
     ]);
     const parts = [];
     await expect(
@@ -741,4 +741,145 @@ describe("OpenCode actual adapter to actual handler, synthetic transport", () =>
       }
     },
   );
+});
+
+describe("OpenCode Go terminal text regression from real live failure", () => {
+  it.each([false, true])(
+    "preserves last text with separate usage=%s",
+    async (separate) => {
+      const events = [
+        chunk({ content: "gepr" }),
+        chunk(
+          { content: "üft." },
+          "stop",
+          "deepseek-v4.1-flash",
+          separate ? null : usage,
+        ),
+        ...(separate
+          ? [{ model: "deepseek-v4.1-flash", choices: [], usage }]
+          : []),
+      ];
+      const result = await collectOpenCode(events, true, [
+        { choices: [], cost: "0" },
+      ]);
+      expect(
+        result.parts
+          .filter((p) => "text" in p)
+          .map((p) => p.text)
+          .join(""),
+      ).toBe("geprüft.");
+      expect(result.parts.filter((p) => "usage" in p)).toEqual([
+        {
+          usage: {
+            inputTokens: 10,
+            outputTokens: 5,
+            model: "deepseek-v4.1-flash",
+          },
+        },
+      ]);
+    },
+  );
+  it.each(["tools", "reasoning", "contentShape", "finishConflict", "bound"])(
+    "retains usage and classifies %s without claiming token overflow",
+    async (kind) => {
+      const report = vi.fn();
+      const end = chunk(
+        kind === "tools"
+          ? { tool_calls: [{}] }
+          : kind === "reasoning"
+            ? { reasoning_content: "must not emit" }
+            : kind === "contentShape"
+              ? { content: 17 }
+              : { content: "must not emit" },
+        "stop",
+        "deepseek-v4.1-flash",
+        kind === "bound" ? { ...usage, completion_tokens: 1025 } : usage,
+      );
+      const x = mock([
+        ...(kind === "finishConflict"
+          ? [chunk({}, "length", "deepseek-v4.1-flash")]
+          : []),
+        end,
+      ]);
+      const parts = [];
+      await expect(
+        (async () => {
+          for await (const p of new OpenCodeProvider(
+            "synthetic",
+            x.fetcher as typeof fetch,
+            report,
+          ).stream(ocContext, new AbortController().signal))
+            parts.push(p);
+        })(),
+      ).rejects.toMatchObject({ code: "PROVIDER_FAILED" });
+      expect(parts.filter((p) => "text" in p)).toEqual([]);
+      expect(parts[0]).toHaveProperty("usage");
+      expect(report).toHaveBeenCalledWith(
+        expect.objectContaining({
+          reason:
+            kind === "tools"
+              ? "UNEXPECTED_TOOLS"
+              : kind === "reasoning"
+                ? "UNEXPECTED_REASONING"
+                : kind === "contentShape"
+                  ? "CONTENT_SHAPE"
+                  : kind === "finishConflict"
+                    ? "FINISH_REASON"
+                    : "TOKEN_BOUND",
+        }),
+      );
+    },
+  );
+  it("actual adapter→handler completes and persists full terminal text with real live token values", async () => {
+    const measured = { prompt_tokens: 725, completion_tokens: 275 };
+    const x = mock(
+      [
+        chunk({ content: "durch einen Menschen gep" }),
+        chunk({ content: "rüft." }, "stop", "deepseek-v4.1-flash"),
+        { model: "deepseek-v4.1-flash", choices: [], usage: measured },
+      ],
+      true,
+      [{ choices: [], cost: "0" }],
+    );
+    const rpc = vi.fn(async (name: string) =>
+      name === "edge_chat_prepare"
+        ? { messageId: id, context: ocContext, replayed: false }
+        : name === "edge_chat_replay"
+          ? null
+          : { status: "completed", costMicrousd: 548 },
+    );
+    const response = await chatHandler({
+      env: () => undefined,
+      platform: {
+        rpc,
+        authenticate: async () => ({ userId: id, sessionId: id }),
+      },
+      provider: new OpenCodeProvider("synthetic", x.fetcher as typeof fetch),
+    })(
+      new Request("https://example.invalid/api/chat-stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workspaceId: id,
+          conversationId: id,
+          clientRequestId: id,
+          content: "Frage",
+          attachmentIds: [],
+        }),
+      }),
+    );
+    const body = await response.text();
+    expect(body).toContain("event: message.completed");
+    expect(body).not.toContain("event: error");
+    expect(body).toContain("rüft.");
+    expect(
+      rpc.mock.calls.find(([n]) => n === "edge_chat_finish")?.[1],
+    ).toMatchObject({
+      p_status: "completed",
+      p_content: "durch einen Menschen geprüft.",
+      p_input_tokens: 725,
+      p_output_tokens: 275,
+      p_response_model: "deepseek-v4.1-flash",
+    });
+  });
 });
