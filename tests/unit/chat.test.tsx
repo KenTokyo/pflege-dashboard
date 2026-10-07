@@ -201,6 +201,7 @@ describe('Sichtbare Wartephase', () => {
     conversationId: SEED_CONVERSATION, clientRequestId: 'synthetisch', content: 'Frage', phase: 'sending',
     text: '', model: null, messageId: null, replayed: false, usage: null, error: null,
     activity: [],
+    responseFormat: 'text', presentation: null,
   };
 
   it('Senden → Denkt nach → Schreiben → Abschluss, ohne leeren Cursor oder verbleibende Warteanzeige', () => {

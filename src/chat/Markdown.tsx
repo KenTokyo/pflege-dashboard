@@ -37,3 +37,15 @@ export function SafeMarkdown({ text }: { text: string }) {
     </div>
   );
 }
+
+/** Phrasing content only, so model emphasis never inserts paragraphs into headings. */
+export function SafeInlineMarkdown({ text }: { text: string }) {
+  return (
+    <span className="md md-inline">
+      <Markdown remarkPlugins={[remarkGfm]} skipHtml components={components}
+        allowedElements={['strong', 'em', 'del', 'code', 'a', 'br', 'img']} unwrapDisallowed>
+        {text}
+      </Markdown>
+    </span>
+  );
+}

@@ -1,5 +1,7 @@
 /** Verbindlicher Anschluss v1.5; Implementierungs-/Prüfstatus steht in docs/api-contract.md. */
 import type { Database } from "./database.types.js";
+import type { ChatPresentation, ResponseFormat } from './openui.js';
+export type { ChatPresentation, ResponseFormat } from './openui.js';
 export const PHASE1_API = {
   session: "/api/session",
   chatStream: "/api/chat-stream",
@@ -41,6 +43,7 @@ export type ChatRequestV1 = {
   clientRequestId: string;
   content: string;
   attachmentIds: [];
+  responseFormat?: ResponseFormat;
 };
 export type Phase1Code =
   | "AUTH_REQUIRED"
@@ -61,6 +64,7 @@ export type Phase1Code =
   | "PROVIDER_RATE_LIMITED"
   | "PROVIDER_UNAVAILABLE"
   | "PROVIDER_CONTENT_BLOCKED"
+  | "PRESENTATION_INVALID"
   | "PROVIDER_FAILED"
   | "INTERNAL_ERROR"
   | "REQUEST_ABORTED";
@@ -86,6 +90,8 @@ export type ChatActivityDetails = {
   reasoningChunks?: number;
   outputChars?: number;
   replayed?: boolean;
+  responseFormat?: ResponseFormat;
+  catalogVersion?: 'pflege-openui-v1';
 };
 export type ProviderActivity = {
   stage: "token_count" | "provider_request" | "awaiting_text";
@@ -115,8 +121,12 @@ type Data = {
     model: ChatModel;
     promptVersionId: string;
     replayed: boolean;
+    responseFormat?: ResponseFormat;
+    catalogVersion?: 'pflege-openui-v1';
   };
   "message.delta": { text: string };
+  "message.presentation.delta": { text: string };
+  "message.presentation.final": { presentation: ChatPresentation };
   "usage.final": {
     inputTokens: number;
     outputTokens: number;

@@ -8,6 +8,8 @@ import { AppError } from '../../src/services/errors';
 import type { AuthChange, AuthSession, Backend, ConversationRow, MessageRow } from '../../src/services/types';
 import { createSeed, TEST_USER_ID, type SeedOptions, type SeedState } from './seed';
 import type { StaffOverview } from '../../types/staff';
+import { OPENUI_CATALOG_VERSION, parseOpenUi, type ChatPresentation } from '../../types/openui';
+import { readPresentation } from '../../src/chat/openui/presentation';
 
 export const TEST_EMAIL = 'pruefung@beispiel.invalid';
 export const TEST_PASSWORD = 'nur-synthetisch';
@@ -15,6 +17,7 @@ export const TEST_PASSWORD = 'nur-synthetisch';
 /** Ablauf einer synthetischen Antwort. */
 export type ChatScript =
   | { kind: 'answer'; chunks: string[]; holdBeforeComplete?: boolean; sources?: { title: string; url: string }[] }
+  | { kind: 'openui'; chunks: string[]; holdBeforeComplete?: boolean; cutBeforeComplete?: boolean; sources?: { title: string; url: string }[] }
   | { kind: 'http_error'; code: Phase1Code }
   | { kind: 'stream_error'; afterChunks: string[]; code: Phase1Code }
   /** Server speichert die Antwort vollständig, die Verbindung zum Browser reißt aber vor `completed` ab. */
@@ -45,6 +48,7 @@ export type FakeBackend = Backend & {
   heldCount: (point: HoldPoint) => number;
   /** Gehaltenen Stream (holdBeforeComplete) abschließen. */
   release: () => void;
+  isStreamHeld: () => boolean;
   failSessionEnd: boolean;
   touchError: Phase1Code | null;
 };
@@ -110,6 +114,7 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
     sources: [],
     client_request_id: null,
     provider_response_model: null,
+    presentation: null,
     ...extra,
   });
 
@@ -135,6 +140,7 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
       else next.resolve();
     },
     heldCount: (point) => held.get(point)?.length ?? 0,
+    isStreamHeld: () => releaseHold !== null,
     failSessionEnd: false,
     touchError: null,
     release: () => releaseHold?.(),
@@ -293,29 +299,56 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
           state.messages.push(message(request.conversationId, 'user', request.content, { client_request_id: request.clientRequestId, created_at: startedAt }));
           putReply(message(request.conversationId, 'assistant', '', { ...base, status: 'streaming' }));
         }
-        emit('message.started', { messageId, model: chatModel, promptVersionId: state.defaultPrompt.id, replayed: Boolean(stored) });
+        const storedPresentation = readPresentation(stored?.presentation);
+        const responseFormat = stored ? storedPresentation ? 'openui' : 'text' : request.responseFormat ?? 'text';
+        emit('message.started', { messageId, model: chatModel, promptVersionId: state.defaultPrompt.id, replayed: Boolean(stored), responseFormat,
+          ...(responseFormat === 'openui' ? { catalogVersion: OPENUI_CATALOG_VERSION } : {}),
+        });
         for (const activity of options.activity ?? []) emit('message.activity', activity);
-        const chunks = stored ? [stored.content] : script.kind === 'answer' ? script.chunks : script.afterChunks;
+        const chunks = stored ? [stored.content] : script.kind === 'answer' || script.kind === 'openui' ? script.chunks : script.afterChunks;
         let text = '';
+        let source = '';
+        let presentation: ChatPresentation | null = storedPresentation;
+        const setPresentation = (state: ChatPresentation['state']) => {
+          presentation = { format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source, state };
+          emit('message.presentation.final', { presentation });
+        };
         try {
           for (const chunk of chunks) {
             await wait(tick, signal);
-            text += chunk;
-            emit('message.delta', { text: chunk });
+            if (!stored && script.kind === 'openui') {
+              source += chunk;
+              emit('message.presentation.delta', { text: chunk });
+            } else {
+              text += chunk;
+              emit('message.delta', { text: chunk });
+            }
           }
           if (script.kind === 'stream_error' && !stored) {
             // Wie der echte Transport: ein SSE-`error`-Ereignis wird zum geworfenen Vertragsfehler.
             throw new AppError(script.code, { requestId });
           }
-          if (script.kind === 'answer' && script.holdBeforeComplete && !stored) {
+          if ((script.kind === 'answer' || script.kind === 'openui') && script.holdBeforeComplete && !stored) {
             await new Promise<void>((resolve, reject) => {
               releaseHold = resolve;
               signal.addEventListener('abort', () => reject(new AppError('REQUEST_ABORTED')), { once: true });
             });
           }
+          if (!stored && script.kind === 'openui') {
+            const parsed = parseOpenUi(source);
+            text = parsed.text;
+            if (text) emit('message.delta', { text });
+            setPresentation(parsed.state === 'valid' ? 'valid' : 'invalid');
+            if (parsed.state !== 'valid') throw new AppError('PRESENTATION_INVALID');
+          }
         } catch (error) {
+          if (!stored && script.kind === 'openui' && !presentation) {
+            text = parseOpenUi(source, true).text;
+            if (text) emit('message.delta', { text });
+            setPresentation(signal.aborted ? 'interrupted' : 'invalid');
+          }
           // Abbruch speichert den Teiltext als unterbrochen, andere Fehler als fehlgeschlagen.
-          if (!stored) putReply(message(request.conversationId, 'assistant', text, { ...base, status: signal.aborted ? 'interrupted' : 'failed' }));
+          if (!stored) putReply(message(request.conversationId, 'assistant', text, { ...base, presentation, status: signal.aborted ? 'interrupted' : 'failed' }));
           throw error;
         }
         if (!stored) {
@@ -324,13 +357,15 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
             provider_response_model: `${chatModel.providerModelId}-synthetisch`,
             input_tokens: 812,
             output_tokens: 164,
-            sources: script.kind === 'answer' ? (script.sources ?? []) : [],
+            sources: script.kind === 'answer' || script.kind === 'openui' ? (script.sources ?? []) : [],
+            presentation,
           });
           putReply(reply);
           replies.set(request.clientRequestId, reply);
           // Server hat vollständig gespeichert, aber die Verbindung zum Browser reißt ab.
-          if (script.kind === 'cut') throw new AppError('NETWORK');
+          if (script.kind === 'cut' || (script.kind === 'openui' && script.cutBeforeComplete)) throw new AppError('NETWORK');
         }
+        if (storedPresentation) emit('message.presentation.final', { presentation: storedPresentation });
         emit('usage.final', { inputTokens: 812, outputTokens: 164, costMicrousd: 0 });
         emit('message.completed', { messageId, replayed: Boolean(stored) });
       },

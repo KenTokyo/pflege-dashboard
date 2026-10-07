@@ -74,6 +74,35 @@ async function consume(
 }
 afterEach(() => vi.unstubAllGlobals());
 describe("native Gemini transport, synthetic responses only", () => {
+  it.each([
+    [503,'UNAVAILABLE','PROVIDER_UNAVAILABLE',true],
+    [500,'INTERNAL','PROVIDER_UNAVAILABLE',true],
+    [429,'RESOURCE_EXHAUSTED','PROVIDER_RATE_LIMITED',true],
+    [401,'UNAUTHENTICATED','PROVIDER_AUTH_FAILED',false],
+    [403,'PERMISSION_DENIED','PROVIDER_AUTH_FAILED',false],
+    [400,'INVALID_ARGUMENT','PROVIDER_FAILED',false],
+  ])('classifies native HTTP-200 stream error %s without leaking text or billing cumulative usage', async(code,status,expected,retryable)=>{
+    const report=vi.fn();const f=transport([chunk('Partial'),{error:{code,status,message:'private key and provider message must not escape'}}]);
+    const parts:ProviderPart[]=[];
+    try{for await(const p of new GeminiProvider('synthetic-private-key',f,report).stream(context,new AbortController().signal))parts.push(p);throw Error('Expected failure');}
+    catch(e){expect(e).toMatchObject({code:expected,retryable});}
+    expect(parts).toEqual([{text:'Partial'},{usageUnreliable:{model}}]);
+    expect(report).toHaveBeenCalledWith({reason:'STREAM_REJECTED',providerStatus:code});
+    expect(JSON.stringify(report.mock.calls)).not.toContain('private');expect(f).toHaveBeenCalledTimes(2);
+  });
+  it('streaming native 400 API_KEY_INVALID is authentication failure',async()=>{
+    const f=transport([{error:{code:400,status:'INVALID_ARGUMENT',details:[{reason:'API_KEY_INVALID'}]}}]);
+    await expect(consume(new GeminiProvider('key',f))).rejects.toMatchObject({code:'PROVIDER_AUTH_FAILED',retryable:false});
+  });
+  it.each([null,{},'unsafe',{code:'503'},{code:200},{code:700},{code:503,message:{}},{code:503,details:{}}])('malformed stream error remains a protocol failure: %j',async error=>{
+    const report=vi.fn();await expect(consume(new GeminiProvider('key',transport([{error}]),report))).rejects.toMatchObject({code:'PROVIDER_FAILED'});
+    expect(report).toHaveBeenCalledWith({reason:'RESPONSE_SHAPE'});
+  });
+  it('an error after STOP invalidates earlier usage instead of turning the request into completed',async()=>{
+    const parts:ProviderPart[]=[];let error:unknown;
+    try{for await(const p of new GeminiProvider('key',transport([chunk('Partial','STOP'),{error:{code:503,status:'UNAVAILABLE'}}])).stream(context,new AbortController().signal))parts.push(p);}catch(e){error=e;}
+    expect(error).toMatchObject({code:'PROVIDER_UNAVAILABLE'});expect(parts).toEqual([{text:'Partial'},{usageUnreliable:{model}}]);
+  });
   it("streams the actually observed terminal signature shape and identical cumulative usage", async () => {
     const stop = chunk("", "STOP");
     Object.assign(stop.candidates[0].content.parts[0], {
@@ -526,6 +555,18 @@ describe("Gemini same-origin handler preserves request finalization and replay",
         attachmentIds: [],
       }),
     });
+  it('native SSE 503 preserves partial text, holds uncertain accounting and exposes only the safe retryable error',async()=>{
+    const x=handler(),f=transport([chunk('Teilantwort'),{error:{code:503,status:'UNAVAILABLE',message:'private provider overload message'}}]);
+    const log=vi.spyOn(console,'warn').mockImplementation(()=>{});
+    vi.stubGlobal('fetch',f);
+    try{
+      const text=await (await chatHandler(x.deps)(request())).text();
+      expect(text).toContain('Teilantwort');expect(text).toContain('PROVIDER_UNAVAILABLE');expect(text).toContain('"retryable":true');
+      expect(text).not.toContain('private provider');expect(text).not.toContain('message.completed');expect(text).not.toContain('usage.final');
+      expect((x.rpc.mock.calls.find(c=>c[0]==='edge_chat_finish') as any)[1]).toMatchObject({p_status:'failed',p_content:'Teilantwort',p_input_tokens:null,p_output_tokens:null,p_response_model:model});
+      expect(f).toHaveBeenCalledTimes(2);expect(JSON.stringify(log.mock.calls)).not.toContain('private provider');
+    }finally{log.mockRestore();}
+  });
   it("selects Gemini explicitly and atomically persists actual identity and usage", async () => {
     const x = handler(),
       f = transport([chunk("Antwort", "STOP")]);

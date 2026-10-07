@@ -15,6 +15,7 @@ import type { Clock } from '../../src/auth/activity';
 import { createFakeBackend, type ChatScript, type FakeOptions } from '../support/fakeBackend';
 import { emptyWorkspace, longContent } from '../support/scenarios';
 import { staffScenario } from '../support/staffScenario';
+import { openUiScenario } from '../support/openUiScenario';
 
 const params = new URLSearchParams(location.search);
 const szenario = params.get('szenario') ?? 'seed';
@@ -47,6 +48,8 @@ const SZENARIEN: Record<string, FakeOptions> = {
   leer: { extend: emptyWorkspace },
   staff: { modelOperational: true, role: 'member', extend: staffScenario },
   langsam: { modelOperational: true, tickMs: 4000, chat: () => ANSWER },
+  openui: openUiScenario({ hold: params.get('halten') === '1' }),
+  'openui-fehler': openUiScenario({ invalid: true }),
 };
 
 // Uhr mit Vorspulen, damit der 15-Minuten-Abmeldeweg ohne Warten sichtbar wird.
@@ -73,6 +76,7 @@ Object.assign(window, {
   __harness: {
     szenario,
     release: () => fake.release(),
+    isStreamHeld: () => fake.isStreamHeld(),
     advance: (ms: number) => {
       offset += ms;
       for (const [id, t] of [...timers.entries()].sort((a, b) => a[1].at - b[1].at)) {

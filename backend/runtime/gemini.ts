@@ -11,6 +11,7 @@ type Usage = { inputTokens: number; outputTokens: number; model: string };
 export type GeminiDiagnostic = {
   reason:
     | "HTTP_REJECTED"
+    | "STREAM_REJECTED"
     | "NETWORK"
     | "RESPONSE_SHAPE"
     | "INVALID_JSON"
@@ -21,6 +22,7 @@ export type GeminiDiagnostic = {
     | "TOKEN_BOUND"
     | "INCOMPLETE_STREAM";
   httpStatus?: number;
+  providerStatus?: number;
 };
 const object = (v: unknown): v is Record<string, any> =>
   !!v && typeof v === "object" && !Array.isArray(v);
@@ -35,6 +37,17 @@ const blocked = new Set([
   "IMAGE_SAFETY",
   "IMAGE_PROHIBITED_CONTENT",
 ]);
+function invalidKeyDetails(value: unknown): boolean {
+  return object(value) && Array.isArray(value.details) && value.details.some((d: unknown) =>
+    object(d) && ['API_KEY_INVALID','API_KEY_EXPIRED'].includes(d.reason));
+}
+function rejection(status: number, invalidKey = false): AppError {
+  return status === 401 || status === 403 || invalidKey
+    ? new AppError('PROVIDER_AUTH_FAILED', 503)
+    : status === 429 ? new AppError('PROVIDER_RATE_LIMITED', 429, true)
+    : status === 408 || status >= 500 ? new AppError('PROVIDER_UNAVAILABLE', 503, true)
+    : new AppError('PROVIDER_FAILED', 502);
+}
 async function invalidKeyReason(response: Response, signal: AbortSignal) {
   if (response.status !== 400 || !response.body) return false;
   const reader = response.body.getReader();
@@ -54,14 +67,7 @@ async function invalidKeyReason(response: Response, signal: AbortSignal) {
       text += decoder.decode(part.value, { stream: true });
     }
     const value = JSON.parse(text + decoder.decode());
-    return (
-      Array.isArray(value?.error?.details) &&
-      value.error.details.some(
-        (d: unknown) =>
-          object(d) &&
-          ["API_KEY_INVALID", "API_KEY_EXPIRED"].includes(d.reason),
-      )
-    );
+    return invalidKeyDetails(value?.error);
   } catch {
     return false;
   } finally {
@@ -83,11 +89,13 @@ export class GeminiProvider implements Provider {
     reason: GeminiDiagnostic["reason"],
     error = new AppError("PROVIDER_FAILED", 502),
     httpStatus?: number,
+    providerStatus?: number,
   ): never {
     try {
       this.report({
         reason,
         ...(httpStatus === undefined ? {} : { httpStatus }),
+        ...(providerStatus === undefined ? {} : { providerStatus }),
       });
     } catch {
       /* no diagnostic may change finalization */
@@ -123,13 +131,7 @@ export class GeminiProvider implements Provider {
       const status = response.status;
       this.fail(
         "HTTP_REJECTED",
-        status === 401 || status === 403 || invalidKey
-          ? new AppError("PROVIDER_AUTH_FAILED", 503)
-          : status === 429
-            ? new AppError("PROVIDER_RATE_LIMITED", 429, true)
-            : status === 408 || status >= 500
-              ? new AppError("PROVIDER_UNAVAILABLE", 503, true)
-              : new AppError("PROVIDER_FAILED", 502),
+        rejection(status, invalidKey),
         status,
       );
     }
@@ -221,7 +223,19 @@ export class GeminiProvider implements Provider {
         } catch {
           this.fail("INVALID_JSON");
         }
-        if (!object(event) || event.error) this.fail("RESPONSE_SHAPE");
+        if (!object(event)) this.fail("RESPONSE_SHAPE");
+        if (Object.hasOwn(event, 'error')) {
+          // Native Gemini can send a Google RPC error inside an HTTP-200 SSE stream.
+          // Earlier cumulative usage never establishes the cost of this incomplete call.
+          finalUsage = false;
+          terminal = false;
+          const error = event.error;
+          if (!object(error) || !Number.isSafeInteger(error.code) || error.code < 400 || error.code > 599 ||
+            (error.status !== undefined && typeof error.status !== 'string') ||
+            (error.message !== undefined && typeof error.message !== 'string') ||
+            (error.details !== undefined && !Array.isArray(error.details))) this.fail('RESPONSE_SHAPE');
+          this.fail('STREAM_REJECTED', rejection(error.code, error.code === 400 && invalidKeyDetails(error)), undefined, error.code);
+        }
         let inconsistentModel = false;
         if (event.modelVersion !== undefined) {
           if (

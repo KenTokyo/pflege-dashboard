@@ -16,6 +16,8 @@ export type Context = {
   acceptedResponseModelIds?: string[];
   promptVersionId: string;
   instructions: string;
+  responseFormat?: 'text' | 'openui';
+  catalogVersion?: 'pflege-openui-v1';
   input: { role: "user" | "assistant"; content: string }[];
   maxOutputTokens: number;
   // Gemini may report thinking separately from visible candidate tokens.

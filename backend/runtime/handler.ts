@@ -9,6 +9,8 @@ import {
 } from "./provider.js";
 import type { ChatActivity, ChatActivityDetails } from "../../types/phase1.js";
 import { GeminiProvider } from "./gemini.js";
+import { OPENUI_CATALOG_VERSION, OPENUI_INSTRUCTIONS, TEXT_STYLE_INSTRUCTIONS, parseOpenUi,
+  type ChatPresentation } from '../../types/openui.js';
 export type Dependencies = {
   env: Environment;
   platform: Platform;
@@ -93,6 +95,7 @@ export function chatHandler(deps: Dependencies) {
         data.content.length > 8000 ||
         !Array.isArray(data.attachmentIds) ||
         data.attachmentIds.length !== 0 ||
+        (data.responseFormat !== undefined && data.responseFormat !== 'text' && data.responseFormat !== 'openui') ||
         Object.keys(data).some(
           (k) =>
             ![
@@ -101,6 +104,7 @@ export function chatHandler(deps: Dependencies) {
               "clientRequestId",
               "content",
               "attachmentIds",
+              "responseFormat",
             ].includes(k),
         )
       )
@@ -118,6 +122,7 @@ export function chatHandler(deps: Dependencies) {
         p_conversation_id: data.conversationId,
         p_request_id: id,
         p_content: data.content,
+        p_response_format: data.responseFormat ?? 'text',
       };
       const replay = await deps.platform.rpc(
         "edge_chat_replay",
@@ -133,8 +138,12 @@ export function chatHandler(deps: Dependencies) {
       }
       const prepared =
         replay ??
-        (await deps.platform.rpc("edge_chat_prepare", payload, request.signal));
+        (await deps.platform.rpc("edge_chat_prepare", { ...payload,
+          p_format_instructions: payload.p_response_format === 'openui' ? OPENUI_INSTRUCTIONS : TEXT_STYLE_INSTRUCTIONS,
+        }, request.signal));
       const context = prepared.context as Context;
+      const responseFormat = context.responseFormat ?? 'text';
+      if (responseFormat !== payload.p_response_format) throw new AppError('INTERNAL_ERROR');
       let reportActivity: ActivityReporter = async () => {};
       const provider =
         deps.provider ??
@@ -177,6 +186,10 @@ export function chatHandler(deps: Dependencies) {
       const controller = new AbortController();
       let cancelled = false;
       let output = "";
+      let presentation: ChatPresentation | null = responseFormat === 'openui' ? {
+        format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source: '', state: 'streaming',
+      } : null;
+      let textEmitted = false;
       let usage:
         | {
             inputTokens: number | null;
@@ -261,6 +274,8 @@ export function chatHandler(deps: Dependencies) {
             p_input_tokens: usage?.inputTokens ?? null,
             p_output_tokens: usage?.outputTokens ?? null,
             p_response_model: usage?.model ?? null,
+            p_presentation: presentation ? { ...presentation, state: status === 'completed' ? 'valid'
+              : status === 'interrupted' ? 'interrupted' : 'invalid' } : null,
           },
           AbortSignal.timeout(2500),
         );
@@ -341,6 +356,8 @@ export function chatHandler(deps: Dependencies) {
                 safe.thinking = details.thinking;
               if (typeof details.replayed === "boolean")
                 safe.replayed = details.replayed;
+              safe.responseFormat = responseFormat;
+              if (responseFormat === 'openui') safe.catalogVersion = OPENUI_CATALOG_VERSION;
               await send("message.activity", {
                 stage,
                 source,
@@ -365,6 +382,8 @@ export function chatHandler(deps: Dependencies) {
                 model: context.model,
                 promptVersionId: context.promptVersionId,
                 replayed: prepared.replayed,
+                responseFormat,
+                ...(responseFormat === 'openui' ? { catalogVersion: OPENUI_CATALOG_VERSION } : {}),
               });
               await activity("auth_verified", "supabase_auth");
               await activity("context_ready", "supabase_sql_rpc", {
@@ -377,6 +396,9 @@ export function chatHandler(deps: Dependencies) {
               });
               if (prepared.replayed) {
                 await send("message.delta", { text: prepared.content });
+                if (prepared.presentation) {
+                  await send('message.presentation.final', { presentation: prepared.presentation });
+                }
                 await send("usage.final", {
                   inputTokens: prepared.inputTokens,
                   outputTokens: prepared.outputTokens,
@@ -407,8 +429,17 @@ export function chatHandler(deps: Dependencies) {
                         outputChars: part.text.length,
                       });
                     }
-                    output += part.text;
-                    if (output.length > 100000) {
+                    if (presentation) {
+                      presentation.source += part.text;
+                      if (presentation.source.length > 100000) {
+                        presentation.source = presentation.source.slice(0, 100000);
+                        throw new AppError('PROVIDER_FAILED', 502);
+                      }
+                      const preview = parseOpenUi(presentation.source, true);
+                      // Preview may replace partial strings; canonical SSE is appended only once final.
+                      if (preview.text) output = preview.text;
+                    } else output += part.text;
+                    if ((presentation?.source.length ?? output.length) > 100000 || output.length > 100000) {
                       throw new AppError("PROVIDER_FAILED", 502);
                     }
                     if (Date.now() - lastCheckpoint >= 2000) {
@@ -418,12 +449,13 @@ export function chatHandler(deps: Dependencies) {
                           ...base,
                           p_request_id: id,
                           p_content: output,
+                          p_presentation: presentation,
                         },
                         controller.signal,
                       );
                       lastCheckpoint = Date.now();
                     }
-                    await send("message.delta", { text: part.text });
+                    await send(presentation ? 'message.presentation.delta' : "message.delta", { text: part.text });
                     if (controller.signal.aborted) throw abortedError();
                   } else if ("usage" in part) usage = part.usage;
                   else
@@ -442,6 +474,14 @@ export function chatHandler(deps: Dependencies) {
                 if (controller.signal.aborted) {
                   throw abortedError();
                 }
+                if (presentation) {
+                  const parsed = parseOpenUi(presentation.source);
+                  if (parsed.text) output = parsed.text;
+                  if (parsed.state !== 'valid') throw new AppError('PRESENTATION_INVALID', 502);
+                  presentation.state = 'valid';
+                  await send('message.delta', { text: output });
+                  textEmitted = true;
+                }
                 await liveCheck();
                 await activity("persisting", "supabase_sql_rpc", {
                   operation: "edge_chat_finish",
@@ -456,6 +496,7 @@ export function chatHandler(deps: Dependencies) {
                   outputTokens: usage.outputTokens,
                   costMicrousd: result.costMicrousd,
                 });
+                if (presentation) await send('message.presentation.final', { presentation });
                 await send("message.completed", {
                   messageId: prepared.messageId,
                   replayed: false,
@@ -476,6 +517,7 @@ export function chatHandler(deps: Dependencies) {
                     "WORKSPACE_FORBIDDEN",
                   ].includes(failureReason.code));
               controller.abort();
+              if (presentation) presentation.state = interrupted ? 'interrupted' : 'invalid';
               try {
                 if (!prepared.replayed) {
                   await final(interrupted ? "interrupted" : "failed");
@@ -485,6 +527,15 @@ export function chatHandler(deps: Dependencies) {
               }
               if (!cancelled) {
                 try {
+                  if (presentation) {
+                    // The controller is already aborted: enqueue only the bounded final projection/state.
+                    for (const [type, eventData] of [
+                      ...(!textEmitted && output ? [['message.delta', { text: output }]] : []),
+                      ['message.presentation.final', { presentation }],
+                    ] as [string, unknown][]) sink.enqueue(new TextEncoder().encode(
+                      `event: ${type}\ndata: ${JSON.stringify({version:1,requestId:id,sequence:++sequence,
+                        conversationId:data.conversationId,type,data:eventData})}\n\n`));
+                  }
                   const failure = errorPayload(
                     failureReason instanceof AppError
                       ? failureReason

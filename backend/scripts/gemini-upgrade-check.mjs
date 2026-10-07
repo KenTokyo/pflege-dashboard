@@ -108,7 +108,7 @@ try {
       state.push(
         (
           await db.query(
-            `select to_jsonb(t) from public.${table} t order by id`,
+            `select ${table === 'messages' ? "to_jsonb(t)-'presentation'" : 'to_jsonb(t)'} from public.${table} t order by id`,
           )
         ).rows,
       );
@@ -202,8 +202,8 @@ try {
       await db.query(
         "select count(*)::int n from supabase_migrations.schema_migrations",
       )
-    ).rows[0].n === 16,
-    "Exactly sixteen journalled migrations",
+    ).rows[0].n === 17,
+    "Exactly seventeen journalled migrations",
   );
   check(
     (
@@ -274,5 +274,5 @@ if (failure) {
   process.exitCode = 1;
 } else
   console.log(
-    `${checks.length} tatsächliche Dreizehn-zu-sechzehn-Upgradeprüfungen bestanden; eigener Stack beendet.`,
+    `${checks.length} tatsächliche Dreizehn-zu-siebzehn-Upgradeprüfungen bestanden; eigener Stack beendet.`,
   );

@@ -32,6 +32,7 @@ function longConversation(state: SeedState) {
       sources: [],
       client_request_id: null,
       provider_response_model: null,
+      presentation: null,
     });
   }
 }

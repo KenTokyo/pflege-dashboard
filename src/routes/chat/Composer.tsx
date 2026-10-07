@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type 
 import { QuestionExamplesDialog } from './QuestionExamplesDialog';
 import { appendQuestion } from './questionExamples';
 import { useSpeechInput } from '../../chat/useSpeechInput';
+import type { ResponseFormat } from '../../chat/responseFormat';
+import { ResponseFormatSwitch } from './ResponseFormatSwitch';
 
 export const MAX_MESSAGE = 8000;
 
@@ -17,9 +19,12 @@ type Props = {
   /** Grund, warum gerade nicht gesendet werden kann (wird angezeigt). */
   blockedReason: string | null;
   inputRef?: RefObject<HTMLTextAreaElement | null>;
+  responseFormat: ResponseFormat;
+  onResponseFormatChange: (value: ResponseFormat) => void;
+  responseFormatSaved: boolean | null;
 };
 
-export function Composer({ value, onChange, onSend, onStop, streaming, blockedReason, inputRef, personName = null }: Props) {
+export function Composer({ value, onChange, onSend, onStop, streaming, blockedReason, inputRef, personName = null, responseFormat, onResponseFormatChange, responseFormatSaved }: Props) {
   const [examplesOpen, setExamplesOpen] = useState(false);
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = inputRef ?? localRef;
@@ -55,10 +60,12 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
   return (
     <div className="composer">
       <div className="composer-examples">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setExamplesOpen(true)}>
+        <button type="button" className="btn btn-ghost btn-sm question-button" aria-label="Was kann ich fragen?" onClick={() => setExamplesOpen(true)}>
           <MessageSquareText className="i" size={16} aria-hidden="true" />
-          Was kann ich fragen?
+          <span className="question-button-label">Was kann ich fragen?</span>
+          <span className="question-button-label-short" aria-hidden="true">Beispiele</span>
         </button>
+        <ResponseFormatSwitch value={responseFormat} onChange={onResponseFormatChange} saved={responseFormatSaved} />
         <button
           type="button"
           className={`icon-btn speech-button ${speech.active ? 'is-recording' : ''}`}

@@ -120,6 +120,7 @@ export function longContent(state: SeedState, now = Date.now()) {
     sources: role === 'assistant' ? [{ title: 'SGB XI § 78 (Gesetze im Internet)', url: 'https://www.gesetze-im-internet.de/sgb_11/__78.html' }] : [],
     client_request_id: null,
     provider_response_model: role === 'assistant' ? 'synthetisches-modell-2026-10-01-mit-sehr-langer-kennung' : null,
+    presentation: null,
   });
   state.messages = [
     ...state.messages,

@@ -1,5 +1,6 @@
 import { CircleAlert, Info, MessageSquareText, Quote } from 'lucide-react';
-import { SafeMarkdown } from '../../chat/Markdown';
+import { AnswerBody } from '../../chat/AnswerBody';
+import type { ResponseFormat } from '../../chat/responseFormat';
 import { messageModel, messageSources, REGION_LABEL, type MessageModel } from '../../data/model';
 import { stampWhen } from '../../lib/format';
 import type { MessageRow } from '../../services/types';
@@ -37,7 +38,7 @@ const STATUS_NOTE: Partial<Record<MessageRow['status'], string>> = {
   pending: 'Antwort steht noch aus.',
 };
 
-export function MessageView({ message }: { message: MessageRow }) {
+export function MessageView({ message, responseFormat = 'text' }: { message: MessageRow; responseFormat?: ResponseFormat }) {
   if (message.role === 'user') {
     return (
       <div className="msg-user">
@@ -63,7 +64,7 @@ export function MessageView({ message }: { message: MessageRow }) {
   return (
     <article className="msg-agent" aria-label="Antwort des KI-Sachbearbeiters">
       <AgentMeta model={messageModel(message)} time={stampWhen(message.created_at, new Date())} />
-      {message.content ? <SafeMarkdown text={message.content} /> : null}
+      <AnswerBody text={message.content} presentation={message.presentation} responseFormat={responseFormat} streaming={message.status === 'streaming'} />
       {note ? (
         <p className="msg-status is-warn">
           <CircleAlert className="i" size={15} aria-hidden="true" />

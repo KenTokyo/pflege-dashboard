@@ -195,6 +195,7 @@ export function createSeed(options: SeedOptions = {}): SeedState {
         sources: [],
         client_request_id: null,
         provider_response_model: null,
+        presentation: null,
       },
     ],
     models,

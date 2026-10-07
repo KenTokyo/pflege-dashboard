@@ -42,6 +42,8 @@ const messages: Record<string, string> = {
     "Der KI-Anbieter konnte diese Anfrage aus Sicherheitsgründen nicht beantworten. Bitte formulieren Sie sie anders.",
   PROVIDER_FAILED:
     "Die Modellantwort konnte nicht vollständig verarbeitet werden. Bitte laden Sie den Verlauf neu.",
+  PRESENTATION_INVALID:
+    "Die OpenUI-Antwort ist unvollständig oder hat ein ungültiges Format. Die lesbaren Teile bleiben im Verlauf.",
   REQUEST_ABORTED: "Die Antwort wurde abgebrochen.",
   INTERNAL_ERROR: "Die Anfrage konnte nicht sicher abgeschlossen werden.",
 };

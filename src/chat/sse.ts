@@ -1,6 +1,8 @@
 import type { ChatEventV1 } from '../../types/phase1';
 import { AppError, isAppErrorCode } from '../services/errors';
 import { parseActivity } from './activity';
+import { readPresentation } from './openui/presentation';
+import { OPENUI_CATALOG_VERSION } from '../../types/openui';
 
 export type SseMessage = { event: string; data: string };
 
@@ -58,7 +60,7 @@ export class SseParser {
   }
 }
 
-const TYPES = new Set(['message.activity', 'message.started', 'message.delta', 'usage.final', 'message.completed', 'error']);
+const TYPES = new Set(['message.activity', 'message.started', 'message.delta', 'message.presentation.delta', 'message.presentation.final', 'usage.final', 'message.completed', 'error']);
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isString = (v: unknown): v is string => typeof v === 'string';
 const isCount = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
@@ -73,6 +75,9 @@ function validData(type: string, data: Record<string, unknown>): boolean {
         isString(data.messageId) &&
         isString(data.promptVersionId) &&
         typeof data.replayed === 'boolean' &&
+        (data.responseFormat === undefined || data.responseFormat === 'text' || data.responseFormat === 'openui') &&
+        (data.catalogVersion === undefined || data.catalogVersion === OPENUI_CATALOG_VERSION) &&
+        (data.responseFormat !== 'openui' || data.catalogVersion === OPENUI_CATALOG_VERSION) &&
         isObject(model) &&
         isString(model.displayName) &&
         isString(model.providerModelId) &&
@@ -81,7 +86,12 @@ function validData(type: string, data: Record<string, unknown>): boolean {
       );
     }
     case 'message.delta':
+    case 'message.presentation.delta':
       return isString(data.text);
+    case 'message.presentation.final': {
+      const presentation = readPresentation(data.presentation);
+      return presentation !== null && presentation.state !== 'streaming';
+    }
     case 'usage.final':
       return isCount(data.inputTokens) && isCount(data.outputTokens) && isCount(data.costMicrousd);
     case 'message.completed':
@@ -120,6 +130,7 @@ export function parseChatEvent(message: SseMessage, conversationId: string): Cha
     throw new AppError('PROTOCOL');
   }
   if (parsed.type === 'message.activity') return { ...parsed, data: parseActivity(parsed.data) } as ChatEventV1;
+  if (parsed.type === 'message.presentation.final') return { ...parsed, data: { presentation: readPresentation(parsed.data.presentation) } } as ChatEventV1;
   return parsed as ChatEventV1;
 }
 

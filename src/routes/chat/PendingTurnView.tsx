@@ -1,5 +1,7 @@
 import { CircleAlert, PencilLine, RefreshCw, RotateCcw, Send, X } from 'lucide-react';
-import { SafeMarkdown } from '../../chat/Markdown';
+import { AnswerBody } from '../../chat/AnswerBody';
+import type { ResponseFormat } from '../../chat/responseFormat';
+import { parseOpenUi } from '../../../types/openui';
 import { recoveryFor, type PendingTurn } from '../../chat/streamStore';
 import { modelDisplayName } from '../../data/model';
 import { AgentMeta } from './MessageView';
@@ -15,6 +17,7 @@ type Props = {
   onEdit: () => void;
   onDismiss: () => void;
   actionsDisabled?: boolean;
+  responseFormat?: ResponseFormat;
 };
 
 const FAILED_TITLE: Record<string, string> = {
@@ -23,10 +26,11 @@ const FAILED_TITLE: Record<string, string> = {
 };
 
 /** Laufende oder gerade beendete Anfrage, bis der gespeicherte Verlauf sie enthält. */
-export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss, actionsDisabled = false }: Props) {
+export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss, actionsDisabled = false, responseFormat = 'text' }: Props) {
   const live = turn.phase === 'sending' || turn.phase === 'streaming';
   const recovery = recoveryFor(turn);
-  const visibleText = turn.text.trim().length > 0;
+  const preview = turn.text || (turn.presentation ? parseOpenUi(turn.presentation.source, live).text : '');
+  const visibleText = preview.trim().length > 0;
   const incompleteAnswer = turn.phase === 'failed' && visibleText;
   const progress = turn.phase === 'sending' ? 'Anfrage wird gesendet …' : visibleText ? 'Antwort wird geschrieben …' : 'Denkt nach …';
   const model = turn.model ? { displayName: modelDisplayName(turn.model.displayName, turn.model.provider), region: turn.model.region } : null;
@@ -42,7 +46,7 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
         </div>
       ) : null}
 
-      {showAssistant && (live || turn.text) ? (
+      {showAssistant && (live || preview || turn.presentation) ? (
         <article className="msg-agent" aria-label="Antwort des KI-Sachbearbeiters" aria-busy={live}>
           <AgentMeta
             model={model}
@@ -50,10 +54,10 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
             {...(turn.replayed ? { note: 'gespeicherte Antwort' } : {})}
           />
           {live ? <p className="msg-status" role="status">{progress}</p> : null}
-          {visibleText ? (
+          {visibleText || (!live && turn.presentation) ? (
             <div className="relative">
-              <SafeMarkdown text={turn.text} />
-              {turn.phase === 'streaming' ? <span className="caret" aria-hidden="true" /> : null}
+              <AnswerBody text={preview} presentation={turn.presentation} responseFormat={responseFormat} streaming={live} />
+              {turn.phase === 'streaming' && visibleText ? <span className="caret" aria-hidden="true" /> : null}
             </div>
           ) : null}
         </article>

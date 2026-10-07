@@ -36,6 +36,7 @@ const MESSAGES: Record<AppErrorCode, string> = {
   PARALLEL_LIMIT: 'Es laufen bereits zu viele Antworten gleichzeitig. Bitte warten Sie, bis eine fertig ist.',
   BUDGET_EXCEEDED: 'Das KI-Budget dieses Arbeitsbereichs ist ausgeschöpft oder noch nicht freigegeben.',
   PROVIDER_FAILED: 'Der KI-Anbieter hat nicht geantwortet. Bitte versuchen Sie es erneut.',
+  PRESENTATION_INVALID: 'Die KI-Antwort hat das gewünschte Komponentenformat nicht eingehalten. Die verfügbare Textfassung bleibt erhalten.',
   PRICING_UNVERIFIED: 'Für dieses Modell sind keine geprüften Preise hinterlegt. Der Server lässt den Aufruf deshalb nicht zu.',
   INTERNAL_ERROR: 'Auf dem Server ist ein Fehler aufgetreten.',
   NETWORK: 'Keine Verbindung zum Server. Bitte prüfen Sie Ihre Internetverbindung.',

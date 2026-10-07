@@ -106,7 +106,8 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
             </button>
           </div>
         )}
-        <div className="flex items-center gap-2">
+        <div className="thread-context">
+          <div className="thread-person">
           <label htmlFor="assign-person" className="assign-label small muted">
             Bezug
           </label>
@@ -131,6 +132,7 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
               </option>
             ))}
           </select>
+          </div>
         </div>
       </div>
       <div className="thread-tools">

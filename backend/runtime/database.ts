@@ -61,7 +61,14 @@ export function rpcQuery(name: string, args: Record<string, unknown>) {
             (v: unknown) => typeof v === "boolean",
           ] as [string, string, Validator],
         ]
-      : specs[name];
+      : name === 'edge_chat_prepare' && Object.hasOwn(args, 'p_response_format')
+        ? [...specs[name], ['p_response_format', 'text', (v: unknown) => v === 'text' || v === 'openui'] as [string,string,Validator],
+          ['p_format_instructions','text', (v: unknown) => typeof v === 'string' && v.length <= 40000] as [string,string,Validator]]
+        : name === 'edge_chat_replay' && Object.hasOwn(args, 'p_response_format')
+          ? [...specs[name], ['p_response_format','text', (v: unknown) => v === 'text' || v === 'openui'] as [string,string,Validator]]
+          : ['edge_chat_finish','edge_chat_checkpoint'].includes(name) && Object.hasOwn(args,'p_presentation')
+            ? [...specs[name], ['p_presentation','jsonb', (v: unknown) => v === null || (typeof v === 'object' && !Array.isArray(v) && JSON.stringify(v).length <= 700000)] as [string,string,Validator]]
+            : specs[name];
   if (
     Object.keys(args).length !== spec.length ||
     spec.some(
@@ -160,6 +167,10 @@ export function createDatabase(
         has_function_privilege(current_user,'public.edge_session(uuid,uuid,uuid,text)','EXECUTE') AS session,
         has_function_privilege(current_user,'public.edge_session(uuid,uuid,uuid,text,boolean)','EXECUTE') AS remembered,
         has_function_privilege(current_user,'public.edge_chat_prepare(uuid,uuid,uuid,uuid,uuid,text)','EXECUTE') AS chat,
+        has_function_privilege(current_user,'public.edge_chat_prepare(uuid,uuid,uuid,uuid,uuid,text,text,text)','EXECUTE') AS presentation,
+        has_function_privilege(current_user,'public.edge_chat_replay(uuid,uuid,uuid,uuid,uuid,text,text)','EXECUTE') AS presentation_replay,
+        has_function_privilege(current_user,'public.edge_chat_finish(uuid,uuid,uuid,text,text,bigint,bigint,text,jsonb)','EXECUTE') AS presentation_finish,
+        has_function_privilege(current_user,'public.edge_chat_checkpoint(uuid,uuid,uuid,uuid,text,jsonb)','EXECUTE') AS presentation_checkpoint,
         NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname=current_user AND (rolcanlogin OR rolsuper OR rolinherit OR rolbypassrls OR rolcreatedb OR rolcreaterole OR rolreplication)) AS limited,
         NOT has_schema_privilege(current_user,'private','USAGE') AND NOT has_schema_privilege(current_user,'auth','USAGE') AND NOT has_schema_privilege(current_user,'storage','USAGE') AS private_denied,
         NOT EXISTS(SELECT 1 FROM pg_class t JOIN pg_namespace n ON n.oid=t.relnamespace WHERE n.nspname='public' AND t.relkind IN ('r','p') AND has_table_privilege(current_user,t.oid,'SELECT,INSERT,UPDATE,DELETE,TRUNCATE')) AS tables_denied`);
@@ -169,6 +180,7 @@ export function createDatabase(
         !proof.session ||
         !proof.remembered ||
         !proof.chat ||
+        !proof.presentation || !proof.presentation_replay || !proof.presentation_finish || !proof.presentation_checkpoint ||
         !proof.limited ||
         !proof.private_denied ||
         !proof.tables_denied

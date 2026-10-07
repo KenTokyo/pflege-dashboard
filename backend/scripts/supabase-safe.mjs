@@ -19,6 +19,8 @@ const phase1Base = process.argv.includes('--phase1-base');
 const sessionBase = process.argv.includes('--session-base');
 const openCodeBase = process.argv.includes('--opencode-base');
 const geminiBase = process.argv.includes('--gemini-base');
+const openUiBase = process.argv.includes('--openui-base');
+if(openUiBase && !['start','reset'].includes(action)) throw new Error('--openui-base gilt nur für den eigenen sechzehn-zu-aktuellen Upgradeprüflauf.');
 if(geminiBase && !['start','reset'].includes(action)) throw new Error('--gemini-base gilt nur für den eigenen dreizehn-zu-aktuellen Upgradeprüflauf.');
 if(openCodeBase && !['start','reset'].includes(action)) throw new Error('--opencode-base gilt nur für den eigenen Elf-zu-dreizehn-Upgradeprüflauf.');
 if(sessionBase && !['start','reset'].includes(action)) throw new Error('--session-base gilt nur für den gezielten Zehn-zu-elf-Upgradeprüflauf.');
@@ -55,6 +57,9 @@ if (sessionBase || openCodeBase) for (const name of await readdir(path.join(mirr
 }
 if (geminiBase) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
   if (name >= '20261007000000') await rm(path.join(mirror,'supabase/migrations',name));
+}
+if (openUiBase) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
+  if (name >= '20261007214239') await rm(path.join(mirror,'supabase/migrations',name));
 }
 // Retire only the owned old mirror; no Edge runtime participates in the Node product.
 await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});

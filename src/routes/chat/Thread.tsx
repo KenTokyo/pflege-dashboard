@@ -5,6 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useWorkspace } from '../../auth/AuthProvider';
 import { usePendingTurn, useStreamStore } from '../../chat/ChatStreamContext';
 import { takeDraftHandoff } from '../../chat/draftHandoff';
+import { useResponseFormat } from '../../chat/responseFormat';
 import { EmptyState, ErrorState, Loading } from '../../components/States';
 import { effectiveModel } from '../../data/model';
 import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels, useSetConversationModel } from '../../data/queries';
@@ -28,6 +29,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   const restore = useArchiveConversation();
   const changeModel = useSetConversationModel();
   const turn = usePendingTurn(conversationId);
+  const responseFormat = useResponseFormat();
   const [draft, setDraft] = useState('');
   const scroller = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -51,11 +53,11 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
     if (!modelKnown) return;
     const text = takeDraftHandoff(conversationId);
     if (!text) return;
-    if (modelUsable && !archived) store.send(conversationId, text);
+    if (modelUsable && !archived) store.send(conversationId, text, responseFormat.value);
     // Einmalige Übernahme aus einem externen Speicher (Dashboard-Übergabe), kein abgeleiteter Zustand.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     else setDraft(text);
-  }, [conversationId, modelKnown, modelUsable, archived, store]);
+  }, [conversationId, modelKnown, modelUsable, archived, store, responseFormat.value]);
 
   // Gespeicherten Verlauf mit der lokalen Anfrage abgleichen.
   // Der Server legt die Antwortzeile schon beim Start an (Status „streaming“) und füllt sie später.
@@ -78,7 +80,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   useLayoutEffect(() => {
     const el = scroller.current;
     if (el && stickToBottom.current) el.scrollTop = el.scrollHeight;
-  }, [history.length, turn?.text, turn?.phase]);
+  }, [history.length, turn?.text, turn?.presentation?.source, turn?.phase, responseFormat.value]);
 
   if (conversation.isPending) {
     return (
@@ -111,7 +113,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
     const text = draft.trim();
     if (!text) return;
     stickToBottom.current = true;
-    store.send(conversationId, text);
+    store.send(conversationId, text, responseFormat.value);
     setDraft('');
   };
 
@@ -155,16 +157,17 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
             </span>
           </div>
         ) : (
-          history.map((m) => <MessageView key={m.id} message={m} />)
+          history.map((m) => <MessageView key={m.id} message={m} responseFormat={responseFormat.value} />)
         )}
         {turn ? (
           <PendingTurnView
             turn={turn}
+            responseFormat={responseFormat.value}
             actionsDisabled={changeModel.isPending}
             showUser={!userStored}
             showAssistant={!assistantFinal}
             onFetchAgain={() => store.fetchAgain(conversationId)}
-            onSendNew={() => store.send(conversationId, turn.content)}
+            onSendNew={() => store.send(conversationId, turn.content, responseFormat.value)}
             onReload={() => void qc.invalidateQueries({ queryKey: keys.messages(ws, conversationId) })}
             onEdit={() => {
               setDraft(turn.content);
@@ -183,6 +186,9 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
         </div>
       ) : null}
       <Composer
+        responseFormat={responseFormat.value}
+        onResponseFormatChange={responseFormat.setValue}
+        responseFormatSaved={responseFormat.saved}
         personName={people.find((person) => person.id === conv.care_recipient_id)?.name ?? null}
         value={draft}
         onChange={setDraft}

@@ -471,13 +471,13 @@ isOneToOne: false
                   ]
                 },"messages": {
                   Row: {
-                    "client_request_id": string | null,"content": string,"conversation_id": string,"created_at": string,"created_by": string,"id": string,"input_tokens": number | null,"model_id": string | null,"model_snapshot": Json | null,"output_tokens": number | null,"prompt_version_id": string | null,"provider_response_model": string | null,"role": Database["public"]['Enums']["message_role"],"sources": NonNullable<Json>,"status": Database["public"]['Enums']["message_status"],"tool_calls": NonNullable<Json>,"workspace_id": string
+                    "client_request_id": string | null,"content": string,"conversation_id": string,"created_at": string,"created_by": string,"id": string,"input_tokens": number | null,"model_id": string | null,"model_snapshot": Json | null,"output_tokens": number | null,"presentation": Json | null,"prompt_version_id": string | null,"provider_response_model": string | null,"role": Database["public"]['Enums']["message_role"],"sources": NonNullable<Json>,"status": Database["public"]['Enums']["message_status"],"tool_calls": NonNullable<Json>,"workspace_id": string
                   }
                   Insert: {
-                    "client_request_id"?: string | null,"content"?: string,"conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role": Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id": string
+                    "client_request_id"?: string | null,"content"?: string,"conversation_id": string,"created_at"?: string,"created_by": string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"presentation"?: Json | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role": Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id": string
                   }
                   Update: {
-                    "client_request_id"?: string | null,"content"?: string,"conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role"?: Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id"?: string
+                    "client_request_id"?: string | null,"content"?: string,"conversation_id"?: string,"created_at"?: string,"created_by"?: string,"id"?: string,"input_tokens"?: number | null,"model_id"?: string | null,"model_snapshot"?: Json | null,"output_tokens"?: number | null,"presentation"?: Json | null,"prompt_version_id"?: string | null,"provider_response_model"?: string | null,"role"?: Database["public"]['Enums']["message_role"],"sources"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["message_status"],"tool_calls"?: NonNullable<Json>,"workspace_id"?: string
                   }
                   Relationships: [
                     {
@@ -890,18 +890,26 @@ isOneToOne: false
                            },
 "edge_chat_checkpoint":
 { Args: { "p_content": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: boolean
+                           } |
+{ Args: { "p_content": string,"p_presentation": Json,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: boolean
                            },
 "edge_chat_finish":
 { Args: { "p_content": string,"p_input_tokens": number,"p_output_tokens": number,"p_request_id": string,"p_response_model": string,"p_status": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           } |
+{ Args: { "p_content": string,"p_input_tokens": number,"p_output_tokens": number,"p_presentation": Json,"p_request_id": string,"p_response_model": string,"p_status": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
                            },
 "edge_chat_prepare":
 { Args: { "p_content": string,"p_conversation_id": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           } |
+{ Args: { "p_content": string,"p_conversation_id": string,"p_format_instructions": string,"p_request_id": string,"p_response_format": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
                            },
 "edge_chat_reap":
 { Args: { "p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: number
                            },
 "edge_chat_replay":
 { Args: { "p_content": string,"p_conversation_id": string,"p_request_id": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
+                           } |
+{ Args: { "p_content": string,"p_conversation_id": string,"p_request_id": string,"p_response_format": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json
                            },
 "edge_session":
 { Args: { "p_action": string,"p_session_id": string,"p_user_id": string,"p_workspace_id": string }; Returns: Json

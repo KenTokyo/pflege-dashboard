@@ -37,6 +37,7 @@ function row(id: string, role: MessageRow['role'], at: string, rid: string | nul
     sources: [],
     client_request_id: rid,
     provider_response_model: null,
+    presentation: null,
   };
 }
 

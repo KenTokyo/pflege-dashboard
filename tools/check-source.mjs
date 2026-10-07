@@ -112,7 +112,8 @@ for (const f of src) {
   const s = read(f);
   for (const [re, label] of RULES) if (re.test(s)) problems.push(`${label} in ${f}`);
   const authStorage = f === 'src/auth/sessionStorage.ts';
-  if (/localStorage/.test(s) && !/ThemeProvider\.tsx$/.test(f) && !authStorage) problems.push(`localStorage außerhalb von Theme/Anmeldung in ${f}`);
+  const displayPreference = f === 'src/chat/responseFormat.ts'; // ausdrücklich freigegebene Text/OpenUI-Gerätepräferenz
+  if (/localStorage/.test(s) && !/ThemeProvider\.tsx$/.test(f) && !authStorage && !displayPreference) problems.push(`localStorage außerhalb von Theme/Anmeldung/Darstellungspräferenz in ${f}`);
   if (/sessionStorage/.test(s) && !authStorage && f !== 'src/services/supabaseBackend.ts') problems.push(`sessionStorage außerhalb des Anmeldespeichers in ${f}`);
   if (/persistSession:\s*true/.test(s) && f !== 'src/services/supabaseBackend.ts') problems.push(`persistSession außerhalb des Auth-Adapters in ${f}`);
   const lines = s.split('\n').length;

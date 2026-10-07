@@ -4,7 +4,7 @@ import path from "node:path";
 /** Schema only, no row content or secrets. Stable against generated constraint names. */
 export async function fingerprint(client, phase0Only = true) {
   const filter = phase0Only
-    ? "and table_name not in ('conversation_requests','session_activity','model_prices','chat_requests') and not(table_name='messages' and column_name='provider_response_model') and not(table_name='workspace_budgets' and column_name='total_cap_microusd')"
+    ? "and table_name not in ('conversation_requests','session_activity','model_prices','chat_requests') and not(table_name='messages' and column_name in ('provider_response_model','presentation')) and not(table_name='workspace_budgets' and column_name='total_cap_microusd')"
     : "";
   const tableFilter = phase0Only
     ? "and t.relname not in ('conversation_requests','session_activity','model_prices','chat_requests')"
@@ -22,7 +22,7 @@ export async function fingerprint(client, phase0Only = true) {
   }
   const constraints = (await client.query(
     `select t.relname as table_name,pg_get_constraintdef(c.oid,true) as definition from pg_constraint c join pg_class t on t.oid=c.conrelid join pg_namespace n on n.oid=t.relnamespace where n.nspname='public' ${tableFilter} order by t.relname,pg_get_constraintdef(c.oid,true)`,
-  )).rows.filter((constraint) => !(phase0Only &&
+  )).rows.filter((constraint) => !(phase0Only && constraint.table_name === 'messages' && constraint.definition.includes('presentation')) && !(phase0Only &&
     constraint.table_name === "workspace_budgets" &&
     constraint.definition === "CHECK (total_cap_microusd >= 0)"));
   const policies = (await client.query(

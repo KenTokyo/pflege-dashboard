@@ -2,6 +2,7 @@ import type { ChatActivity, ChatModel, ChatRequestV1 } from '../../types/phase1'
 import { newId } from '../lib/ids';
 import { AppError, toAppError, type AppErrorCode } from '../services/errors';
 import type { ChatPort } from '../services/types';
+import { OPENUI_CATALOG_VERSION, OPENUI_SOURCE_LIMIT, type ChatPresentation, type ResponseFormat } from '../../types/openui';
 
 export type StreamPhase = 'sending' | 'streaming' | 'completed' | 'failed' | 'aborted';
 
@@ -17,6 +18,8 @@ export type PendingTurn = {
   usage: { inputTokens: number; outputTokens: number } | null;
   error: AppError | null;
   activity: ChatActivity[];
+  responseFormat: ResponseFormat;
+  presentation: ChatPresentation | null;
 };
 
 /** Was der Nutzer nach einem Fehler sinnvoll tun kann (Vertrag v1.0: keine automatische bezahlte Wiederholung). */
@@ -27,6 +30,7 @@ const SEND_NEW = new Set<AppErrorCode>([
   'REQUEST_ABORTED',
   'IDEMPOTENCY_CONFLICT',
   'PROVIDER_FAILED',
+  'PRESENTATION_INVALID',
   'PROVIDER_RATE_LIMITED',
   'PROVIDER_UNAVAILABLE',
   'RATE_LIMITED',
@@ -96,14 +100,14 @@ export class StreamStore {
   }
 
   /** Neuer Request mit neuer ID. */
-  send(conversationId: string, content: string): void {
-    this.start(conversationId, content, newId());
+  send(conversationId: string, content: string, responseFormat: ResponseFormat = 'text'): void {
+    this.start(conversationId, content, newId(), responseFormat);
   }
 
   /** Gleicher Request erneut (gleiche ID): Replay oder echter Serverzustand. */
   fetchAgain(conversationId: string): void {
     const turn = this.turns.get(conversationId);
-    if (turn) this.start(conversationId, turn.content, turn.clientRequestId);
+    if (turn) this.start(conversationId, turn.content, turn.clientRequestId, turn.responseFormat);
   }
 
   abort(conversationId: string): void {
@@ -145,7 +149,7 @@ export class StreamStore {
     return this.disposed || (this.o.isCurrent ? !this.o.isCurrent() : false);
   }
 
-  private start(conversationId: string, content: string, clientRequestId: string): void {
+  private start(conversationId: string, content: string, clientRequestId: string, responseFormat: ResponseFormat): void {
     if (this.stale() || this.isActive(conversationId)) return;
     const controller = new AbortController();
     const unregister = this.o.registerStream(controller);
@@ -162,6 +166,8 @@ export class StreamStore {
       usage: null,
       error: null,
       activity: [],
+      responseFormat,
+      presentation: responseFormat === 'openui' ? { format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source: '', state: 'streaming' } : null,
     };
     this.turns.set(conversationId, turn);
     this.emit();
@@ -179,6 +185,7 @@ export class StreamStore {
       clientRequestId,
       content,
       attachmentIds: [],
+      responseFormat,
     };
 
     this.o.chat
@@ -190,8 +197,21 @@ export class StreamStore {
             case 'message.activity':
               update({ activity: [...turn.activity.slice(-63), event.data] }, false);
               break;
-            case 'message.started':
-              update({ phase: 'streaming', model: event.data.model, messageId: event.data.messageId, replayed: event.data.replayed });
+            case 'message.started': {
+              const actualFormat = event.data.responseFormat ?? 'text';
+              update({ phase: 'streaming', model: event.data.model, messageId: event.data.messageId, replayed: event.data.replayed, responseFormat: actualFormat,
+                presentation: actualFormat === 'openui' ? turn.presentation ?? { format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source: '', state: 'streaming' } : null,
+              });
+              break;
+            }
+            case 'message.presentation.delta': {
+              const source = (turn.presentation?.source ?? '') + event.data.text;
+              if (source.length > OPENUI_SOURCE_LIMIT) throw new AppError('PROTOCOL');
+              update({ responseFormat: 'openui', presentation: { format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source, state: 'streaming' } }, false);
+              break;
+            }
+            case 'message.presentation.final':
+              update({ presentation: event.data.presentation }, false);
               break;
             case 'message.delta':
               update({ text: turn.text + event.data.text }, false);
