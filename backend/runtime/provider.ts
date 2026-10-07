@@ -1,5 +1,6 @@
 import { AppError } from "./errors.js";
 import type { ProviderActivity } from "../../types/phase1.js";
+import { boundProviderInput } from './format-binding.js';
 export type ActivityReporter = (activity: ProviderActivity) => Promise<void>;
 export type Context = {
   // New snapshots include trusted DB time; historical completed replays may predate it.
@@ -88,7 +89,7 @@ export class OpenAIProvider implements Provider {
     const input = {
       model: context.model.providerModelId,
       instructions: context.instructions,
-      input: context.input,
+      input: boundProviderInput(context),
     };
     const headers = {
       "Content-Type": "application/json",
@@ -477,7 +478,7 @@ export class DeepSeekProvider implements Provider {
             model: context.model.providerModelId,
             messages: [
               { role: "system", content: context.instructions },
-              ...context.input,
+              ...boundProviderInput(context),
             ],
             thinking: { type: "disabled" },
             max_tokens: context.maxOutputTokens,

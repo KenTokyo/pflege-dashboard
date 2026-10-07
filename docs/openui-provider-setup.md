@@ -1,6 +1,6 @@
 # Optionale OpenUI-Antworten
 
-Stand 07.10.2026. OpenUI ist die Bibliothek von Thesys unter https://www.openui.com/. Der Anschluss verwendet das ausgewählte DeepSeek/OpenCode- oder Gemini-Modell. DeepSeek bleibt Standard, Gemini bleibt ausdrücklich wählbar. Kein neuer Schlüssel, Gateway, Autofix, Konto oder zusätzlicher Modellaufruf.
+Stand 08.10.2026. OpenUI ist die Bibliothek von Thesys unter https://www.openui.com/. Der Anschluss verwendet das ausgewählte DeepSeek/OpenCode- oder Gemini-Modell. DeepSeek bleibt Standard, Gemini bleibt ausdrücklich wählbar. Kein neuer Schlüssel, Gateway, Autofix, Konto oder zusätzlicher Modellaufruf.
 
 ## Vertrag und Speicherung
 
@@ -13,6 +13,20 @@ root = Answer([Text("**Antrag** prüfen."), Facts("Bekannt", ["Pflegegrad aus de
 ```
 
 Nur ein Root-Statement mit Inline-Komponenten, JSON-Stringliteralen und Listen ist erlaubt. Keine Variablen, Referenzen, Ausdrücke, weiteren Statements, Queries, Mutationen oder Actions. Dieser strikte Literalparser verhindert, dass der tolerant reparierende SDK-Parser unbekannte Bestandteile unbemerkt aus einer erfolgreichen Antwort entfernt. 100.000 Quellzeichen, 24 Abschnitte und 40 Einträge pro Liste begrenzen den Parser und sehr kleinteilige generierte Bäume; keine neuen Nutzungs- oder Ausgabenlimits.
+
+### Formatwechsel in bestehender Historie
+
+Die erste echte DeepSeek/OpenCode-OpenUI-Antwort war erfolgreich. Nach einer normalen Textantwort ignorierte das Modell bei einer weiteren OpenUI-Anfrage das Format und lieferte vollständig abgeschlossenen Markdowntext. Der bestehende Fehlerweg bewahrte den Text und buchte die belegte Nutzung einmal; es war kein Abbruch oder Tokenlimit.
+
+Die Nacharbeit beseitigt zwei konkrete Promptprobleme: Die allgemeine SDK-Vorlage empfahl Referenzen und Hoisting, obwohl der engere App-Parser ausschließlich Inline-Literale zulässt. `OPENUI_INSTRUCTIONS` nennt nun ausschließlich die fünf erlaubten positionsbasierten Signaturen, die vollständige Inline-Grammatik und ein passendes Syntaxbeispiel. SDK-Schemas und Parser bleiben im Einsatz.
+
+`backend/runtime/format-binding.ts` ergänzt eine feste vertrauenswürdige Formatbindung unmittelbar vor der letzten echten Nutzerfrage im Nachrichtenarray für DeepSeek/OpenCode und OpenAI. Alle vorhandenen Nutzer- und Assistententexte bleiben unverändert. Die Bindung erklärt ausdrücklich: Der Verlauf enthält kanonischen lesbaren Sachkontext und ist kein Vorbild für das aktuelle Format. Wünsche wie „kurz“ oder „ein Satz“ ändern den Antwortinhalt, nicht den aktiven Transportvertrag. Persona, Fakten und Sicherheitsregeln behalten Vorrang. Bei Gemini liegt dieselbe Bindung am Ende der separaten `systemInstruction`; `contents` enthält weiterhin ausschließlich die ursprünglichen User-/Model-Nachrichten. Historische Snapshots ohne Formatfeld bleiben unverändert.
+
+Der Handler übergibt Katalog und diese Bindung bereits an `edge_chat_prepare`, bevor der unveränderliche Kontext und die Reservierung entstehen. Die Wiederholung auf dem Providerdraht passt einschließlich UTF-8 und JSON-Escapes in den vorhandenen 4096-Byte-Zuschlag der SQL-Reservierung; beide Formate werden darauf geprüft. OpenAI und Gemini zählen außerdem exakt den später gesendeten Input einschließlich der Bindung, bevor die Generierung beginnt. DeepSeek/OpenCode reserviert weiterhin den vollständigen dokumentierten Kontext. Keine neue Migration, API-Änderung, automatische Wiederholung oder zusätzliche Generierung. Die unveränderte finale Formatprüfung verhindert einen vorgetäuschten UI-Erfolg.
+
+Neue lokale Regressionen benutzen fünf Nachrichten in derselben Reihenfolge wie der echte Fehler: frühere UI-Antwort als kanonischer Text, normale Textantwort, dann eine kurze Folgefrage. Die tatsächlich serialisierten OpenCode-, OpenAI- und Gemini-Requests erhalten die komplette Historie und korrekte Rollen; Tokenzählung und Generierung stimmen überein. Der gesamte Handlerweg belegt die Reservierung vor dem einzigen OpenCode-Aufruf, erfolgreiche kanonische UI-Projektion und unveränderte einmalige Finalisierung bei erneutem Markdown-Formatfehler. Backend-Gate nach Nacharbeit: 304/304 Tests, strikte Typprüfung und Build bestanden. Die zuvor ausgeführten nativen SQL-/Upgrade-Gates bleiben separat belegt; sie wurden für diese reine Prompt-/Adapterkorrektur nicht als neuer Lauf ausgegeben. Die erneute echte Prüfung desselben Verlaufs auf Vercel übernimmt Root.
+
+Offizielle Rollenverträge: [DeepSeek Chat Completion](https://api-docs.deepseek.com/api/create-chat-completion/), [OpenAI Responses](https://developers.openai.com/api/reference/typescript/resources/responses), [Gemini `systemInstruction` und Verlauf](https://ai.google.dev/api/generate-content). Die dokumentierte Formatbindung verbessert die Anweisung; sie ersetzt keine harte finale Schemaprüfung und garantiert nicht, dass ein Modell jede Antwort korrekt formatiert.
 
 `parseOpenUi(source,isStreaming)` liefert `state`, sichere `source`, `text`, `sections` und gegebenenfalls `reason`. Unbekannte, dynamische oder unvollständige finale Programme führen zu `PRESENTATION_INVALID`, Status `failed` und einer sichtbaren Formatwarnung. Klarer normaler Markdowntext eines Modells, das das Format ignoriert hat, bleibt im fehlgeschlagenen Datensatz lesbar. Programmtext wird nicht als erfolgreiche normale Antwort ausgegeben.
 

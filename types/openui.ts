@@ -174,12 +174,20 @@ export function parseOpenUi(source: string, isStreaming = false): OpenUiResult {
 }
 
 export const TEXT_STYLE_INSTRUCTIONS = '\nDarstellung: Kurze Schlüsselbegriffe oder Feldnamen bei Bedarf sparsam **fett** hervorheben. Kurze Einordnungen können *kursiv* sein. Listen nur, wenn sie helfen; keine ganzen Antworten hervorheben. Fakten-, Sicherheitsregeln und die gewählte Persona haben Vorrang.';
-export const OPENUI_INSTRUCTIONS = OPENUI_LIBRARY.prompt({ toolCalls: false, bindings: false, inlineMode: false, editMode: false,
-  preamble: 'Behalte die gewählte Persona, Sprache sowie alle vorhandenen Fakten- und Sicherheitsregeln bei. Die folgende Anweisung ändert ausschließlich die Antwortdarstellung in OpenUI Lang.',
-  additionalRules: [
-    'Gib ausschließlich ein vollständiges Programm root = Answer([...]) aus. Verwende die Komponenten inline; keine zusätzlichen Statements, Referenzen, Aktionen, Queries, Mutationen, Variablen oder Ausdrücke.',
-    'Jeder Textwert ist ein JSON-Stringliteral. Höchstens 24 Abschnitte, höchstens 40 Einträge je Liste.',
-    'Alle Informationen und Unsicherheiten gehören in die Abschnitte. Die Textansicht wird vollständig aus denselben Abschnitten abgeleitet. Keine zweite Antwort oder erfundenen Daten, Fristen oder erfolgten Aktionen.',
-    'Facts sind Stichpunkte aus dem vorhandenen Kontext und keine unabhängige Verifikation. Nutze Notice für Unsicherheiten. Markdown innerhalb der Textwerte ist erlaubt.',
-  ], examples: ['root = Answer([Text("**Antrag** prüfen."), Facts("Bekannt", ["Pflegegrad aus dem Kontext"]), Steps("Nächste Schritte", ["Unterlagen prüfen"]), Notice("Einordnung", "*Eine Frist ist noch nicht bestätigt.*")])'],
-}) + TEXT_STYLE_INSTRUCTIONS;
+// The SDK's general-purpose prompt recommends references and hoisting, whereas
+// this deliberately static catalogue accepts only one literal inline statement.
+// Use the exact bounded wire grammar, never contradictory general SDK advice.
+export const OPENUI_INSTRUCTIONS = [
+  'Behalte die gewählte Persona, Sprache sowie alle vorhandenen Fakten- und Sicherheitsregeln bei. Die folgende Anweisung ändert ausschließlich die Antwortdarstellung in OpenUI Lang.',
+  'Antwortformat OpenUI, Katalog pflege-openui-v1: Gib ausschließlich ein vollständiges Programm root = Answer([...]) aus. Verwende die Komponenten inline; keine zusätzlichen Statements, Referenzen, Aktionen, Queries, Mutationen, Variablen oder Ausdrücke.',
+  'Exakte positionsbasierte Signaturen:',
+  'Answer(sections: (Text | Facts | Steps | Notice)[]) — vollständige Antwort aus den Abschnitten in ihrer Reihenfolge.',
+  'Text(markdown: string) — lesbarer Textabschnitt.',
+  'Facts(title: string, items: string[]) — sachliche Stichpunkte aus dem vorhandenen Kontext; keine unabhängige Prüfung.',
+  'Steps(title: string, items: string[]) — geordnete nächste Schritte; keine Behauptung ausgeführter Aktionen.',
+  'Notice(title: string, markdown: string) — Einordnung, notwendiger Hinweis oder Unsicherheit.',
+  'Jeder Textwert ist ein JSON-Stringliteral. Höchstens 24 Abschnitte, höchstens 40 Einträge je Liste. Keine freie Prosa oder Markdown-Codeblöcke außerhalb der Stringliterale.',
+  'Alle Informationen und Unsicherheiten gehören in die Abschnitte. Die Textansicht wird vollständig aus denselben Abschnitten abgeleitet. Keine zweite Antwort oder erfundenen Daten, Fristen oder erfolgten Aktionen.',
+  'Markdown mit **fett** und *kursiv* ist ausschließlich innerhalb der Stringliterale erlaubt.',
+  'Nur Syntaxbeispiel, kein vorgegebener Sachinhalt: root = Answer([Text("**Antrag** prüfen."), Facts("Bekannt", ["Pflegegrad aus dem Kontext"]), Steps("Nächste Schritte", ["Unterlagen prüfen"]), Notice("Einordnung", "*Eine Frist ist noch nicht bestätigt.*")])',
+].join('\n') + TEXT_STYLE_INSTRUCTIONS;

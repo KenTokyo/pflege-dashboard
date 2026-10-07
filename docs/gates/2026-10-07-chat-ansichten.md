@@ -61,10 +61,20 @@ Im bestehenden angemeldeten Testkonto wurde über die Kundenansicht das Gespräc
 
 Wechsel OpenUI→Text lieferte die vollständigen gleichen Informationen, einschließlich beider Hinweise, ohne zusätzlichen Chatrequest. Danach echte normale Textfolgeantwort abgeschlossen: 227 Zeichen, Format text, keine Präsentationsdaten, 1369/70 Tokens, genau eine zweite Nutzungszeile. Nach Wechsel auf OpenUI und normalem Neuladen bleiben Anmeldung, Auswahl, strukturierte erste Antwort und normale zweite Antwort erhalten.
 
-Aufklappbarer Ablauf zeigt sechs tatsächlich gemeldete Schritte sowie Thinking-Konfiguration deaktiviert. Die Konfiguration wird korrekt angezeigt, keine internen Gedankeninhalte behauptet. Ein im Live-JSON gefundener Verlust der beiden neuen Metadaten responseFormat/catalogVersion durch den Frontendfilter wird gezielt nachgezogen und separat geprüft.
+Aufklappbarer Ablauf zeigt sechs tatsächlich gemeldete Schritte sowie Thinking-Konfiguration deaktiviert. Die Konfiguration wird korrekt angezeigt, keine internen Gedankeninhalte behauptet. Ein im Live-JSON gefundener Verlust der beiden neuen Metadaten responseFormat/catalogVersion durch den Frontendfilter wurde in `449aea1` gezielt korrigiert, in elf Activity-Tests sowie im tatsächlichen Live-JSON geprüft. Beide neuen Felder sind sichtbar; unbekannte Werte bleiben ausgeschlossen.
 
 Dritte direkte Gemini-Probe nach zeitlichem Abstand bestätigt erneut Google 503 UNAVAILABLE; der korrigierte Adapter liefert nun PROVIDER_UNAVAILABLE. Gemini-OpenUI ist deshalb weiterhin ohne erfolgreichen Liveabschluss, DeepSeek-Text und DeepSeek-OpenUI sind tatsächlich erfolgreich abgeschlossen.
 
 Auch der zweite Einstieg ist live geprüft: Sachbearbeiter-Test → Martha-Fall → gespeichertes Gespräch öffnet dieselbe vollständige OpenUI-Antwort. Die echte Nutzungsübersicht aktualisiert sich auf die neuen abgeschlossenen Anfragen; Beispielgespräche und echte KI-Aufrufe bleiben getrennt gezählt. [Echter Live-Ausschnitt mit Schalter und Mikrofon](2026-10-07-chat-ansichten/live-openui-dark.png).
 
 Bereinigungskontrolle: eigene CfT-PIDs 48277 und 55087 existieren nicht mehr; Port 5199 ist frei. Ein parallel laufender fremder Prüfbrowser gehört laut Prozessverzeichnis zu einem anderen Spieleprojekt und wurde nicht verändert.
+
+## Weiterer Live-Randfall: erneuter Formatwechsel
+
+Die dritte Anfrage im selben Verlauf wechselte nach einer normalen Textantwort wieder auf OpenUI. DeepSeek lieferte reines Markdown (122 Ausgabetokens) statt Komponenten. Die App erhielt und zeigte 374 Zeichen, markierte die Darstellung korrekt als invalid und den Request als failed; genau eine Nutzungszeile wurde angelegt, kein automatischer Retry. Dadurch ist die Formatzuverlässigkeit bei bestehender Textgeschichte noch nicht abschließend abgenommen. Backend-Nacharbeit und erneute Prüfung dieses Wechsels laufen. Request: `165ede52-2e1b-4ff5-a921-ce7f34ad6a1f`.
+
+### Korrektur der Formatbindung
+
+Der erzeugte Standardprompt der Bibliothek empfahl Referenzen/Hoisting, während unser Katalog nur Inline-Literale erlaubt. Er wurde durch einen kurzen eindeutigen Prompt mit genau fünf Signaturen ersetzt. Außerdem erhält der Anbieter direkt vor der letzten echten Nutzerfrage eine vertrauenswürdige Systemanweisung zum aktuell gewählten Format. Alle bisherigen Texte und die aktuelle Frage bleiben unverändert. Gemini nutzt seine getrennte systemInstruction ohne unzulässige Systemrollen in contents.
+
+Die Bindung ist bereits vor Reservierung Teil des unveränderlichen Kontext-Snapshots; ihre zusätzliche Transportkopie passt einschließlich UTF-8/JSON unter die bestehende 4096-Byte-Reserve. Kein automatischer Wiederholungsaufruf, kein Anbieterwechsel und keine neue Migration. Backend: 304 Tests einschließlich zwölf neuer Formatwechsel-/Requestbody-/Zählungsfälle bestanden. Root: Frontend-Typprüfung, Produktbuild, Bundleprüfung und 34 OpenUI-/Activityfälle bestanden. Der erneute Livebeleg folgt separat.

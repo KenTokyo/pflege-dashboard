@@ -1,4 +1,5 @@
 import { AppError } from "./errors.js";
+import { boundGeminiInstructions } from './format-binding.js';
 import {
   sseData,
   type Context,
@@ -151,7 +152,7 @@ export class GeminiProvider implements Provider {
         role: role === "assistant" ? "model" : "user",
         parts: [{ text: content }],
       })),
-      systemInstruction: { parts: [{ text: context.instructions }] },
+      systemInstruction: { parts: [{ text: boundGeminiInstructions(context) }] },
       generationConfig: {
         candidateCount: 1,
         maxOutputTokens: context.maxOutputTokens,

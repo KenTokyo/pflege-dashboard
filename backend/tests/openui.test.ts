@@ -3,6 +3,7 @@ import { parseOpenUi, OPENUI_INSTRUCTIONS, OPENUI_LIBRARY, TEXT_STYLE_INSTRUCTIO
 import { chatHandler } from '../runtime/handler.ts';
 import type { Context } from '../runtime/provider.ts';
 import { rpcQuery } from '../runtime/database.ts';
+import { reservedFormatInstructions } from '../runtime/format-binding.ts';
 const source = 'root = Answer([Text("**Antrag** prüfen."), Facts("Bekannt", ["Pflegegrad 3", "Fiktive Kasse"]), Steps("Weiter", ["Unterlagen prüfen", "Rückfrage stellen"]), Notice("Hinweis", "*Keine bestätigte Frist.*")])';
 const projected = '**Antrag** prüfen.\n\nBekannt\n\n- Pflegegrad 3\n- Fiktive Kasse\n\nWeiter\n\n1. Unterlagen prüfen\n2. Rückfrage stellen\n\nHinweis\n\n*Keine bestätigte Frist.*';
 describe('actual OpenUI SDK behind the strict read-only literal gate', () => {
@@ -10,9 +11,11 @@ describe('actual OpenUI SDK behind the strict read-only literal gate', () => {
     const result = parseOpenUi(source); expect(result.state).toBe('valid'); expect(result.text).toBe(projected);
     expect(result.sections.map(x => x.typeName)).toEqual(['Text','Facts','Steps','Notice']);
   });
-  it('uses the official library prompt with tools, bindings and edits disabled', () => {
+  it('uses the bounded server catalogue prompt without conflicting SDK reference/hoisting instructions', () => {
     expect(OPENUI_INSTRUCTIONS).toContain('Answer'); expect(OPENUI_INSTRUCTIONS).toContain('keine zusätzlichen Statements');
     expect(TEXT_STYLE_INSTRUCTIONS).toContain('**fett**'); expect(TEXT_STYLE_INSTRUCTIONS).toContain('*kursiv*');
+    expect(OPENUI_INSTRUCTIONS).not.toContain('Use references');expect(OPENUI_INSTRUCTIONS).not.toContain('prefer references');
+    expect(OPENUI_INSTRUCTIONS).not.toContain('Hoisting');expect(OPENUI_INSTRUCTIONS).not.toContain('Query(');
   });
   it('every source prefix is bounded and cannot be a final successful truncated answer', () => {
     for (let i = 0; i < source.length; i++) {
@@ -91,7 +94,7 @@ describe('presentation handler retains authenticated chat and accounting flow',(
     const finish=x.rpc.mock.calls.find(x=>x[0]==='edge_chat_finish')![1];
     expect(finish).toMatchObject({p_content:projected,p_status:'completed',p_input_tokens:34,p_output_tokens:90,p_presentation:{source,state:'valid'}});
     const prep=x.rpc.mock.calls.find(x=>x[0]==='edge_chat_prepare')![1];
-    expect(prep.p_format_instructions).toBe(OPENUI_INSTRUCTIONS); expect(prep.p_response_format).toBe('openui');
+    expect(prep.p_format_instructions).toBe(reservedFormatInstructions('openui')); expect(prep.p_response_format).toBe('openui');
   });
   it.each(['root = Answer([Text("incomplete','root = Answer([Text("visible"),Unknown("warning")])'])('format failure never becomes completed and retains usage (%s)',async malformed=>{
     const x=fixture([malformed]);const e=events(await (await chatHandler(x.deps)(request())).text());

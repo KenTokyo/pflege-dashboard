@@ -9,8 +9,9 @@ import {
 } from "./provider.js";
 import type { ChatActivity, ChatActivityDetails } from "../../types/phase1.js";
 import { GeminiProvider } from "./gemini.js";
-import { OPENUI_CATALOG_VERSION, OPENUI_INSTRUCTIONS, TEXT_STYLE_INSTRUCTIONS, parseOpenUi,
+import { OPENUI_CATALOG_VERSION, parseOpenUi,
   type ChatPresentation } from '../../types/openui.js';
+import { reservedFormatInstructions } from './format-binding.js';
 export type Dependencies = {
   env: Environment;
   platform: Platform;
@@ -122,7 +123,7 @@ export function chatHandler(deps: Dependencies) {
         p_conversation_id: data.conversationId,
         p_request_id: id,
         p_content: data.content,
-        p_response_format: data.responseFormat ?? 'text',
+        p_response_format: data.responseFormat === 'openui' ? 'openui' as const : 'text' as const,
       };
       const replay = await deps.platform.rpc(
         "edge_chat_replay",
@@ -139,7 +140,7 @@ export function chatHandler(deps: Dependencies) {
       const prepared =
         replay ??
         (await deps.platform.rpc("edge_chat_prepare", { ...payload,
-          p_format_instructions: payload.p_response_format === 'openui' ? OPENUI_INSTRUCTIONS : TEXT_STYLE_INSTRUCTIONS,
+          p_format_instructions: reservedFormatInstructions(payload.p_response_format),
         }, request.signal));
       const context = prepared.context as Context;
       const responseFormat = context.responseFormat ?? 'text';
