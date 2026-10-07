@@ -3,6 +3,7 @@ export const QUESTION_GROUPS = [
   {
     id: 'overview',
     label: 'Überblick bekommen',
+    description: 'Die Situation verstehen und einen guten Anfang finden.',
     questions: [
       { title: 'Was ist gerade wichtig?', text: 'Geben Sie mir bitte einen kurzen Überblick zur ausgewählten Person. Was steht in den gespeicherten Angaben, und worum sollte ich mich als Nächstes kümmern?' },
       { title: 'Welche Informationen sind schon da?', text: 'Fassen Sie bitte zusammen, was über die ausgewählte Person hinterlegt ist: Pflegegrad, Pflegekasse, offene Aufgaben und vorhandene Unterlagen. Sagen Sie auch, welche Angaben fehlen.' },
@@ -12,6 +13,7 @@ export const QUESTION_GROUPS = [
   {
     id: 'tasks',
     label: 'Aufgaben ordnen',
+    description: 'Gespeicherte Termine sortieren und nächste Schritte planen.',
     questions: [
       { title: 'Was muss zuerst erledigt werden?', text: 'Ordnen Sie die offenen Aufgaben zur ausgewählten Person nach Dringlichkeit. Schreiben Sie dazu: zuerst erledigen, danach erledigen oder noch klären. Nutzen Sie nur die gespeicherten Termine und sagen Sie, wenn ein Datum fehlt.' },
       { title: 'Was steht diese Woche an?', text: 'Welche gespeicherten Aufgaben zur ausgewählten Person stehen diese Woche an? Zeigen Sie auch überfällige Aufgaben und nennen Sie für jede einen einfachen nächsten Schritt.' },
@@ -21,6 +23,7 @@ export const QUESTION_GROUPS = [
   {
     id: 'explain',
     label: 'Einfach verstehen',
+    description: 'Begriffe und schwierige Texte in Alltagssprache erklären lassen.',
     questions: [
       { title: 'Was bedeutet der Pflegegrad?', text: 'Erklären Sie mir bitte in einfachen Worten, was der hinterlegte Pflegegrad der ausgewählten Person bedeutet. Welche Fragen sollte ich dazu mit der Pflegekasse klären?' },
       { title: 'Einen schwierigen Text erklären', text: 'Ich verstehe diesen Text nicht gut. Erklären Sie ihn bitte in einfachen Worten und sagen Sie, welche Punkte ich nachfragen sollte:\n\n[Hier den Text einfügen]' },
@@ -30,6 +33,7 @@ export const QUESTION_GROUPS = [
   {
     id: 'writing',
     label: 'Ein Schreiben vorbereiten',
+    description: 'Einen freundlichen Text entwerfen und fehlende Angaben klären.',
     questions: [
       { title: 'Bei der Pflegekasse nachfragen', text: 'Formulieren Sie mir hier im Chat einen freundlichen Textentwurf an die Pflegekasse der ausgewählten Person. Ich möchte nach dem Stand meines Anliegens fragen. Fragen Sie mich zuerst nach den fehlenden Angaben.' },
       { title: 'Einen Brief verständlicher machen', text: 'Helfen Sie mir bitte, diesen Text freundlich und verständlich zu formulieren. Die Bedeutung soll gleich bleiben:\n\n[Hier meinen Entwurf einfügen]' },
@@ -39,6 +43,7 @@ export const QUESTION_GROUPS = [
   {
     id: 'conversation',
     label: 'Ein Gespräch vorbereiten',
+    description: 'Mit klaren Fragen in Beratung, Telefonat oder Familiengespräch gehen.',
     questions: [
       { title: 'Fragen für die Pflegeberatung sammeln', text: 'Ich habe bald einen Termin bei der Pflegeberatung. Welche Fragen sollte ich zur ausgewählten Person mitnehmen? Nutzen Sie die vorhandenen Angaben und ordnen Sie die Fragen nach Thema.' },
       { title: 'Ein Telefonat vorbereiten', text: 'Ich möchte bei der Pflegekasse anrufen. Helfen Sie mir mit einer kurzen Gesprächsnotiz: Wie erkläre ich mein Anliegen, was frage ich und welche Angaben sollte ich bereithalten?' },

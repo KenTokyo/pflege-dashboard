@@ -150,6 +150,13 @@ export function useArchiveConversation() {
   );
 }
 
+export function useSetConversationModel() {
+  const { data } = useBackend();
+  return useConversationWrite((a: { conversation: ConversationRow; modelId: string | null }) =>
+    data.setConversationModel(a.conversation, a.modelId),
+  );
+}
+
 export function useCreateConversation() {
   const { data } = useBackend();
   return useConversationWrite((a: CreateConversationArgs) => data.createConversation(a));

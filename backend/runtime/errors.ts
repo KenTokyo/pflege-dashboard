@@ -32,6 +32,14 @@ const messages: Record<string, string> = {
   PARALLEL_LIMIT: "Es laufen bereits zwei Anfragen für Ihr Konto.",
   BUDGET_EXCEEDED:
     "Das KI-Budget ist ausgeschöpft oder noch nicht freigegeben. Es wurde kein Modell aufgerufen.",
+  PROVIDER_AUTH_FAILED:
+    "Der KI-Anbieter hat den hinterlegten Schlüssel abgelehnt. Bitte die Servereinrichtung prüfen.",
+  PROVIDER_RATE_LIMITED:
+    "Die verfügbare Quote beim KI-Anbieter ist erreicht. Bitte versuchen Sie es später erneut.",
+  PROVIDER_UNAVAILABLE:
+    "Der KI-Anbieter ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.",
+  PROVIDER_CONTENT_BLOCKED:
+    "Der KI-Anbieter konnte diese Anfrage aus Sicherheitsgründen nicht beantworten. Bitte formulieren Sie sie anders.",
   PROVIDER_FAILED:
     "Die Modellantwort konnte nicht vollständig verarbeitet werden. Bitte laden Sie den Verlauf neu.",
   REQUEST_ABORTED: "Die Antwort wurde abgebrochen.",

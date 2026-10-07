@@ -4,6 +4,7 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSupabaseBackend } from '../../src/services/supabaseBackend';
+import { createSeed } from '../support/seed';
 
 const config = { supabaseUrl: 'https://beispiel.invalid', publishableKey: 'sb_publishable_test' };
 
@@ -19,17 +20,17 @@ function fakeSession() {
   };
 }
 
-type Pending = { url: string; resolve: (r: Response) => void };
+type Pending = { url: string; init?: RequestInit | undefined; resolve: (r: Response) => void };
 
 function stubFetch() {
   const pending: Pending[] = [];
   const calls: string[] = [];
   vi.stubGlobal(
     'fetch',
-    vi.fn((input: string | URL | Request) => {
+    vi.fn((input: string | URL | Request, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
       calls.push(url);
-      return new Promise<Response>((resolve) => pending.push({ url, resolve }));
+      return new Promise<Response>((resolve) => pending.push({ url, init, resolve }));
     }),
   );
   const answer = (part: string, body: unknown, status = 200) => {
@@ -43,6 +44,33 @@ function stubFetch() {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+describe('Supabase-Adapter: Modellwahl', () => {
+  it.each(['gemini-registry-id', null])('bestehender RPC speichert %s und erhält Modus, Archivierung und Revision', async (modelId) => {
+    const net = stubFetch();
+    const backend = createSupabaseBackend(config);
+    const signIn = backend.auth.signIn('pruefung@beispiel.invalid', 'nur-synthetisch');
+    await vi.waitFor(() => expect(net.pending).toHaveLength(1));
+    net.answer('/auth/v1/token', fakeSession());
+    await signIn;
+    const base = createSeed().conversations[0];
+    if (!base) throw new Error('Testgespräch fehlt');
+    const conversation = { ...base, mode_override: 'answer_only' as const, archived_at: '2026-10-07T08:00:00Z', revision: 5 };
+    const update = backend.data.setConversationModel(conversation, modelId);
+    await vi.waitFor(() => expect(net.pending).toHaveLength(1));
+    const call = net.pending[0];
+    expect(call?.url).toContain('/rest/v1/rpc/set_conversation_preferences');
+    expect(JSON.parse(call?.init?.body as string)).toEqual({
+      p_conversation_id: conversation.id,
+      p_mode: 'answer_only',
+      p_model_id: modelId,
+      p_archived: true,
+      p_expected_revision: 5,
+    });
+    net.answer('/rpc/set_conversation_preferences', { ...conversation, model_override_id: modelId, revision: 6 });
+    expect(await update).toMatchObject({ model_override_id: modelId, revision: 6 });
+  });
 });
 
 describe('Supabase-Adapter: lokale Abmeldung', () => {

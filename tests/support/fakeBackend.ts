@@ -3,10 +3,11 @@
  * (Supabase und eigener /api-Server); Login-Formular, Routen, Sitzungslogik und Stream-Verarbeitung bleiben
  * Produktcode. Diese Datei liegt außerhalb von src/ und gelangt nie in den Produkt-Build.
  */
-import type { ChatEventV1, ChatModel, ChatRequestV1, Phase1Code } from '../../types/phase1';
+import type { ChatActivity, ChatEventV1, ChatModel, ChatRequestV1, Phase1Code } from '../../types/phase1';
 import { AppError } from '../../src/services/errors';
 import type { AuthChange, AuthSession, Backend, ConversationRow, MessageRow } from '../../src/services/types';
 import { createSeed, TEST_USER_ID, type SeedOptions, type SeedState } from './seed';
+import type { StaffOverview } from '../../types/staff';
 
 export const TEST_EMAIL = 'pruefung@beispiel.invalid';
 export const TEST_PASSWORD = 'nur-synthetisch';
@@ -20,10 +21,13 @@ export type ChatScript =
   | { kind: 'cut'; afterChunks: string[] };
 
 export type FakeOptions = SeedOptions & {
+  staffOverview?: StaffOverview;
   rememberSession?: boolean;
   /** Verzögerung zwischen synthetischen Stream-Ereignissen (ms). */
   tickMs?: number;
   chat?: (request: ChatRequestV1) => ChatScript;
+  /** Explicit synthetic activity events, never enabled in a production transport. */
+  activity?: ChatActivity[];
   /** Synthetischen Bestand vor dem Start erweitern (z. B. große Datenmengen, lange Texte). */
   extend?: (state: SeedState) => void;
 };
@@ -189,6 +193,12 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
       },
     },
     data: {
+      getStaffOverview: () => Promise.resolve(options.staffOverview ?? {
+        generatedAt: '2026-10-07T12:00:00Z',
+        totals: { careRecipients: state.people.length, openTasks: state.tasks.filter((t) => t.status === 'open' || t.status === 'in_progress').length, conversations: state.conversations.length, activeConversations: state.conversations.filter((c) => c.archived_at === null).length, documents: state.documents.length, requests: 0, completedRequests: 0, failedRequests: 0, interruptedRequests: 0, inputTokens: 0, outputTokens: 0, costMicrousd: 0 },
+        people: state.people.map((p) => ({ id: p.id, name: p.name, careGrade: p.care_grade, openTasks: state.tasks.filter((t) => t.care_recipient_id === p.id && (t.status === 'open' || t.status === 'in_progress')).length, conversations: state.conversations.filter((c) => c.care_recipient_id === p.id).length, completedAnswers: 0, lastConversationAt: state.conversations.filter((c) => c.care_recipient_id === p.id).map((c) => c.created_at).sort().at(-1) ?? null })),
+        usage: [],
+      }),
       loadWorkspace: async (userId) => {
         await gate('loadWorkspace');
         return userId === TEST_USER_ID ? state.workspace : null;
@@ -236,6 +246,11 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
         return Promise.resolve(next);
       },
       updateAgentSettings: () => Promise.reject(new AppError('NOT_DEPLOYED')),
+      async setConversationModel(c, modelId) {
+        await gate('rename');
+        if (modelId !== null && !state.models.some((m) => m.id === modelId && m.enabled && m.status === 'operational')) throw new AppError('RESOURCE_NOT_FOUND');
+        return bump(c.id, { model_override_id: modelId }, c.revision);
+      },
     },
     chat: {
       async stream(request, { signal, onEvent }) {
@@ -243,13 +258,15 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
         const script = options.chat?.(request) ?? { kind: 'http_error', code: 'PROVIDER_NOT_CONFIGURED' };
         if (script.kind === 'http_error') throw new AppError(script.code);
         const stored = replies.get(request.clientRequestId);
-        const model = state.models.find((m) => m.id === state.settings.version.default_model_id);
+        const modelId = conversation(request.conversationId).model_override_id ?? state.settings.version.default_model_id;
+        const model = state.models.find((m) => m.id === modelId);
+        if (!model || !['openai', 'deepseek', 'opencode', 'gemini'].includes(model.provider)) throw new AppError('MODEL_UNAVAILABLE');
         const chatModel: ChatModel = {
-          registryId: model?.id ?? '',
-          provider: 'openai',
-          providerModelId: model?.provider_model_id ?? '',
-          displayName: model?.display_name ?? '',
-          region: model?.hosting_region ?? 'unverified',
+          registryId: model.id,
+          provider: model.provider as ChatModel['provider'],
+          providerModelId: model.provider_model_id,
+          displayName: model.display_name,
+          region: model.hosting_region,
         };
         let sequence = 0;
         const requestId = crypto.randomUUID();
@@ -277,6 +294,7 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
           putReply(message(request.conversationId, 'assistant', '', { ...base, status: 'streaming' }));
         }
         emit('message.started', { messageId, model: chatModel, promptVersionId: state.defaultPrompt.id, replayed: Boolean(stored) });
+        for (const activity of options.activity ?? []) emit('message.activity', activity);
         const chunks = stored ? [stored.content] : script.kind === 'answer' ? script.chunks : script.afterChunks;
         let text = '';
         try {
@@ -287,7 +305,7 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
           }
           if (script.kind === 'stream_error' && !stored) {
             // Wie der echte Transport: ein SSE-`error`-Ereignis wird zum geworfenen Vertragsfehler.
-            throw new AppError(script.code, { requestId, retryable: false });
+            throw new AppError(script.code, { requestId });
           }
           if (script.kind === 'answer' && script.holdBeforeComplete && !stored) {
             await new Promise<void>((resolve, reject) => {

@@ -18,6 +18,8 @@ const runtimeOnly = process.argv.includes('--runtime-only');
 const phase1Base = process.argv.includes('--phase1-base');
 const sessionBase = process.argv.includes('--session-base');
 const openCodeBase = process.argv.includes('--opencode-base');
+const geminiBase = process.argv.includes('--gemini-base');
+if(geminiBase && !['start','reset'].includes(action)) throw new Error('--gemini-base gilt nur für den eigenen dreizehn-zu-aktuellen Upgradeprüflauf.');
 if(openCodeBase && !['start','reset'].includes(action)) throw new Error('--opencode-base gilt nur für den eigenen Elf-zu-dreizehn-Upgradeprüflauf.');
 if(sessionBase && !['start','reset'].includes(action)) throw new Error('--session-base gilt nur für den gezielten Zehn-zu-elf-Upgradeprüflauf.');
 if (phase1Base && !['start','reset'].includes(action)) throw new Error('--phase1-base gilt nur für den gezielten Acht-zu-zehn-Upgradeprüflauf.');
@@ -26,10 +28,11 @@ const actions = {
   status: ['status', '--output-format', 'json'],
   reset: ['db', 'reset', '--local', '--yes'],
   test: ['test', 'db', '--local'],
+  advisors: ['db', 'advisors', '--local', '--type', 'security', '--level', 'warn', '--fail-on', 'error'],
   types: ['gen', 'types', '--local', '--lang', 'typescript', '--schema', 'public'],
   stop: ['stop'],
 };
-if (!Object.hasOwn(actions, action)) throw new Error('Erlaubt: start, status, reset, test, types, stop.');
+if (!Object.hasOwn(actions, action)) throw new Error('Erlaubt: start, status, reset, test, advisors, types, stop.');
 if (runtimeOnly && action !== 'start') throw new Error('--runtime-only gilt nur für die Bereitschaftsprüfung.');
 await mkdir(local, { recursive: true, mode: 0o700 });
 await chmod(local, 0o700);
@@ -49,6 +52,9 @@ if (phase1Base) for (const name of await readdir(path.join(mirror,'supabase/migr
 if (sessionBase || openCodeBase) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
   if (name >= (sessionBase ? '20261006162000' : '20261006183000'))
     await rm(path.join(mirror,'supabase/migrations',name));
+}
+if (geminiBase) for (const name of await readdir(path.join(mirror,'supabase/migrations'))) {
+  if (name >= '20261007000000') await rm(path.join(mirror,'supabase/migrations',name));
 }
 // Retire only the owned old mirror; no Edge runtime participates in the Node product.
 await rm(path.join(mirror,'supabase/functions'),{recursive:true,force:true});

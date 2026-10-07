@@ -34,6 +34,6 @@ describe('Chat: Tastatur und Warten', () => {
 
   it('langsame Antwort ohne ersten Text: sichtbarer Hinweis statt nur Cursor', async () => {
     await startHeld([]);
-    expect(await screen.findByText(/Antwort wird erstellt/)).toBeTruthy();
+    expect(await screen.findByText('Denkt nach …')).toBeTruthy();
   });
 });

@@ -34,6 +34,10 @@ describe('recoveryFor', () => {
     ['REQUEST_INTERRUPTED', 'send_new'],
     ['IDEMPOTENCY_CONFLICT', 'send_new'],
     ['PROVIDER_NOT_CONFIGURED', 'none'],
+    ['PROVIDER_AUTH_FAILED', 'none'],
+    ['PROVIDER_CONTENT_BLOCKED', 'none'],
+    ['PROVIDER_RATE_LIMITED', 'send_new'],
+    ['PROVIDER_UNAVAILABLE', 'send_new'],
     ['BUDGET_EXCEEDED', 'none'],
   ] as const)('%s → %s', (code, expected) => {
     expect(recoveryFor({ phase: 'failed', error: new AppError(code) })).toBe(expected);

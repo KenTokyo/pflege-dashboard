@@ -5,24 +5,33 @@ import { ErrorState } from '../../components/States';
 import { MODE_LABEL, REGION_LABEL, modelDisplayName, type EffectiveModel } from '../../data/model';
 import { useArchiveConversation, useAssignRecipient, useRenameConversation } from '../../data/queries';
 import { baseName } from '../../lib/format';
-import type { CareRecipient, ConversationRow, Enums } from '../../services/types';
+import type { AppError, CareRecipient, ConversationRow, Enums, ModelRow } from '../../services/types';
 
 type Props = {
   conversation: ConversationRow;
   people: CareRecipient[];
   mode: Enums['agent_mode'] | null;
   model: EffectiveModel | null;
+  models: ModelRow[];
+  defaultModelId: string | null;
   busy: boolean;
+  changingModel: boolean;
+  modelError: AppError | null;
+  onModelChange: (modelId: string | null) => void;
 };
 
-export function ThreadHead({ conversation, people, mode, model, busy }: Props) {
+export function ThreadHead({ conversation, people, mode, model, models, defaultModelId, busy, changingModel, modelError, onModelChange }: Props) {
   const rename = useRenameConversation();
   const archive = useArchiveConversation();
   const assign = useAssignRecipient();
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(conversation.title);
-  const error = rename.error ?? archive.error ?? assign.error;
+  const error = rename.error ?? archive.error ?? assign.error ?? modelError;
   const archived = conversation.archived_at !== null;
+  const availableModels = models.filter((m) => m.enabled && m.status === 'operational');
+  const workspaceDefault = models.find((m) => m.id === defaultModelId);
+  const overrideUnavailable = conversation.model_override_id !== null && !availableModels.some((m) => m.id === conversation.model_override_id);
+  const unavailableOverride = overrideUnavailable ? models.find((m) => m.id === conversation.model_override_id) : null;
 
   const save = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,17 +139,25 @@ export function ThreadHead({ conversation, people, mode, model, busy }: Props) {
             {MODE_LABEL[mode]}
           </span>
         ) : null}
-        <span className="chip-static" title="Modell für die nächste Antwort">
+        <label className="chip-static model-picker" title={busy ? 'Während einer laufenden Antwort oder Änderung nicht änderbar' : 'Modell für die nächste Antwort'}>
           <Cpu className="i" size={15} aria-hidden="true" />
-          {model?.model ? (
-            <>
-              {modelDisplayName(model.model.display_name, model.model.provider)}
-              <span className={`region ${model.model.hosting_region === 'eu' ? 'region-eu' : ''}`}>{REGION_LABEL[model.model.hosting_region]}</span>
-            </>
-          ) : (
-            'Kein Modell freigegeben'
-          )}
-        </span>
+          <span className="sr-only">Modell für die nächste Antwort</span>
+          <select
+            aria-label="Modell für die nächste Antwort"
+            value={conversation.model_override_id ?? ''}
+            disabled={busy || models.length === 0}
+            onChange={(e) => {
+              const id = e.target.value;
+              if (id !== '' && !availableModels.some((m) => m.id === id)) return;
+              if ((id || null) !== conversation.model_override_id) onModelChange(id || null);
+            }}
+          >
+            <option value="">{workspaceDefault ? `Standard · ${modelDisplayName(workspaceDefault.display_name, workspaceDefault.provider)}` : 'Kein Modell freigegeben'}</option>
+            {overrideUnavailable ? <option value={conversation.model_override_id ?? ''} disabled>{unavailableOverride ? modelDisplayName(unavailableOverride.display_name, unavailableOverride.provider) : 'Gespeichertes Modell'} · nicht verfügbar</option> : null}
+            {availableModels.map((m) => <option key={m.id} value={m.id}>{modelDisplayName(m.display_name, m.provider)}</option>)}
+          </select>
+          {model?.model ? <span className={`region ${model.model.hosting_region === 'eu' ? 'region-eu' : ''}`}>{REGION_LABEL[model.model.hosting_region]}</span> : null}
+        </label>
         <button
           type="button"
           className="btn btn-secondary btn-sm"
@@ -153,6 +170,7 @@ export function ThreadHead({ conversation, people, mode, model, busy }: Props) {
           <span className="btn-label">{archived ? 'Wiederherstellen' : 'Archivieren'}</span>
         </button>
       </div>
+      {changingModel ? <p className="w-full small muted" role="status">Modell wird gespeichert …</p> : null}
       {error ? (
         <div className="w-full">
           <ErrorState error={error} title="Änderung nicht gespeichert" />

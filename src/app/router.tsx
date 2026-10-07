@@ -19,6 +19,7 @@ const ChatIndexRoute = lazyRouteComponent(() => import('../routes/ChatRoute'), '
 const DocumentsPage = lazyRouteComponent(() => import('../routes/DocumentsPage'), 'DocumentsPage');
 const TasksPage = lazyRouteComponent(() => import('../routes/TasksPage'), 'TasksPage');
 const SettingsPage = lazyRouteComponent(() => import('../routes/SettingsPage'), 'SettingsPage');
+const StaffPage = lazyRouteComponent(() => import('../routes/StaffPage'), 'StaffPage');
 
 function Root() {
   return (
@@ -48,10 +49,11 @@ export const chatRoute = createRoute({ getParentRoute: () => appRoute, path: '/g
 const documentsRoute = createRoute({ getParentRoute: () => appRoute, path: '/dokumente', component: DocumentsPage });
 const tasksRoute = createRoute({ getParentRoute: () => appRoute, path: '/aufgaben', component: TasksPage });
 const settingsRoute = createRoute({ getParentRoute: () => appRoute, path: '/einstellungen', component: SettingsPage });
+const staffRoute = createRoute({ getParentRoute: () => appRoute, path: '/sachbearbeitung', component: StaffPage });
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  appRoute.addChildren([dashboardRoute, chatIndexRoute, chatRoute, documentsRoute, tasksRoute, settingsRoute]),
+  appRoute.addChildren([dashboardRoute, chatIndexRoute, chatRoute, documentsRoute, tasksRoute, settingsRoute, staffRoute]),
 ]);
 
 export function createAppRouter(history?: RouterHistory) {

@@ -1,4 +1,4 @@
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, BookOpenText, Compass, ListTodo, MessageSquareText, MessagesSquare, PenLine, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { QUESTION_GROUPS } from './questionExamples';
 
@@ -8,6 +8,8 @@ type Props = {
   hasDraft: boolean;
   personName: string | null;
 };
+
+const GROUP_ICONS = { overview: Compass, tasks: ListTodo, explain: BookOpenText, writing: PenLine, conversation: MessagesSquare };
 
 /** Nur bei geöffnetem Dialog gemountet; die Auswahl startet bei jedem Öffnen neu. */
 export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName }: Props) {
@@ -27,7 +29,10 @@ export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName
     <dialog ref={ref} className="dialog question-dialog" aria-labelledby="question-title" aria-describedby="question-intro" onCancel={onClose}>
       <div className="dialog-inner">
         <div className="dialog-head">
-          <h2 id="question-title">Was kann ich fragen?</h2>
+          <div className="question-heading">
+            <span className="question-heading-icon" aria-hidden="true"><MessageSquareText className="i" size={21} /></span>
+            <div><p className="small muted">Ein guter Anfang für Ihr Anliegen</p><h2 id="question-title">Was kann ich fragen?</h2></div>
+          </div>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Beispiele schließen" title="Schließen">
             <X className="i" size={18} aria-hidden="true" />
           </button>
@@ -38,7 +43,9 @@ export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName
             {personName ? <>Dieses Gespräch bezieht sich auf <strong>{personName}</strong>.</> : 'Für Fragen zu einer Person wählen Sie oben im Gespräch die passende Person aus.'}
           </p>
           <div className="question-categories" role="group" aria-label="Themen für Beispielfragen">
-            {QUESTION_GROUPS.map((item) => (
+            {QUESTION_GROUPS.map((item) => {
+              const Icon = GROUP_ICONS[item.id];
+              return (
               <button
                 key={item.id}
                 type="button"
@@ -46,10 +53,13 @@ export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName
                 aria-pressed={item.id === group.id}
                 onClick={() => { setGroupId(item.id); setSelected(null); }}
               >
-                {item.label}
+                <Icon className="i" size={17} aria-hidden="true" />
+                <span>{item.label}</span>
               </button>
-            ))}
+              );
+            })}
           </div>
+          <div className="question-section-head"><h3>{group.label}</h3><span className="small muted">{group.questions.length} Beispiele</span><p>{group.description}</p></div>
           <fieldset className="question-list">
             <legend className="sr-only">{group.label}: Frage auswählen</legend>
             {group.questions.map((question) => (

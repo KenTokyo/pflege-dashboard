@@ -117,6 +117,10 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
   };
 
   const data: DataPort = {
+    async getStaffOverview(workspaceId, options = {}) {
+      const { c, guard } = reader(options.signal);
+      return must(await single(guard, withSignal(c.rpc('staff_overview', { p_workspace_id: workspaceId }), options.signal)));
+    },
     async loadWorkspace(userId): Promise<WorkspaceContext | null> {
       const { c, guard } = reader();
       const profiles = must(await single(guard, c.from('profiles').select('id, workspace_id, display_name').eq('user_id', userId)));
@@ -285,6 +289,18 @@ export function createSupabaseBackend(config: PublicConfig): Backend {
           p_mode: conversation.mode_override,
           p_model_id: conversation.model_override_id,
           p_archived: archived,
+          p_expected_revision: conversation.revision,
+        }),
+      );
+    },
+
+    async setConversationModel(conversation, modelId) {
+      return must(
+        await db().rpc('set_conversation_preferences', {
+          p_conversation_id: conversation.id,
+          p_mode: conversation.mode_override,
+          p_model_id: modelId,
+          p_archived: conversation.archived_at !== null,
           p_expected_revision: conversation.revision,
         }),
       );

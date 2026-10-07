@@ -1,6 +1,6 @@
 import { Navigate } from '@tanstack/react-router';
 
-const RETURN_PAGES = ['/gespraeche', '/dokumente', '/aufgaben', '/einstellungen'] as const;
+const RETURN_PAGES = ['/gespraeche', '/dokumente', '/aufgaben', '/einstellungen', '/sachbearbeitung'] as const;
 type ReturnPage = (typeof RETURN_PAGES)[number];
 const CONVERSATION_PATH = /^\/gespraeche\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 

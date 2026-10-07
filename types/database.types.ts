@@ -967,6 +967,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"staff_overview":
+{ Args: { "p_workspace_id": string }; Returns: Json
+                           },
 "update_agent_settings":
 { Args: { "p_expected_revision": number,"p_mode": Database["public"]['Enums']["agent_mode"],"p_model_id": string,"p_persona": string,"p_reset_to_default": boolean,"p_system_prompt": string,"p_workspace_id": string }; Returns: {
               "created_at": string,
@@ -984,7 +987,7 @@ isOneToOne: false
       } }
           }
           Enums: {
-            "actor_kind": "system"|"user","agent_mode": "answer_only"|"create","ai_provider": "openai"|"anthropic"|"mistral"|"deepseek"|"opencode","attachment_scope": "workspace"|"owner","attachment_status": "pending"|"ready"|"rejected"|"deleted","document_kind": "letter"|"application"|"objection"|"respite"|"relief","document_status": "draft"|"reviewed"|"sent","hosting_region": "eu"|"us"|"unverified","membership_role": "member"|"admin","membership_status": "active"|"revoked","message_role": "user"|"assistant"|"system"|"tool","message_status": "pending"|"streaming"|"completed"|"interrupted"|"failed","model_status": "planned"|"operational"|"retired","proposal_kind": "document"|"task"|"note"|"handover","proposal_status": "pending"|"confirmed"|"rejected"|"expired"|"stale","reservation_status": "reserved"|"settled"|"held"|"released","task_priority": "low"|"normal"|"high"|"urgent","task_status": "open"|"in_progress"|"done"|"cancelled"
+            "actor_kind": "system"|"user","agent_mode": "answer_only"|"create","ai_provider": "openai"|"anthropic"|"mistral"|"deepseek"|"opencode"|"gemini","attachment_scope": "workspace"|"owner","attachment_status": "pending"|"ready"|"rejected"|"deleted","document_kind": "letter"|"application"|"objection"|"respite"|"relief","document_status": "draft"|"reviewed"|"sent","hosting_region": "eu"|"us"|"unverified","membership_role": "member"|"admin","membership_status": "active"|"revoked","message_role": "user"|"assistant"|"system"|"tool","message_status": "pending"|"streaming"|"completed"|"interrupted"|"failed","model_status": "planned"|"operational"|"retired","proposal_kind": "document"|"task"|"note"|"handover","proposal_status": "pending"|"confirmed"|"rejected"|"expired"|"stale","reservation_status": "reserved"|"settled"|"held"|"released","task_priority": "low"|"normal"|"high"|"urgent","task_status": "open"|"in_progress"|"done"|"cancelled"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1100,7 +1103,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "actor_kind": ["system", "user"],"agent_mode": ["answer_only", "create"],"ai_provider": ["openai", "anthropic", "mistral", "deepseek", "opencode"],"attachment_scope": ["workspace", "owner"],"attachment_status": ["pending", "ready", "rejected", "deleted"],"document_kind": ["letter", "application", "objection", "respite", "relief"],"document_status": ["draft", "reviewed", "sent"],"hosting_region": ["eu", "us", "unverified"],"membership_role": ["member", "admin"],"membership_status": ["active", "revoked"],"message_role": ["user", "assistant", "system", "tool"],"message_status": ["pending", "streaming", "completed", "interrupted", "failed"],"model_status": ["planned", "operational", "retired"],"proposal_kind": ["document", "task", "note", "handover"],"proposal_status": ["pending", "confirmed", "rejected", "expired", "stale"],"reservation_status": ["reserved", "settled", "held", "released"],"task_priority": ["low", "normal", "high", "urgent"],"task_status": ["open", "in_progress", "done", "cancelled"]
+            "actor_kind": ["system", "user"],"agent_mode": ["answer_only", "create"],"ai_provider": ["openai", "anthropic", "mistral", "deepseek", "opencode", "gemini"],"attachment_scope": ["workspace", "owner"],"attachment_status": ["pending", "ready", "rejected", "deleted"],"document_kind": ["letter", "application", "objection", "respite", "relief"],"document_status": ["draft", "reviewed", "sent"],"hosting_region": ["eu", "us", "unverified"],"membership_role": ["member", "admin"],"membership_status": ["active", "revoked"],"message_role": ["user", "assistant", "system", "tool"],"message_status": ["pending", "streaming", "completed", "interrupted", "failed"],"model_status": ["planned", "operational", "retired"],"proposal_kind": ["document", "task", "note", "handover"],"proposal_status": ["pending", "confirmed", "rejected", "expired", "stale"],"reservation_status": ["reserved", "settled", "held", "released"],"task_priority": ["low", "normal", "high", "urgent"],"task_status": ["open", "in_progress", "done", "cancelled"]
           }
         }
 } as const

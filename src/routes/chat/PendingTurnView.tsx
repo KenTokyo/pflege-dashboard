@@ -3,6 +3,7 @@ import { SafeMarkdown } from '../../chat/Markdown';
 import { recoveryFor, type PendingTurn } from '../../chat/streamStore';
 import { modelDisplayName } from '../../data/model';
 import { AgentMeta } from './MessageView';
+import { ActivityView } from './ActivityView';
 
 type Props = {
   turn: PendingTurn;
@@ -13,6 +14,7 @@ type Props = {
   onReload: () => void;
   onEdit: () => void;
   onDismiss: () => void;
+  actionsDisabled?: boolean;
 };
 
 const FAILED_TITLE: Record<string, string> = {
@@ -21,10 +23,12 @@ const FAILED_TITLE: Record<string, string> = {
 };
 
 /** Laufende oder gerade beendete Anfrage, bis der gespeicherte Verlauf sie enthält. */
-export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss }: Props) {
+export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss, actionsDisabled = false }: Props) {
   const live = turn.phase === 'sending' || turn.phase === 'streaming';
   const recovery = recoveryFor(turn);
-  const incompleteAnswer = turn.phase === 'failed' && turn.text.trim().length > 0;
+  const visibleText = turn.text.trim().length > 0;
+  const incompleteAnswer = turn.phase === 'failed' && visibleText;
+  const progress = turn.phase === 'sending' ? 'Anfrage wird gesendet …' : visibleText ? 'Antwort wird geschrieben …' : 'Denkt nach …';
   const model = turn.model ? { displayName: modelDisplayName(turn.model.displayName, turn.model.provider), region: turn.model.region } : null;
 
   return (
@@ -43,21 +47,14 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
           <AgentMeta
             model={model}
             time={null}
-            {...(turn.phase === 'sending'
-              ? { note: 'Anfrage wird gesendet …' }
-              : turn.phase === 'streaming' && !turn.text
-                ? { note: 'Antwort wird erstellt …' }
-                : turn.replayed
-                  ? { note: 'gespeicherte Antwort' }
-                  : {})}
+            {...(turn.replayed ? { note: 'gespeicherte Antwort' } : {})}
           />
-          {turn.text ? (
+          {live ? <p className="msg-status" role="status">{progress}</p> : null}
+          {visibleText ? (
             <div className="relative">
               <SafeMarkdown text={turn.text} />
               {turn.phase === 'streaming' ? <span className="caret" aria-hidden="true" /> : null}
             </div>
-          ) : turn.phase === 'streaming' ? (
-            <span className="caret" aria-hidden="true" />
           ) : null}
         </article>
       ) : null}
@@ -75,13 +72,13 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
             {turn.error?.requestId ? <span className="block muted">Vorgangsnummer: {turn.error.requestId}</span> : null}
             <div className="alert-actions">
               {recovery === 'fetch_again' ? (
-                <button type="button" className="btn btn-secondary btn-sm" onClick={onFetchAgain}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={onFetchAgain} disabled={actionsDisabled}>
                   <RefreshCw className="i" size={15} aria-hidden="true" />
                   Antwort erneut abrufen
                 </button>
               ) : null}
               {recovery === 'send_new' ? (
-                <button type="button" className="btn btn-secondary btn-sm" onClick={onSendNew}>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={onSendNew} disabled={actionsDisabled}>
                   <Send className="i" size={15} aria-hidden="true" />
                   Neu senden
                 </button>
@@ -104,6 +101,7 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
           </div>
         </div>
       ) : null}
+      <ActivityView activity={turn.activity} />
     </>
   );
 }

@@ -97,6 +97,7 @@ async function initialize(): Promise<Dependencies> {
   });
   const database = createDatabase(config.database, [
     ...(env("OPENAI_API_KEY") ? ["openai"] : []),
+    ...(env("GEMINI_API_KEY") ? ["gemini"] : []),
     ...((env("OPENCODE_API_KEY") ?? env("DEEPSEEK_API_KEY"))
       ? ["opencode"]
       : []),

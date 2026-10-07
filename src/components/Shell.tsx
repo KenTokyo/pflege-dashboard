@@ -1,10 +1,11 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useLocation } from '@tanstack/react-router';
 import { FileText, LayoutGrid, ListChecks, LogOut, MessagesSquare, Settings } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { baseName, initials } from '../lib/format';
 import { BrandMark } from './Brand';
 import { ThemeToggle } from './ThemeToggle';
+import { StaffViewSwitch } from '../staff/StaffViewSwitch';
 
 const NAV = [
   { to: '/', label: 'Übersicht', icon: LayoutGrid, exact: true },
@@ -62,6 +63,13 @@ function UserMenu({ placement }: { placement: 'up' | 'down' }) {
               {workspace.name} · {role === 'admin' ? 'Verwaltung' : 'Mitglied'}
             </span>
           </div>
+          <Link to="/sachbearbeitung" role="menuitem" className="menu-item" onClick={() => setOpen(false)}>
+            <LayoutGrid className="i" size={17} aria-hidden="true" />
+            Sachbearbeiter-Test
+          </Link>
+          <Link to="/" role="menuitem" className="menu-item" onClick={() => setOpen(false)}>
+            Kundenansicht
+          </Link>
           <button type="button" role="menuitem" className="menu-item" onClick={() => signOut('manual')}>
             <LogOut className="i" size={17} aria-hidden="true" />
             Abmelden
@@ -74,6 +82,7 @@ function UserMenu({ placement }: { placement: 'up' | 'down' }) {
 
 export function Shell({ children, mainClassName = '' }: { children: ReactNode; mainClassName?: string }) {
   const { workspace } = useWorkspace();
+  const pathname = useLocation({ select: (location) => location.pathname });
   return (
     <div className="shell">
       <nav className="rail" aria-label="Hauptnavigation">
@@ -114,6 +123,7 @@ export function Shell({ children, mainClassName = '' }: { children: ReactNode; m
       </header>
 
       <main id="main" tabIndex={-1} className={`main ${mainClassName}`}>
+        {pathname === '/' || pathname === '/sachbearbeitung' ? <StaffViewSwitch /> : null}
         {children}
       </main>
 

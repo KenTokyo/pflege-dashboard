@@ -4,6 +4,9 @@ export function redact(value) {
     .replace(/\x1b\[[0-9;]*m/g, '')
     .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, '[REDACTED JWT]')
     .replace(/\bsb_(?:secret|publishable)_[A-Za-z0-9_-]+\b/g, '[REDACTED KEY]')
+    .replace(/\bAIza[A-Za-z0-9_-]{20,}\b/g, '[REDACTED KEY]')
+    .replace(/\bAQ\.[A-Za-z0-9_.-]{20,}/g, '[REDACTED KEY]')
+    .replace(/^.*\b[A-Z0-9_]+_(?:API_KEY|TOKEN|SECRET|PASSWORD)\b\s*[=:].*$/gmi, '[REDACTED SENSITIVE LINE]')
     .replace(/\b(?:sk-(?:ant-)?|sbp_)[A-Za-z0-9_-]{8,}\b/g, '[REDACTED KEY]')
     .replace(/(postgres(?:ql)?:\/\/[^\s:@/]+:)[^\s@]+(@)/gi, '$1[REDACTED]$2')
     .replace(/([^\n]*(?:\b(?:anon(?:_key)?|service[_ -]?role(?:_key)?|publishable(?:_key)?|secret(?:_key)?|access[_ -]?token|password|authorization|jwt[_ -]?secret|api[_ -]?key)\b)[^\n]*[=:│|][^\n]*)/gi, '[REDACTED SENSITIVE LINE]');

@@ -27,6 +27,7 @@ try {
   if (!stopping) {
     const database = createDatabase(config.database, [
       ...(config.env("OPENAI_API_KEY") ? ["openai"] : []),
+      ...(config.env("GEMINI_API_KEY") ? ["gemini"] : []),
       ...((config.env("OPENCODE_API_KEY") ?? config.env("DEEPSEEK_API_KEY"))
         ? ["opencode"]
         : []),

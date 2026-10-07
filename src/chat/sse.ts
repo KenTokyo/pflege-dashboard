@@ -1,5 +1,6 @@
 import type { ChatEventV1 } from '../../types/phase1';
 import { AppError, isAppErrorCode } from '../services/errors';
+import { parseActivity } from './activity';
 
 export type SseMessage = { event: string; data: string };
 
@@ -57,13 +58,15 @@ export class SseParser {
   }
 }
 
-const TYPES = new Set(['message.started', 'message.delta', 'usage.final', 'message.completed', 'error']);
+const TYPES = new Set(['message.activity', 'message.started', 'message.delta', 'usage.final', 'message.completed', 'error']);
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isString = (v: unknown): v is string => typeof v === 'string';
 const isCount = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
 
 function validData(type: string, data: Record<string, unknown>): boolean {
   switch (type) {
+    case 'message.activity':
+      return parseActivity(data) !== null;
     case 'message.started': {
       const model = data.model;
       return (
@@ -116,6 +119,7 @@ export function parseChatEvent(message: SseMessage, conversationId: string): Cha
   ) {
     throw new AppError('PROTOCOL');
   }
+  if (parsed.type === 'message.activity') return { ...parsed, data: parseActivity(parsed.data) } as ChatEventV1;
   return parsed as ChatEventV1;
 }
 

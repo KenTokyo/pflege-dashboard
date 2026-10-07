@@ -1,4 +1,4 @@
-import type { ChatModel, ChatRequestV1 } from '../../types/phase1';
+import type { ChatActivity, ChatModel, ChatRequestV1 } from '../../types/phase1';
 import { newId } from '../lib/ids';
 import { AppError, toAppError, type AppErrorCode } from '../services/errors';
 import type { ChatPort } from '../services/types';
@@ -16,6 +16,7 @@ export type PendingTurn = {
   replayed: boolean;
   usage: { inputTokens: number; outputTokens: number } | null;
   error: AppError | null;
+  activity: ChatActivity[];
 };
 
 /** Was der Nutzer nach einem Fehler sinnvoll tun kann (Vertrag v1.0: keine automatische bezahlte Wiederholung). */
@@ -26,6 +27,8 @@ const SEND_NEW = new Set<AppErrorCode>([
   'REQUEST_ABORTED',
   'IDEMPOTENCY_CONFLICT',
   'PROVIDER_FAILED',
+  'PROVIDER_RATE_LIMITED',
+  'PROVIDER_UNAVAILABLE',
   'RATE_LIMITED',
   'PARALLEL_LIMIT',
   'INTERNAL_ERROR',
@@ -158,6 +161,7 @@ export class StreamStore {
       replayed: false,
       usage: null,
       error: null,
+      activity: [],
     };
     this.turns.set(conversationId, turn);
     this.emit();
@@ -183,6 +187,9 @@ export class StreamStore {
         onEvent: (event) => {
           if (this.stale()) return;
           switch (event.type) {
+            case 'message.activity':
+              update({ activity: [...turn.activity.slice(-63), event.data] }, false);
+              break;
             case 'message.started':
               update({ phase: 'streaming', model: event.data.model, messageId: event.data.messageId, replayed: event.data.replayed });
               break;

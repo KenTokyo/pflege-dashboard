@@ -59,6 +59,7 @@ export function providerLabel(provider: string): string {
     mistral: 'Mistral AI',
     deepseek: 'DeepSeek',
     opencode: 'OpenCode',
+    gemini: 'Google AI Studio',
   };
   return labels[provider] ?? provider;
 }
@@ -66,7 +67,9 @@ export function providerLabel(provider: string): string {
 /** Der Weiterleitungsanbieter bleibt auch dann erkennbar, wenn im Modellnamen nur DeepSeek steht. */
 export function modelDisplayName(displayName: string, provider?: string): string {
   const viaOpenCode = provider === 'opencode';
-  return viaOpenCode && !/opencode/i.test(displayName) ? `${displayName} · über OpenCode` : displayName;
+  if (viaOpenCode && !/opencode/i.test(displayName)) return `${displayName} · über OpenCode`;
+  if (provider === 'gemini' && !/ai studio/i.test(displayName)) return `${displayName} · Google AI Studio`;
+  return displayName;
 }
 
 export type MessageModel = {

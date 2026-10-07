@@ -100,3 +100,29 @@ describe('DeepSeek über OpenCode sichtbar zuordnen', () => {
     expect(messageModel({ model_snapshot: { ...snapshot, provider: 'deepseek' }, provider_response_model: 'deepseek-flash' })?.displayName).toBe('DeepSeek V4.1 Flash');
   });
 });
+
+describe('Gemini sichtbar zuordnen', () => {
+  it('nennt Google AI Studio und ergänzt den Anbieter genau einmal', () => {
+    expect(providerLabel('gemini')).toBe('Google AI Studio');
+    expect(modelDisplayName('Gemini · Testmodell', 'gemini')).toBe('Gemini · Testmodell · Google AI Studio');
+    expect(modelDisplayName('Gemini · Google AI Studio', 'gemini')).toBe('Gemini · Google AI Studio');
+  });
+
+  it('liest den historischen Gemini-Snapshot mit ungeprüfter Region und tatsächlicher Modell-ID', () => {
+    expect(messageModel({
+      model_snapshot: { display_name: 'Gemini · Testmodell', hosting_region: 'unverified', provider: 'gemini' },
+      provider_response_model: 'gemini-testmodell',
+    })).toEqual({
+      displayName: 'Gemini · Testmodell · Google AI Studio',
+      region: 'unverified',
+      responseModel: 'gemini-testmodell',
+    });
+  });
+
+  it('wechselt bei fehlendem oder deaktiviertem Standard nicht still zu einem anderen Anbieter', () => {
+    const s = createSeed({ modelOperational: true });
+    expect(effectiveModel({ model_override_id: 'nicht-im-katalog' }, s.settings, s.models)).toEqual({ usable: false, model: null, reason: 'none' });
+    s.models = s.models.map((m) => ({ ...m, enabled: false }));
+    expect(effectiveModel(null, s.settings, s.models)).toMatchObject({ usable: false, reason: 'disabled' });
+  });
+});

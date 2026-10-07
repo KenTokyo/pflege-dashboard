@@ -15,6 +15,7 @@ const names = [
   "OPENAI_API_KEY",
   "DEEPSEEK_API_KEY",
   "OPENCODE_API_KEY",
+  "GEMINI_API_KEY",
   "ALLOWED_ORIGINS",
   "HOST",
   "PORT",

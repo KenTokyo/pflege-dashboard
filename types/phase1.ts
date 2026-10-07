@@ -57,6 +57,10 @@ export type Phase1Code =
   | "RATE_LIMITED"
   | "PARALLEL_LIMIT"
   | "BUDGET_EXCEEDED"
+  | "PROVIDER_AUTH_FAILED"
+  | "PROVIDER_RATE_LIMITED"
+  | "PROVIDER_UNAVAILABLE"
+  | "PROVIDER_CONTENT_BLOCKED"
   | "PROVIDER_FAILED"
   | "INTERNAL_ERROR"
   | "REQUEST_ABORTED";
@@ -68,12 +72,44 @@ export type Phase1Error = {
 };
 export type ChatModel = {
   registryId: string;
-  provider: "openai" | "deepseek" | "opencode";
+  provider: "openai" | "deepseek" | "opencode" | "gemini";
   providerModelId: string;
   displayName: string;
   region: "eu" | "us" | "unverified";
 };
+export type ChatActivityDetails = {
+  operation?: string;
+  inputMessages?: number;
+  requestChars?: number;
+  maxOutputTokens?: number;
+  thinking?: "disabled" | "low" | "provider_default";
+  reasoningChunks?: number;
+  outputChars?: number;
+  replayed?: boolean;
+};
+export type ProviderActivity = {
+  stage: "token_count" | "provider_request" | "awaiting_text";
+  details?: ChatActivityDetails;
+};
+export type ChatActivity = {
+  stage:
+    | "auth_verified"
+    | "context_ready"
+    | "token_count"
+    | "provider_request"
+    | "awaiting_text"
+    | "streaming"
+    | "persisting";
+  at: string;
+  elapsedMs: number;
+  source:
+    "supabase_auth" | "supabase_sql_rpc" | "provider_http" | "provider_stream";
+  provider?: ChatModel["provider"];
+  modelId?: string;
+  details?: ChatActivityDetails;
+};
 type Data = {
+  "message.activity": ChatActivity;
   "message.started": {
     messageId: string;
     model: ChatModel;

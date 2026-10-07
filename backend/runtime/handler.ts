@@ -5,7 +5,10 @@ import {
   OpenAIProvider,
   OpenCodeProvider,
   type Provider,
+  type ActivityReporter,
 } from "./provider.js";
+import type { ChatActivity, ChatActivityDetails } from "../../types/phase1.js";
+import { GeminiProvider } from "./gemini.js";
 export type Dependencies = {
   env: Environment;
   platform: Platform;
@@ -68,6 +71,7 @@ export function sessionHandler(deps: Dependencies) {
 }
 export function chatHandler(deps: Dependencies) {
   return async (request: Request): Promise<Response> => {
+    const startedAt = Date.now();
     let id: string = crypto.randomUUID();
     let headers = new Headers({ "Cache-Control": "no-store" });
     try {
@@ -121,15 +125,17 @@ export function chatHandler(deps: Dependencies) {
         request.signal,
       );
       const key = deps.env("OPENAI_API_KEY");
+      const geminiKey = deps.env("GEMINI_API_KEY");
       const openCodeKey =
         deps.env("OPENCODE_API_KEY") ?? deps.env("DEEPSEEK_API_KEY");
-      if (!replay && !key && !openCodeKey && !deps.provider) {
+      if (!replay && !key && !openCodeKey && !geminiKey && !deps.provider) {
         throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
       }
       const prepared =
         replay ??
         (await deps.platform.rpc("edge_chat_prepare", payload, request.signal));
       const context = prepared.context as Context;
+      let reportActivity: ActivityReporter = async () => {};
       const provider =
         deps.provider ??
         (context.model.provider === "opencode"
@@ -146,10 +152,28 @@ export function chatHandler(deps: Dependencies) {
                 );
               },
               data.conversationId,
+              (activity) => reportActivity(activity),
             )
-          : context.model.provider === "openai"
-            ? new OpenAIProvider(key ?? "")
-            : undefined);
+          : context.model.provider === "gemini"
+            ? new GeminiProvider(
+                geminiKey ?? "",
+                fetch,
+                (diagnostic) => {
+                  console.warn(
+                    JSON.stringify({
+                      component: "gemini_provider",
+                      requestId: id,
+                      ...diagnostic,
+                    }),
+                  );
+                },
+                (activity) => reportActivity(activity),
+              )
+            : context.model.provider === "openai"
+              ? new OpenAIProvider(key ?? "", fetch, (activity) =>
+                  reportActivity(activity),
+                )
+              : undefined);
       const controller = new AbortController();
       let cancelled = false;
       let output = "";
@@ -272,11 +296,83 @@ export function chatHandler(deps: Dependencies) {
                 ),
               );
             };
+            const activity = async (
+              stage: ChatActivity["stage"],
+              source: ChatActivity["source"],
+              details: ChatActivityDetails = {},
+            ) => {
+              if (deps.provider) return; // Synthetic injected transports do not claim production HTTP stages.
+              // Construct fixed, bounded metadata. Never forward provider objects, text or headers.
+              const safe: ChatActivityDetails = {};
+              const operations = [
+                "edge_chat_replay",
+                "edge_chat_prepare",
+                "edge_chat_finish",
+                "gemini.countTokens",
+                "gemini.streamGenerateContent",
+                "openai.input_tokens",
+                "openai.responses",
+                "opencode.chat_completions",
+                "deepseek.chat_completions",
+              ];
+              if (details.operation && operations.includes(details.operation))
+                safe.operation = details.operation;
+              for (const key of [
+                "inputMessages",
+                "requestChars",
+                "maxOutputTokens",
+                "reasoningChunks",
+                "outputChars",
+              ] as const) {
+                const value = details[key];
+                if (
+                  typeof value === "number" &&
+                  Number.isSafeInteger(value) &&
+                  value >= 0
+                )
+                  safe[key] = value;
+              }
+              if (
+                details.thinking &&
+                ["disabled", "low", "provider_default"].includes(
+                  details.thinking,
+                )
+              )
+                safe.thinking = details.thinking;
+              if (typeof details.replayed === "boolean")
+                safe.replayed = details.replayed;
+              await send("message.activity", {
+                stage,
+                source,
+                at: new Date().toISOString(),
+                elapsedMs: Math.max(0, Date.now() - startedAt),
+                provider: context.model.provider,
+                modelId: context.model.providerModelId,
+                details: safe,
+              } satisfies ChatActivity);
+            };
+            reportActivity = (event) =>
+              activity(
+                event.stage,
+                event.details?.reasoningChunks
+                  ? "provider_stream"
+                  : "provider_http",
+                event.details,
+              );
             try {
               await send("message.started", {
                 messageId: prepared.messageId,
                 model: context.model,
                 promptVersionId: context.promptVersionId,
+                replayed: prepared.replayed,
+              });
+              await activity("auth_verified", "supabase_auth");
+              await activity("context_ready", "supabase_sql_rpc", {
+                operation: prepared.replayed
+                  ? "edge_chat_replay"
+                  : "edge_chat_prepare",
+                inputMessages: context.input.length,
+                requestChars: payload.p_content.length,
                 replayed: prepared.replayed,
               });
               if (prepared.replayed) {
@@ -296,6 +392,7 @@ export function chatHandler(deps: Dependencies) {
                 await liveCheck();
                 if (!provider)
                   throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
+                let textStarted = false;
                 for await (const part of provider.stream(
                   context,
                   controller.signal,
@@ -304,6 +401,12 @@ export function chatHandler(deps: Dependencies) {
                     throw abortedError();
                   }
                   if ("text" in part) {
+                    if (!textStarted && part.text) {
+                      textStarted = true;
+                      await activity("streaming", "provider_stream", {
+                        outputChars: part.text.length,
+                      });
+                    }
                     output += part.text;
                     if (output.length > 100000) {
                       throw new AppError("PROVIDER_FAILED", 502);
@@ -340,6 +443,10 @@ export function chatHandler(deps: Dependencies) {
                   throw abortedError();
                 }
                 await liveCheck();
+                await activity("persisting", "supabase_sql_rpc", {
+                  operation: "edge_chat_finish",
+                  outputChars: output.length,
+                });
                 const result = await final("completed");
                 if (result?.status !== "completed") {
                   throw new AppError("PROVIDER_FAILED", 502);

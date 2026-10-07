@@ -1,4 +1,6 @@
 import { AppError } from "./errors.js";
+import type { ProviderActivity } from "../../types/phase1.js";
+export type ActivityReporter = (activity: ProviderActivity) => Promise<void>;
 export type Context = {
   // New snapshots include trusted DB time; historical completed replays may predate it.
   serverNow?: string;
@@ -6,7 +8,7 @@ export type Context = {
   serverTimeZone?: "Europe/Berlin";
   model: {
     registryId: string;
-    provider: "openai" | "deepseek" | "opencode";
+    provider: "openai" | "deepseek" | "opencode" | "gemini";
     providerModelId: string;
     displayName: string;
     region: string;
@@ -16,6 +18,8 @@ export type Context = {
   instructions: string;
   input: { role: "user" | "assistant"; content: string }[];
   maxOutputTokens: number;
+  // Gemini may report thinking separately from visible candidate tokens.
+  outputTokenBound?: number;
   inputTokenBound: number;
   maximumCostMicrousd: number;
 };
@@ -73,6 +77,7 @@ export class OpenAIProvider implements Provider {
   constructor(
     private key: string,
     private fetcher: typeof fetch = fetch,
+    private activity: ActivityReporter = async () => {},
   ) {}
   async *stream(
     context: Context,
@@ -87,6 +92,13 @@ export class OpenAIProvider implements Provider {
       "Content-Type": "application/json",
       Authorization: `Bearer ${this.key}`,
     };
+    await this.activity({
+      stage: "token_count",
+      details: {
+        operation: "openai.input_tokens",
+        thinking: "provider_default",
+      },
+    });
     const count = await this.fetcher(
       "https://api.openai.com/v1/responses/input_tokens",
       {
@@ -107,6 +119,14 @@ export class OpenAIProvider implements Provider {
       throw new AppError("PRICING_UNVERIFIED", 503);
     }
     // Phase 1 never sends tools or tool_choice, even for create mode. No provider retries.
+    await this.activity({
+      stage: "provider_request",
+      details: {
+        operation: "openai.responses",
+        thinking: "provider_default",
+        maxOutputTokens: context.maxOutputTokens,
+      },
+    });
     const response = await this.fetcher("https://api.openai.com/v1/responses", {
       method: "POST",
       headers,
@@ -126,6 +146,10 @@ export class OpenAIProvider implements Provider {
     )
       throw new AppError("PROVIDER_FAILED", 502);
     let finished = false;
+    await this.activity({
+      stage: "awaiting_text",
+      details: { thinking: "provider_default" },
+    });
     for await (const data of sseData(response.body, signal)) {
       if (data === "[DONE]") continue;
       let event: any;
@@ -394,6 +418,7 @@ export class DeepSeekProvider implements Provider {
     private report: (diagnostic: DeepSeekDiagnostic) => void = () => {},
     private provider: "deepseek" | "opencode" = "deepseek",
     private conversationId?: string,
+    private activity: ActivityReporter = async () => {},
   ) {}
   private fail(
     reason: DeepSeekDiagnostic["reason"],
@@ -414,6 +439,17 @@ export class DeepSeekProvider implements Provider {
     if (context.model.provider !== this.provider || !this.key)
       throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
     let response: Response;
+    await this.activity({
+      stage: "provider_request",
+      details: {
+        operation:
+          this.provider === "opencode"
+            ? "opencode.chat_completions"
+            : "deepseek.chat_completions",
+        thinking: "disabled",
+        maxOutputTokens: context.maxOutputTokens,
+      },
+    });
     try {
       response = await this.fetcher(
         this.provider === "opencode"
@@ -476,7 +512,12 @@ export class DeepSeekProvider implements Provider {
       done = false,
       observed: string | undefined,
       consistent = true;
+    await this.activity({
+      stage: "awaiting_text",
+      details: { thinking: "disabled" },
+    });
     let finishReason: string | undefined;
+    let reasoningChunks = 0;
     let invalidTerminalReason: DeepSeekDiagnostic["reason"] | undefined;
     let terminalText = "";
     let confirmedUsage:
@@ -656,6 +697,15 @@ export class DeepSeekProvider implements Provider {
       if (!usageOnly && (event.choices.length !== 1 || choice?.index !== 0))
         this.fail("CHOICE_SHAPE", metadata);
       const delta = choice?.delta;
+      if (
+        typeof delta?.reasoning_content === "string" &&
+        delta.reasoning_content
+      ) {
+        await this.activity({
+          stage: "awaiting_text",
+          details: { thinking: "disabled", reasoningChunks: ++reasoningChunks },
+        });
+      }
       const ending =
         usageOnly ||
         (choice.finish_reason !== null && choice.finish_reason !== undefined);
@@ -765,7 +815,8 @@ export class OpenCodeProvider extends DeepSeekProvider {
     fetcher: typeof fetch = fetch,
     report: (diagnostic: DeepSeekDiagnostic) => void = () => {},
     conversationId?: string,
+    activity: ActivityReporter = async () => {},
   ) {
-    super(key, fetcher, report, "opencode", conversationId);
+    super(key, fetcher, report, "opencode", conversationId, activity);
   }
 }

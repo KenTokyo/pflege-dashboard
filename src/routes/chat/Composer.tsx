@@ -1,8 +1,9 @@
-import { ArrowUp, MessageSquareText, ShieldCheck, Square } from 'lucide-react';
+import { ArrowUp, MessageSquareText, Mic, MicOff, ShieldCheck, Square } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 
 import { QuestionExamplesDialog } from './QuestionExamplesDialog';
 import { appendQuestion } from './questionExamples';
+import { useSpeechInput } from '../../chat/useSpeechInput';
 
 export const MAX_MESSAGE = 8000;
 
@@ -23,7 +24,8 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = inputRef ?? localRef;
   const tooLong = value.length > MAX_MESSAGE;
-  const canSend = !streaming && !blockedReason && value.trim().length > 0 && !tooLong;
+  const speech = useSpeechInput(value, onChange, streaming || Boolean(blockedReason) || examplesOpen);
+  const canSend = !streaming && !blockedReason && !speech.active && value.trim().length > 0 && !tooLong;
 
   // Höhe an den Inhalt anpassen (bis max-height), nur bei Eingabe.
   useLayoutEffect(() => {
@@ -57,7 +59,25 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
           <MessageSquareText className="i" size={16} aria-hidden="true" />
           Was kann ich fragen?
         </button>
+        <button
+          type="button"
+          className={`icon-btn speech-button ${speech.active ? 'is-recording' : ''}`}
+          onClick={() => speech.active ? speech.stop() : speech.start()}
+          disabled={!speech.supported || streaming || Boolean(blockedReason) || examplesOpen}
+          aria-label={speech.active ? 'Spracheingabe beenden' : 'Spracheingabe starten'}
+          aria-pressed={speech.active}
+          title={!speech.supported ? 'Dieser Browser bietet keine Spracheingabe an. Bitte Frage eintippen.' : speech.active ? 'Aufnahme beenden und Text prüfen' : 'Frage diktieren, vor dem Senden prüfen'}
+        >
+          {speech.active ? <MicOff className="i" size={17} aria-hidden="true" /> : <Mic className="i" size={17} aria-hidden="true" />}
+        </button>
       </div>
+      {speech.status || speech.error || speech.interim ? (
+        <div className={`speech-status ${speech.error ? 'is-error' : ''}`} role={speech.error ? 'alert' : 'status'}>
+          <span>{speech.error ?? speech.status}</span>
+          {speech.interim ? <span className="speech-interim">{speech.interim}</span> : null}
+          {speech.active ? <span className="small muted">Spracherkennung über Ihren Browser. Prüfen Sie den Text vor dem Senden.</span> : null}
+        </div>
+      ) : null}
       {examplesOpen ? (
         <QuestionExamplesDialog
           personName={personName}

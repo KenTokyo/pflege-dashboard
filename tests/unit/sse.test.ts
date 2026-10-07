@@ -152,6 +152,36 @@ describe('Chat-Transport', () => {
     expect(events).toHaveLength(0);
   });
 
+  it.each([
+    ['PROVIDER_AUTH_FAILED', 502, false, /Zugangsschlüssel abgelehnt/],
+    ['PROVIDER_RATE_LIMITED', 429, true, /Anfragegrenze des KI-Anbieters/],
+    ['PROVIDER_UNAVAILABLE', 503, true, /gerade nicht erreichbar/],
+    ['PROVIDER_CONTENT_BLOCKED', 422, false, /keine Antwort freigegeben/],
+  ] as const)('%s bleibt als HTTP- und Streamfehler verständlich und ohne Anbieterdetails erhalten', async (code, status, retryable, text) => {
+    const data = { code, message: 'secret-provider-debug', requestId: REQ, retryable };
+    const http = await run(new Response(JSON.stringify({ error: data }), { status }));
+    expect(http.error).toMatchObject({ code, requestId: REQ, retryable });
+    expect((http.error as AppError).message).toMatch(text);
+    expect((http.error as AppError).message).not.toContain('secret-provider-debug');
+    expect(http.events).toHaveLength(0);
+    const stream = await run(sseResponse([started, delta(2, 'Teilantwort'), frame(3, 'error', data)]));
+    expect(stream.error).toMatchObject({ code, requestId: REQ, retryable });
+    expect((stream.error as AppError).message).toMatch(text);
+    expect(stream.events.map((e) => e.type)).toEqual(['message.started', 'message.delta']);
+    expect(stream.fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('Gemini-Stream behält Google-Modellkennung und ungeprüfte Region; der Browser ruft nur /api auf', async () => {
+    const geminiModel = { ...model, provider: 'gemini', providerModelId: 'gemini-testmodell', displayName: 'Gemini · Testmodell' };
+    const begin = frame(1, 'message.started', { messageId: 'a', model: geminiModel, promptVersionId: 'p', replayed: false });
+    const { error, events, fetchImpl } = await run(sseResponse([begin, delta(2, 'Antwort'), completed(3)]));
+    expect(error).toBeNull();
+    expect(events[0]).toMatchObject({ type: 'message.started', data: { model: geminiModel } });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const [url] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('/api/chat-stream');
+  });
+
   it('unbekannter Endpunkt (404 ohne JSON) wird NOT_DEPLOYED', async () => {
     const { error } = await run(new Response('not found', { status: 404 }));
     expect((error as AppError).code).toBe('NOT_DEPLOYED');

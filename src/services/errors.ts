@@ -28,6 +28,10 @@ const MESSAGES: Record<AppErrorCode, string> = {
   REQUEST_ABORTED: 'Die Antwort wurde abgebrochen.',
   MODEL_UNAVAILABLE: 'Das KI-Modell ist derzeit nicht eingerichtet oder nicht verfügbar.',
   PROVIDER_NOT_CONFIGURED: 'Der KI-Anbieter ist auf dem Server noch nicht eingerichtet. Es wird keine Antwort erzeugt.',
+  PROVIDER_AUTH_FAILED: 'Der KI-Anbieter hat den Zugangsschlüssel abgelehnt. Die Verwaltung muss den Zugang prüfen.',
+  PROVIDER_RATE_LIMITED: 'Die Anfragegrenze des KI-Anbieters ist erreicht. Bitte versuchen Sie es später erneut.',
+  PROVIDER_UNAVAILABLE: 'Der KI-Anbieter ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.',
+  PROVIDER_CONTENT_BLOCKED: 'Der KI-Anbieter hat für diese Anfrage keine Antwort freigegeben. Bitte formulieren Sie Ihre Frage anders.',
   RATE_LIMITED: 'Zu viele Anfragen in kurzer Zeit. Bitte warten Sie einen Moment.',
   PARALLEL_LIMIT: 'Es laufen bereits zu viele Antworten gleichzeitig. Bitte warten Sie, bis eine fertig ist.',
   BUDGET_EXCEEDED: 'Das KI-Budget dieses Arbeitsbereichs ist ausgeschöpft oder noch nicht freigegeben.',
@@ -44,7 +48,10 @@ const MESSAGES: Record<AppErrorCode, string> = {
   NO_MODEL: 'Für diesen Arbeitsbereich ist noch kein KI-Modell eingerichtet.',
 };
 
-const RETRYABLE = new Set<AppErrorCode>(['NETWORK', 'PROVIDER_FAILED', 'INTERNAL_ERROR', 'RATE_LIMITED', 'PARALLEL_LIMIT', 'PROTOCOL']);
+const RETRYABLE = new Set<AppErrorCode>([
+  'NETWORK', 'PROVIDER_FAILED', 'PROVIDER_RATE_LIMITED', 'PROVIDER_UNAVAILABLE',
+  'INTERNAL_ERROR', 'RATE_LIMITED', 'PARALLEL_LIMIT', 'PROTOCOL',
+]);
 
 export class AppError extends Error {
   readonly code: AppErrorCode;

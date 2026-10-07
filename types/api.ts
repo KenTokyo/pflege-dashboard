@@ -9,7 +9,8 @@ export type {
 export type ProposalKind = "document" | "task" | "note" | "handover";
 export type ModelSnapshot = {
   registryId: UUID;
-  provider: "openai" | "anthropic" | "mistral" | "deepseek" | "opencode";
+  provider:
+    "openai" | "anthropic" | "mistral" | "deepseek" | "opencode" | "gemini";
   providerModelId: string;
   displayName: string;
   region: "eu" | "us" | "unverified";
@@ -72,6 +73,10 @@ export type ApiErrorCode =
   | "UPLOAD_REJECTED"
   | "RATE_LIMITED"
   | "BUDGET_EXCEEDED"
+  | "PROVIDER_AUTH_FAILED"
+  | "PROVIDER_RATE_LIMITED"
+  | "PROVIDER_UNAVAILABLE"
+  | "PROVIDER_CONTENT_BLOCKED"
   | "PROVIDER_FAILED"
   | "PRICING_UNVERIFIED"
   | "INTERNAL_ERROR";

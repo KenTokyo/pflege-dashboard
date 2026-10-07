@@ -7,7 +7,7 @@ import { usePendingTurn, useStreamStore } from '../../chat/ChatStreamContext';
 import { takeDraftHandoff } from '../../chat/draftHandoff';
 import { EmptyState, ErrorState, Loading } from '../../components/States';
 import { effectiveModel } from '../../data/model';
-import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels } from '../../data/queries';
+import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels, useSetConversationModel } from '../../data/queries';
 import { messageFor } from '../../services/errors';
 import type { CareRecipient, MessageRow } from '../../services/types';
 import { Composer } from './Composer';
@@ -26,6 +26,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   const settings = useAgentSettings();
   const models = useModels();
   const restore = useArchiveConversation();
+  const changeModel = useSetConversationModel();
   const turn = usePendingTurn(conversationId);
   const [draft, setDraft] = useState('');
   const scroller = useRef<HTMLDivElement>(null);
@@ -40,6 +41,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
 
   let blockedReason: string | null = null;
   if (archived) blockedReason = 'Dieses Gespräch ist archiviert. Zum Weiterschreiben bitte wiederherstellen.';
+  else if (changeModel.isPending) blockedReason = 'Das Modell wird geändert. Bitte warten Sie einen Moment.';
   else if (model && !model.usable) blockedReason = `${messageFor('NO_MODEL')} Die Verwaltung muss ein geprüftes Modell freigeben.`;
 
   // Übergabe vom Dashboard: Frage nur im Speicher, einmalig senden.
@@ -69,8 +71,8 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   const history =
     requestId !== null && !assistantFinal ? stored.filter((m) => !(m.role === 'assistant' && m.client_request_id === requestId)) : stored;
   useEffect(() => {
-    if (turn?.phase === 'completed' && assistantFinal) store.dismiss(conversationId);
-  }, [turn?.phase, assistantFinal, store, conversationId]);
+    if (turn?.phase === 'completed' && assistantFinal && turn.activity.length === 0) store.dismiss(conversationId);
+  }, [turn?.phase, turn?.activity.length, assistantFinal, store, conversationId]);
 
   // Am Ende des Verlaufs bleiben, solange der Nutzer nicht hochgescrollt hat.
   useLayoutEffect(() => {
@@ -115,7 +117,18 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
 
   return (
     <section className="thread" aria-label={`Gespräch: ${conv.title}`}>
-      <ThreadHead conversation={conv} people={people} mode={mode} model={model} busy={live} />
+      <ThreadHead
+        conversation={conv}
+        people={people}
+        mode={mode}
+        model={model}
+        models={models.data ?? []}
+        defaultModelId={settings.data?.version.default_model_id ?? null}
+        busy={live || changeModel.isPending}
+        changingModel={changeModel.isPending}
+        modelError={changeModel.error}
+        onModelChange={(modelId) => changeModel.mutate({ conversation: conv, modelId })}
+      />
       <div
         ref={scroller}
         className="messages"
@@ -147,6 +160,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
         {turn ? (
           <PendingTurnView
             turn={turn}
+            actionsDisabled={changeModel.isPending}
             showUser={!userStored}
             showAssistant={!assistantFinal}
             onFetchAgain={() => store.fetchAgain(conversationId)}

@@ -14,6 +14,7 @@ import { App } from '../../src/app/App';
 import type { Clock } from '../../src/auth/activity';
 import { createFakeBackend, type ChatScript, type FakeOptions } from '../support/fakeBackend';
 import { emptyWorkspace, longContent } from '../support/scenarios';
+import { staffScenario } from '../support/staffScenario';
 
 const params = new URLSearchParams(location.search);
 const szenario = params.get('szenario') ?? 'seed';
@@ -44,6 +45,7 @@ const SZENARIEN: Record<string, FakeOptions> = {
   // Randfälle: lange Inhalte, leerer Bestand, sehr langsame Antwort (zum Abbrechen).
   lang: { modelOperational: true, tickMs: 60, chat: () => ANSWER, extend: (s) => longContent(s) },
   leer: { extend: emptyWorkspace },
+  staff: { modelOperational: true, role: 'member', extend: staffScenario },
   langsam: { modelOperational: true, tickMs: 4000, chat: () => ANSWER },
 };
 

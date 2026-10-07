@@ -54,7 +54,8 @@ const PATTERNS = [
   [/service_role/, 'service_role'],
   [/postgres(ql)?:\/\/[^\s"'`]+/, 'Datenbank-URL'],
   [/\bsk-(proj-|ant-)?[A-Za-z0-9_-]{20,}/, 'Provider-API-Key'],
-  [/OPENAI_API_KEY|ANTHROPIC_API_KEY|SUPABASE_SERVICE_ROLE|SUPABASE_DB_PASSWORD|DATABASE_URL/, 'Server-Variablenname'],
+  [/AIza[A-Za-z0-9_-]{30,}/, 'Google-API-Key'],
+  [/OPENAI_API_KEY|ANTHROPIC_API_KEY|DEEPSEEK_API_KEY|OPENCODE_API_KEY|OPENCODE_GO_API_KEY|GEMINI_API_KEY|GOOGLE_API_KEY|SUPABASE_SERVICE_ROLE|SUPABASE_DB_PASSWORD|DATABASE_URL/, 'Server-Variablenname'],
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, 'privater Schlüssel'],
 ];
 for (const { f, s } of text) for (const [re, label] of PATTERNS) if (re.test(s)) problems.push(`${label} in ${f}`);

@@ -7,6 +7,7 @@ import type {
   SessionResult,
 } from '../../types/phase1';
 import type { UpdateAgentSettingsArgs } from '../../types/rpc';
+import type { StaffOverview } from '../../types/staff';
 import type { AppError } from './errors';
 
 type Tables = Database['public']['Tables'];
@@ -76,6 +77,7 @@ export type ReadOptions = { signal?: AbortSignal };
 
 /** Alle Listen werden vollständig geladen (seitenweise), nie still gekürzt. */
 export interface DataPort {
+  getStaffOverview(workspaceId: string, options?: ReadOptions): Promise<StaffOverview>;
   loadWorkspace(userId: string): Promise<WorkspaceContext | null>;
   listCareRecipients(workspaceId: string, options?: ReadOptions): Promise<CareRecipient[]>;
   listOpenTasks(workspaceId: string, options?: ReadOptions): Promise<TaskRow[]>;
@@ -88,6 +90,7 @@ export interface DataPort {
   getDefaultPrompt(workspaceId: string, options?: ReadOptions): Promise<PromptVersionRow | null>;
   renameConversation(conversationId: string, title: string, expectedRevision: number): Promise<ConversationRow>;
   setConversationArchived(conversation: ConversationRow, archived: boolean): Promise<ConversationRow>;
+  setConversationModel(conversation: ConversationRow, modelId: string | null): Promise<ConversationRow>;
   createConversation(args: CreateConversationArgs): Promise<ConversationRow>;
   assignConversationRecipient(args: AssignConversationRecipientArgs): Promise<ConversationRow>;
   markDocumentStatus(documentId: string, status: Enums['document_status'], expectedRevision: number): Promise<DocumentRow>;

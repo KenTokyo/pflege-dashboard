@@ -6,11 +6,13 @@ import { baseName } from '../../lib/format';
 import type { CareRecipient } from '../../services/types';
 
 /** Natives <dialog>: Fokus bleibt im Dialog, Escape schließt. Unter 760 px Vollbild. */
-export function NewConversationDialog({ open, onClose, people }: { open: boolean; onClose: () => void; people: CareRecipient[] }) {
+export function NewConversationDialog({ open, onClose, people, initialRecipientId = null }: { open: boolean; onClose: () => void; people: CareRecipient[]; initialRecipientId?: string | null }) {
   const ref = useRef<HTMLDialogElement>(null);
   const { start, pending, error, reset } = useStartConversation();
   const [title, setTitle] = useState('');
-  const [personId, setPersonId] = useState('');
+  const [personId, setPersonId] = useState<string | null>(null);
+  const preferredPersonId = personId ?? initialRecipientId ?? '';
+  const selectedPersonId = people.some((p) => p.id === preferredPersonId) ? preferredPersonId : '';
 
   useEffect(() => {
     const dialog = ref.current;
@@ -22,7 +24,7 @@ export function NewConversationDialog({ open, onClose, people }: { open: boolean
   const close = () => {
     reset();
     setTitle('');
-    setPersonId('');
+    setPersonId(null);
     onClose();
   };
 
@@ -31,7 +33,7 @@ export function NewConversationDialog({ open, onClose, people }: { open: boolean
     e.preventDefault();
     if (!trimmed || trimmed.length > 120 || pending) return;
     try {
-      await start({ title: trimmed, careRecipientId: personId || null });
+      await start({ title: trimmed, careRecipientId: selectedPersonId || null });
       close();
     } catch {
       // Fehler wird im Dialog angezeigt.
@@ -65,7 +67,7 @@ export function NewConversationDialog({ open, onClose, people }: { open: boolean
           <div className="field">
             <label htmlFor="new-conv-person">Bezug zu einer Person</label>
             <div className="input">
-              <select id="new-conv-person" value={personId} onChange={(e) => setPersonId(e.target.value)}>
+              <select id="new-conv-person" value={selectedPersonId} onChange={(e) => setPersonId(e.target.value)}>
                 <option value="">Allgemein (ohne Person)</option>
                 {people.map((p) => (
                   <option key={p.id} value={p.id}>

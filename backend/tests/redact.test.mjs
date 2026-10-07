@@ -11,6 +11,9 @@ describe('Secret-safe local logs',()=>{
   });
   it('removes provider/API access keys',()=>{
     expect(redact('sk-ant-syntheticfixture sbp_syntheticfixture')).not.toContain('syntheticfixture');
+    expect(redact('request AIzaSyntheticFixture01234567890 response')).not.toContain('AIzaSyntheticFixture01234567890');
+    expect(redact('request AQ.SyntheticFixture0123456789012 response')).not.toContain('AQ.SyntheticFixture0123456789012');
+    expect(redact('GEMINI_API_KEY=opaque-synthetic-value')).not.toContain('opaque-synthetic-value');
   });
   it('redacts database password while keeping enough context',()=>{
     const out=redact('postgresql://postgres:synthetic-db-password@127.0.0.1:56422/postgres');
