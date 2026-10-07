@@ -127,7 +127,7 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
             <option value="">Allgemein</option>
             {people.map((p) => (
               <option key={p.id} value={p.id}>
-                {baseName(p.name)} · Pflegegrad {p.care_grade}
+                {baseName(p.name)} · {p.care_grade === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${p.care_grade}`}
               </option>
             ))}
           </select>

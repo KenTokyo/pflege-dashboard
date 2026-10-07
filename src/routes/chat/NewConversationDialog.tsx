@@ -71,7 +71,7 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
                 <option value="">Allgemein (ohne Person)</option>
                 {people.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {baseName(p.name)} · Pflegegrad {p.care_grade}
+                    {baseName(p.name)} · {p.care_grade === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${p.care_grade}`}
                   </option>
                 ))}
               </select>

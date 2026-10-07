@@ -6,7 +6,7 @@ Stand 07.10.2026. Ergänzung des ausdrücklich erweiterten [Demoauftrags](tasks/
 
 ## Referenz und Gestaltung vor der Umsetzung
 
-Gelesen: aktuelle `src/components/Shell.tsx`, `src/routes/DashboardPage.tsx`, `src/routes/chat/NewConversationDialog.tsx`, `src/styles/tokens.css`, `src/styles/app.css`. Gesehen: `docs/mocks/tagwerk/phase1-randfaelle/vorher/lang-dashboard-breit-hell.png` (1280×720). Das ist eine bestehende Referenz, kein Nachweis der neuen Ansicht.
+Gelesen: aktuelle `src/components/Shell.tsx`, `src/routes/DashboardPage.tsx`, `src/routes/chat/NewConversationDialog.tsx`, `src/styles/tokens.css`, `src/styles/app.css`. Gesehen: `docs/mocks/tagwerk/phase1-randfaelle/vorher/lang-dashboard-breit-hell.png` (1280 × 720). Das ist eine bestehende Referenz, kein Nachweis der neuen Ansicht.
 
 Referenz [OpenUI](https://www.openui.com/), am 07.10.2026 gelesen: eigene vordefinierte Komponenten mit aktuellen Daten verbinden; keine freie Codeausführung. Die Umsetzung heißt ausdrücklich **Filteranfrage**. Ein kleiner lokaler Parser setzt Person, Ansicht und Sortierung; er ist kein generatives Modell. Die echte KI bleibt über „KI fragen“ erreichbar. Keine Installation eines zusätzlichen UI-Frameworks.
 
@@ -21,8 +21,8 @@ Tagwerk beibehalten: Bricolage Grotesque für Titel, Atkinson Hyperlegible Next 
 - [x] Filteranfrage erzeugt nur unterstützte feste Ansichten und zeigt die erkannte Auswahl; unbekannte/mehrdeutige Personen ergeben eine verständliche Meldung.
 - [x] „Fall öffnen“ zeigt gespeicherte Angaben, Aufgaben, Dokumente und Gespräche; „KI fragen“ öffnet den echten Gesprächsdialog mit dieser Person, ohne automatische Anfrage.
 - [x] Lade-, Leer-, Fehler- und laufende Aktualisierungszustände; Fehler werden nie als Null ausgegeben.
-- [ ] Tastaturbedienung, sichtbarer Fokus, Escape/Fokusrückkehr in Dialogen, keine verschachtelten interaktiven Elemente.
-- [ ] 390px, 768px und 1280×720, beide Themes, langer Name, keine waagerechten Überläufe; andere Akzentfarbe erhalten.
+- [x] Tastaturbedienung, sichtbarer Fokus, Escape/Fokusrückkehr in Dialogen, keine verschachtelten interaktiven Elemente.
+- [x] 390px, 768px und 1280 × 720, beide Themes, langer Name, keine waagerechten Überläufe; andere Akzentfarbe erhalten.
 - [x] Abmeldung verwirft Daten; kein Polling oder dauernde Animation; keine eigenen Browser/Server gestartet, Prüfprozesse beendet.
 
 ## Prüfstand
@@ -44,7 +44,7 @@ Die Filteranfrage ist standardmäßig eingeklappt, damit Fallliste und Fristen a
 
 Browserabnahme liegt beim Orchestrator; dieser Agent hat keinen Browser gestartet. Vorbereitetes Szenario: `/sachbearbeitung?szenario=staff` im bestehenden Vite-Harness (`vite.harness.config.ts`). Es enthält sechs rein synthetische Personen, zwölf Aufgaben, einen sehr langen Namen, Null-KI-Nutzung und eine normale Mitgliedrolle. Die Datei `tests/support/staffScenario.ts` gelangt nie in den Produkt-Build. Anmelden über den vorhandenen synthetischen Harness-Zugang; kein echtes Konto. Alternativ `szenario=leer` und `szenario=lang`.
 
-Noch wirklich zu sehen: 390px, 768px, 1280×720; hell/dunkel/abweichender Akzent; nativer Dialog mit Fokusfalle und Fokusrückkehr; auf-/zugeklappte Filteranfrage, lange Namen, keine Überläufe; echte Vercel-Daten plus Fall-/Chat-Einstieg. JSDOM emuliert keinen Browser-Top-Layer und meldet sein nicht implementiertes `scrollTo`; Tests belegen daher keine visuelle Endabnahme.
+Noch wirklich zu sehen: 390px, 768px, 1280 × 720; hell/dunkel/abweichender Akzent; nativer Dialog mit Fokusfalle und Fokusrückkehr; auf-/zugeklappte Filteranfrage, lange Namen, keine Überläufe; echte Vercel-Daten plus Fall-/Chat-Einstieg. JSDOM emuliert keinen Browser-Top-Layer und meldet sein nicht implementiertes `scrollTo`; Tests belegen daher keine visuelle Endabnahme.
 
 Bewertung vor/nach: Funktion vorher nicht vorhanden; Logik und DOM-Vertrag nach Nacharbeit **9/10 im geprüften Umfang**. Visuelle Qualität für Übersicht, Filteranfrage und Fall-/Gesprächsfluss **noch nicht bewertet**, bis der Orchestrator die echten Bilder prüft. Keine unbesehen behauptete 9/10.
 
@@ -57,3 +57,7 @@ Bewertung vor/nach: Funktion vorher nicht vorhanden; Logik und DOM-Vertrag nach 
 | Niedrig | `src/styles/staff.css` | Neue Interaktionszustände fehlten | Benannte 150ms-Übergänge, scale(0.96) bei Druck, reduzierte Bewegung statisch | Unterbrechbare kurze Rückmeldung |
 
 Quellzustände geprüft: Standard, Fokus, Hover/Pressed, Lade-/Leer-/Fehlerstatus, reduzierte Bewegung. **Approve für Quell-/DOM-Umfang. Not verified: Browserdarstellung, native Fokusfalle, Live-RPC.**
+
+## Unabhängige Root-Abnahme
+
+91 Browserprüfungen bei 390 / 768 / 1280 × 720 in beiden Themes mit sechs synthetischen Fällen bestanden. Alle acht Layoutbilder einzeln geprüft; Ansicht/Fall-Dialog jeweils 9/10. Anschließend echte Vercel-Abnahme mit bestehendem normalem Mitglied und tatsächlichen Supabase-Daten: sechs Fälle, zwölf Aufgaben; Nora öffnen, direktes KI-Gespräch, zwei DeepSeek-Antworten und bewusst gewählte Gemini-Antwort erfolgreich. Filteranfrage zu Nora, Rücksetzen und beide Themes live geprüft. Kennzahlen aktualisieren auf tatsächlich acht erfolgreiche Aufrufe nach zusätzlichem lokalen Gemini-Test. Keine Rollenänderung, keine erfundene Nutzung. Abmeldung/Datenverwerfen durch bestehende automatisierte Authprüfungen belegt; menschlichen Browser nicht zur erneuten Passworteingabe abgemeldet. Einzelbelege und Restgrenzen stehen im [Root-Gate](gates/2026-10-07-demo-ausbau.md).
