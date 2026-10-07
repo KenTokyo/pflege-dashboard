@@ -22,6 +22,22 @@ describe('Echte gemeldete Ablaufdaten', () => {
     expect(event.data).toMatchObject({ stage: 'awaiting_text', details: { thinking: 'disabled', reasoningChunks: 4 } });
   });
 
+  it.each(['text', 'openui'] as const)('erhält erlaubtes Antwortformat %s und die bekannte Katalogversion im bereinigten Ablauf', (responseFormat) => {
+    const data: ChatActivity = { ...trace, details: { ...trace.details, responseFormat, catalogVersion: 'pflege-openui-v1' } };
+    const event = parseChatEvent({ event: 'message.activity', data: JSON.stringify({ version: 1, type: 'message.activity', sequence: 1, requestId: 'r', conversationId: 'c', data }) }, 'c');
+    expect(event.data).toMatchObject({ details: { responseFormat, catalogVersion: 'pflege-openui-v1' } });
+    const { container } = render(<ActivityView activity={[data]} />);
+    expect(container.querySelector('pre')?.textContent).toContain(`"responseFormat": "${responseFormat}"`);
+    expect(container.querySelector('pre')?.textContent).toContain('"catalogVersion": "pflege-openui-v1"');
+  });
+
+  it('verwirft unbekannte Format- und Katalogwerte weiterhin ohne andere echte Metadaten zu verlieren', () => {
+    const parsed = parseActivity({ ...trace, details: { ...trace.details, responseFormat: 'arbitrary-format', catalogVersion: 'foreign-catalog' } });
+    expect(parsed?.details).toEqual(trace.details);
+    expect(JSON.stringify(parsed)).not.toContain('arbitrary-format');
+    expect(JSON.stringify(parsed)).not.toContain('foreign-catalog');
+  });
+
   it.each([
     { ...trace, stage: 'fake_mcp_call' },
     { ...trace, source: 'not-a-source' },

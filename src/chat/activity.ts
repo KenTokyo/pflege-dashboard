@@ -1,4 +1,5 @@
 import type { ChatActivity, ChatActivityDetails } from '../../types/phase1';
+import { OPENUI_CATALOG_VERSION } from '../../types/openui';
 
 const STAGES = new Set(['auth_verified', 'context_ready', 'token_count', 'provider_request', 'awaiting_text', 'streaming', 'persisting']);
 const SOURCES = new Set(['supabase_auth', 'supabase_sql_rpc', 'provider_http', 'provider_stream']);
@@ -18,6 +19,8 @@ export function parseActivity(value: unknown): ChatActivity | null {
     }
     if (value.details.thinking === 'disabled' || value.details.thinking === 'low' || value.details.thinking === 'provider_default') details.thinking = value.details.thinking;
     if (typeof value.details.replayed === 'boolean') details.replayed = value.details.replayed;
+    if (value.details.responseFormat === 'text' || value.details.responseFormat === 'openui') details.responseFormat = value.details.responseFormat;
+    if (value.details.catalogVersion === OPENUI_CATALOG_VERSION) details.catalogVersion = OPENUI_CATALOG_VERSION;
   }
   return {
     stage: value.stage as ChatActivity['stage'],

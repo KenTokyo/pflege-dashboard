@@ -35,5 +35,5 @@ Ziel: Auf der bestehenden Vercel-URL vorführbar.
 
 - [x] Passende Node-/Vertrags-/Sicherheitsprüfungen, Build und Bundlecheck.
 - [x] Dark/Light, 390/768/1280px, Tastatur, lange Inhalte, beide Einstiegspfade; keine eigenen dauerhaften Prüfprozesse.
-- [ ] Geprüfte Änderungen gezielt committen/pushen, Deployment prüfen.
-- [ ] Echter Live-Chat mit Komponenten, Textwechsel und Reload; ehrliche Grenzen dokumentieren.
+- [x] Geprüfte Änderungen gezielt committen/pushen, Deployment prüfen.
+- [x] Echter Live-Chat mit Komponenten, Textwechsel und Reload; ehrliche Grenzen dokumentieren.
