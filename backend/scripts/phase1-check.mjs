@@ -100,12 +100,12 @@ try {
     await step("scripts/gemini-setup-check.mjs");
     await step("scripts/concurrency.mjs");
     await step("scripts/phase1-concurrency.mjs");
-    await step("node_modules/typescript/bin/tsc", ["-p", "tsconfig.build.json"]);
+    await step("node_modules/tsc-rs/bin/tsc-rs", ["-p", "tsconfig.build.json"]);
     await step("scripts/node-smoke.mjs");
     await step("scripts/node-database-check.mjs");
     await step("scripts/supabase-safe.mjs", ["types"]);
     await step("scripts/schema-baseline.mjs");
-    await step("node_modules/typescript/bin/tsc", ["--noEmit"]);
+    await step("node_modules/tsc-rs/bin/tsc-rs", ["--noEmit"]);
     await step("node_modules/vitest/vitest.mjs", [
       "run",
       "--reporter=default",

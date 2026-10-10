@@ -35,7 +35,7 @@ try{
     await step('scripts/supabase-safe.mjs',['test']);
     await step('scripts/concurrency.mjs');
     await step('scripts/supabase-safe.mjs',['types']);
-    await step('node_modules/typescript/bin/tsc',['--noEmit']);
+    await step('node_modules/tsc-rs/bin/tsc-rs',['--noEmit']);
     await step('node_modules/vitest/vitest.mjs',['run','--reporter=default','--reporter=json','--outputFile=.local/vitest-result.json']);
   }
 }catch(error){failure=error;}finally{

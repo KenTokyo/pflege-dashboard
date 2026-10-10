@@ -10,10 +10,10 @@
   "scripts": {
     "dev": "node tools/dev.mjs",
     "dev:web": "vite",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "build": "tsc-rs -p tsconfig.json --noEmit && vite build",
     "start": "node tools/start.mjs",
     "preview": "npm run build && node tools/start.mjs",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc-rs -p tsconfig.json --noEmit",
     "lint": "eslint --max-warnings=0 .",
     "test": "vitest run",
     "check:bundle": "node tools/check-bundle.mjs",
@@ -23,7 +23,8 @@
     "check": "npm run typecheck && npm run lint && npm run test && npm run build && npm run check:bundle && npm run check:source && npm run check:proxy && npm run check:dev",
     "shots": "node tools/shots.mjs",
     "shots:randfaelle": "node tools/edge-shots.mjs",
-    "shots:echt": "node tools/real-app-shots.mjs"
+    "shots:echt": "node tools/real-app-shots.mjs",
+    "typecheck:legacy": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",
@@ -59,6 +60,7 @@
     "jsdom": "30.1.2",
     "playwright-core": "1.63.0",
     "tailwindcss": "4.3.3",
+    "tsc-rs": "0.2.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.1",
     "vite": "8.3.3",

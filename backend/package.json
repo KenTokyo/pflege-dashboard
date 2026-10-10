@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "check:phase0": "node scripts/phase0-check.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc-rs --noEmit",
     "test": "vitest run",
     "supabase:start": "node scripts/supabase-safe.mjs start",
     "supabase:status": "node scripts/supabase-safe.mjs status",
@@ -15,15 +15,17 @@
     "check:phase1": "node scripts/phase1-check.mjs",
     "hosted:inspect": "node scripts/hosted-schema.mjs inspect",
     "hosted:apply": "node scripts/hosted-schema.mjs apply",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc-rs -p tsconfig.build.json",
     "serve": "npm run build && node .local/build/backend/runtime/index.js",
-    "smoke:node": "npm run build && node scripts/node-smoke.mjs --hosted"
+    "smoke:node": "npm run build && node scripts/node-smoke.mjs --hosted",
+    "typecheck:legacy": "node node_modules/typescript/bin/tsc --noEmit"
   },
   "devDependencies": {
     "@types/node": "^26.6.4",
     "@types/pg": "^8.23.1",
     "prettier": "3.9.9",
     "supabase": "2.119.0",
+    "tsc-rs": "0.2.0",
     "typescript": "7.0.2",
     "vite": "8.3.3",
     "vitest": "5.0.3"
