@@ -58,11 +58,12 @@ export function InstrumentStaffPage() {
       </button>
     </header></Reveal>
     <Reveal stage="metric"><section className="in-card is-metrics" aria-label="Arbeitsbestand" aria-busy={refreshing}>
-      <Metric value={people.isPending || people.isError ? NaN : peopleList.length} label="Pflegefälle" unit="Fälle"
+      <Metric value={people.isPending || people.isError ? NaN : peopleList.length} label="Pflegefälle"
+        unit={peopleList.length === 1 ? 'Fall' : 'Fälle'}
         explanation="Gespeicherte fiktive Personen" tone="person" />
-      <Metric value={unavailableTasks ? NaN : overdue} label="Überfällig" unit="Aufgaben"
+      <Metric value={unavailableTasks ? NaN : overdue} label="Überfällig" unit={overdue === 1 ? 'Aufgabe' : 'Aufgaben'}
         explanation="Offene Aufgaben vor heute" tone="deadline" />
-      <Metric value={unavailableTasks ? NaN : thisWeek} label="Diese Woche" unit="Aufgaben"
+      <Metric value={unavailableTasks ? NaN : thisWeek} label="Diese Woche" unit={thisWeek === 1 ? 'Aufgabe' : 'Aufgaben'}
         explanation="Fälligkeit Montag bis Sonntag" tone="task" />
     </section></Reveal>
 
@@ -70,7 +71,6 @@ export function InstrumentStaffPage() {
       <CardHead icon={filter.view === 'cases' ? 'person' : 'task'}
         title={filter.view === 'cases' ? 'Fallübersicht' : 'Offene Aufgaben'} id="is-board-title"
         subtitle={`Gespeicherte Daten · sortiert nach ${sortLabel}`}
-        {...(!blocked ? { count: filter.view === 'cases' ? filteredPeople.length : filteredTasks.length } : {})}
         end={<Segments label="Arbeitsansicht" value={filter.view} options={[
           { value: 'cases', label: 'Fälle' }, { value: 'tasks', label: 'Aufgaben' },
         ]} onChange={(view) => setFilter({ ...filter, view,

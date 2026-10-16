@@ -21,6 +21,15 @@ React-Prüfrichtlinie: vorhandener Query-Cache, unabhängige Abfragen, abgeleite
 
 ## Phasen
 
+### Nacharbeit vom 16.10.2026
+
+- [x] Einheiten für 0 / 1 / mehrere in Kennzahlen, Arbeitsbestand, Analyse und Falldialog prüfen und anpassen.
+- [x] Doppelten Zähler im Kopf der Fallübersicht entfernen.
+- [x] Zeilenaktion mit ruhigem Rand; Akzent erst bei Hover und Tastaturfokus.
+- [x] Vertragsprüfungen und Sichtabnahme wiederholt; Tagwerk-Vergleich bytegleich. Separater Commit nur eigener Pfade; kein Push.
+
+Die gemeinsame Timeline bleibt unverändert; deren Tagesgrammatik bearbeitet Bereich A.
+
 - [x] Regeln, Vertrag, Bausteine und Datenwege gelesen; Inhaltskarte vor Code festgelegt.
 - [x] Instrument-Seite, Fallliste, Filter, Analyse und Falldialog; Tagwerk nur durch Weiche berühren.
 - [x] Typecheck, Bereichs-Lint, Source, Vitest; Sicht hell/dunkel 1920×1080 und 390 px, Werkbank/Dialog.
@@ -34,7 +43,8 @@ React-Prüfrichtlinie: vorhandener Query-Cache, unabhängige Abfragen, abgeleite
 
 ## Prüfungen, Bilder und Bewertung
 
-In Arbeit. Keine vollständige Abnahme behauptet.
+Die folgenden Zwischenstände dokumentieren die erste Lieferung. Die aktuelle Nacharbeit und ihre grünen
+Vertragsprüfungen stehen am Ende dieses Berichts.
 
 Zwischenstand: eigener gezielter ESLint-Lauf bestanden. Typecheck meldete nur ChatIcons (C), Gesamt-Lint nur A/B/C.
 Source-Prüfung nach eigenen Mindestschrift-Korrekturen nur C. Erster Vitest-Lauf 234/246; zwölf Fehler durch
@@ -165,10 +175,93 @@ Drei schwächste Stellen:
 - [x] Implementierung und Nacharbeit abgeschlossen.
 - [x] Bereichseigene Prüfungen und alle 246 Tests bestanden; Sichtbelege geöffnet.
 - [x] Tagwerk-Gegenprobe bytegleich.
-- [ ] Gesamt-Lint nach fremder QA-Bereinigung nochmals grün.
+- [x] Gesamt-Lint nach fremder QA-Bereinigung nochmals grün; siehe Nacharbeit.
 - [x] Eigene Pfade für separaten Commit geprüft; kein Push.
 
 Letzte Wiederholung vor Commit: Typecheck erneut Exit 0 (`typecheck-release.log`).
 Gesamt-Lint (`lint-release.log`) jetzt ausschließlich sechs temporäre Dateien von A in `.local/instrument-welle2-a/qa/`;
 C hat seine temporäre Probe inzwischen entfernt. Keine D-Fehler. Port 5234 frei (`lsof` ohne Listener),
 Browserwerkzeug bestätigt abschließend `tabs: []`.
+
+## Nacharbeit: Einheiten und ruhigere Tabelle
+
+Basis dieser Nacharbeit: `427bfc4`. Nur fünf Bereichsdateien und dieser Bericht geändert;
+`src/routes/StaffPage.tsx` nach der temporären Gegenprobe exakt wiederhergestellt (kein Diff).
+
+- Kennzahlen wählen Fall/Fälle bzw. Aufgabe/Aufgaben anhand des tatsächlichen Endwerts.
+- Arbeitsbestand wählt offene Aufgabe/Aufgaben, Gespräch/Gespräche und echte KI-Antwort/Antworten.
+- Falldialog: Offene Aufgabe, Gespeichertes Gespräch und Dokument bei jeweils genau einem Eintrag.
+- Analyse berücksichtigt auch Anfrage/Anfragen, Nutzung/Nutzungen und Token/Tokens.
+- Der zusätzliche Zähler im Kopf der Fall-/Aufgabenübersicht entfällt.
+- Fall öffnen bleibt als Randknopf mit Pfeil; nur Hover und Tastaturfokus erhalten Akzentfläche, -text und -rand.
+  Derselbe Zeilenknopf gilt für die Aufgabenansicht. Hauptaktionen in Werkbank/Falldialog bleiben eindeutig.
+- Grundlage/Timeline und NewConversationDialog unverändert verwendet. Keine neue Produktlogik oder Testdaten im Produkt.
+
+### Wiederholte Abnahme
+
+| Prüfung | Ergebnis / Beleg unter `.local/instrument-d/` |
+| --- | --- |
+| `npm run typecheck` | Exit 0, `nacharbeit-typecheck.log` |
+| `npm run lint` | Gesamtprojekt Exit 0, `nacharbeit-lint.log`; frühere fremde QA-Blockade damit erledigt |
+| `npm run check:source` | Exit 0, 132 Dateien / 152 AA-Paare, `nacharbeit-source.log` |
+| `npx vitest run --maxWorkers=4 --testTimeout=30000` | Exit 0, 246/246 Tests in 21 Dateien, `nacharbeit-vitest.log` |
+| Desktop 1920×1080 hell / dunkel | Bilder geöffnet: `nacharbeit-Light.png`, `nacharbeit-Dark.png` |
+| Dialog offen hell / dunkel | `nacharbeit-DialogHell.png`, `nacharbeit-DialogDark.png` |
+| Werkbank offen hell / dunkel | `nacharbeit-WorkbenchLight.png`, `nacharbeit-WorkbenchDark.png` |
+| Handy 390×844 hell / dunkel | `nacharbeit-MobileLight.png`, `nacharbeit-MobileDark.png` |
+| Handy Fallliste / Werkbank | `nacharbeit-MobileCases.png`, `nacharbeit-MobileWorkbench.png` |
+| Handy Dialog hell / dunkel, bis zu den Verknüpfungen gescrollt | `nacharbeit-MobileDialogLight.png`, `nacharbeit-MobileDialogDark.png`, `nacharbeit-MobileDialogBottom.png` |
+| Vollständige Einzahl-Probe Desktop / Handy | `nacharbeit-Singular.png`, `nacharbeit-MobileSingular.png` |
+| Falldialog mit je einem Eintrag | `nacharbeit-SingularDialog.png`: Offene Aufgabe / Gespeichertes Gespräch / Dokument, jeweils Zähler 1 |
+| Sichtbare und zugängliche Einheiten | Einzahl-Probe: 1 Fall / 0 Aufgaben / 1 Aufgabe / 1 Anfrage; Arbeitsbestand 1 offene Aufgabe / 1 Gespräch / 1 echte KI-Antwort; Analyse 1 Nutzung / 1 Token |
+| Mehrzahl und Null | Staff-Bestand: 6 Fälle / 1 Aufgabe / 3 Aufgaben; Liste 2 offene Aufgaben, 1–3 Gespräche, 0 echte KI-Antworten |
+| Doppelter Zähler | `.is-board > .in-card-head .in-count` fehlt; sechs echte Fallzeilen bleiben vorhanden |
+| Zeilenknöpfe | Alle sechs ohne `is-primary`; hell neutral RGB 239/239/236, Text 20/20/20, Rand 130/130/123 |
+| Hover / Fokus | Beide Akzent weich, Text RGB 37/79/184, Rand 40/86/197; echter Tab-Fokus mit `:focus-visible`, Bild `nacharbeit-Focus.png` |
+| Symbolknopf | Mittenabweichung 0 px, Abstand 7 px, Inhalt mittig; `nacharbeit-knopf-4x.png` geöffnet |
+| Filter / Wechsel / KI-Einstieg | Priorität angewendet, unbekannte Person mit Fehler, Aufgabenansicht angewendet; 0 Chat-Aufrufe. KI-Einstieg übernimmt Martha in vorhandenen C-Dialog |
+| Abschneiden / Leerlauf | Desktop/390: keine horizontale Überbreite, Ellipsen-Zählung 0; nach Auftritt/Interaktion 0 laufende Animationen |
+| Tagwerk-Nacharbeit | Eigene CSS-Datei aus Basis `427bfc4` gegen aktuelle Datei in derselben geladenen Tagwerk-Ansicht: beide PNGs 166.561 Byte, `cmp` Exit 0 |
+
+Alle genannten Bilder selbst geöffnet. Desktop erneut neben Tenet c4 betrachtet: ruhige Zeilenaktionen,
+gemeinsame Skala, schmale Trennlinien und Daten statt Zierflächen. Die Einzahl-Probe war ausschließlich
+ein temporärer synthetischer Backend-Transport unter `.local/instrument-d/`; beide Probedateien entfernt.
+Keine echten Konten oder Provideraufrufe.
+
+Tagwerk-Belege: `nacharbeit-TagwerkCSSBefore.png` / `nacharbeit-TagwerkCSSAfter.png`.
+Die Produktseite blieb dabei unverändert geladen; nur der Inhalt des eigenen Instrument-Styles wurde
+vorübergehend durch die Basisfassung ersetzt und danach wiederhergestellt. Alle geänderten JSX-Dateien
+werden ausschließlich im Instrument-Zweig gerendert; die Weiche selbst hat keinen Diff.
+Der zusätzliche Vergleich Originalkomponente aus `7bd021e` gegen aktuelle Weiche nach getrennten Serverstarts
+zeigte 64 Pixel mit maximal einer Farbstufe Unterschied (`nacharbeit-TagwerkOriginal.png` / `nacharbeit-TagwerkFinal.png`).
+Für den tatsächlichen Einfluss dieser Nacharbeit wurde daher der beschriebene kontrollierte CSS-Vergleich verwendet;
+keine Toleranz, Maskierung oder Bildkorrektur. Der bytegleiche Originalvergleich der ersten Lieferung bleibt oben belegt.
+
+Browser-Finding: Der Instrument-Name des Theme-Knopfs existiert in Tagwerk nicht. Der Sammelaufruf endete daher
+nach erfolgreicher Anmeldung mit `BrowserEvaluationFailed`. Screenshot zeigte fertiges Tagwerk hell;
+nicht erneut geklickt, Gegenbild ebenfalls in hell aufgenommen. Keine Eingabe blind wiederholt.
+
+### Bewertung nach Nacharbeit
+
+Fallübersicht vorher **8/10**, jetzt **9/10** (eigene Bewertung). Die vorherige 9 war angesichts falscher Einheiten,
+des doppelten Zählers und sechs voller Akzentknöpfe zu hoch. Start 5, vier belegte Punkte:
+
+- +1: korrekte Zahl + Einheit einschließlich Einzahl und Null; `nacharbeit-Singular.png`.
+- +1: ruhige, dicht gefüllte Tabelle und eindeutige Aktionshierarchie; `nacharbeit-Light.png`, `nacharbeit-Dark.png`.
+- +1: mobile Fälle, Werkbank und nutzbarer Vollbilddialog ohne Ellipsen; Handy-Bilder oben.
+- +1: unveränderte wahrheitsgetreue Fristachse, präziser Pfeilknopf und Endruhe; Desktop / 4×-Bild und Messwerte oben.
+
+Die drei schwächsten Stellen nach Abschluss: Scrollbedarf bei sechs Fällen plus Analyse (`nacharbeit-Dark.png`),
+enge Abstände naher Fristen auf fester Skala (`nacharbeit-Light.png`), mehrzeilige Kennzahl-Erklärungen am Handy
+mit entsprechendem Höhenbedarf (`nacharbeit-MobileLight.png`).
+
+Während der Abschlussprüfung lieferte A die Korrektur für Timeline und Metric. Eigene finale Prüf-App danach
+neu gestartet und normal angemeldet: `nacharbeit-FinalGemeinsam.png` zeigt 6 Fälle / 1 Aufgabe / 3 Aufgaben,
+sechs neutrale Zeilenaktionen, keinen Kopfzähler und jetzt „Seit 1 Tag überfällig“. Erneut 0 Animationen;
+bei 390 px `scrollWidth = 390`, Ellipsen 0. Die älteren Bilder oben zeigen noch As vorherigen Tageswortlaut.
+Keine D-Änderung an A-Dateien; die zusätzliche Metric-Behandlung widerspricht den expliziten D-Einheiten nicht.
+
+Parallel hinzugekommene Commits `4bc06a2` (A) und `86b86ae` (C) vor Abschluss gelesen;
+Darstellungswechsel und unveränderter neuer Gesprächsdialog funktionieren mit diesem gemeinsamen Stand.
+Eigene Probedateien entfernt, alle eigenen Tabs geschlossen, `browser_tabs: []`, eigener Server 5234 beendet.
+Nur Bereich-D-Pfade in den neuen Commit aufnehmen. Kein Push.

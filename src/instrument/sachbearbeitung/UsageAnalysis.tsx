@@ -26,7 +26,7 @@ export function UsageAnalysis({ query }: { query: ReturnType<typeof useStaffOver
       <ErrorState title="Gesprächszahlen und Modellnutzung nicht verfügbar" error={query.error}
         onRetry={() => void query.refetch()} /> : metrics ? <div className="is-analysis-body">
         <div className="is-request-analysis"><Reveal stage="metric"><Metric value={metrics.totals.requests}
-          label="Tatsächlich ausgeführt" unit="Anfragen" tone="ai" /></Reveal>
+          label="Tatsächlich ausgeführt" unit={metrics.totals.requests === 1 ? 'Anfrage' : 'Anfragen'} tone="ai" /></Reveal>
           <Reveal stage="data"><div className="is-status-bar" aria-hidden="true">
             {statuses.filter((item) => item.value).map((item) => <span key={item.label}
               style={{ flex: item.value, background: `var(--thing-${item.tone})` }} />)}
@@ -36,8 +36,9 @@ export function UsageAnalysis({ query }: { query: ReturnType<typeof useStaffOver
         </div>
         <div className="is-model-analysis">{metrics.usage.length ? <ul>{metrics.usage.map((model) =>
           <li key={model.modelId}><div><h3>{model.displayName}</h3><p>{model.provider} · {model.providerModelId}</p></div>
-            <div><strong>{number(model.requests)}</strong><span>Nutzungen</span></div>
-            <div><strong>{number(model.inputTokens + model.outputTokens)}</strong><span>Tokens</span>
+            <div><strong>{number(model.requests)}</strong><span>{model.requests === 1 ? 'Nutzung' : 'Nutzungen'}</span></div>
+            <div><strong>{number(model.inputTokens + model.outputTokens)}</strong>
+              <span>{model.inputTokens + model.outputTokens === 1 ? 'Token' : 'Tokens'}</span>
               <small>{number(model.inputTokens)} ein / {number(model.outputTokens)} aus</small></div></li>)}</ul> :
           <div className="is-usage-empty"><span className="is-empty-trace" aria-hidden="true" />
             <h3>Noch keine abgeschlossene Modellnutzung gespeichert.</h3>

@@ -32,10 +32,13 @@ export function CaseList({ people, tasks, summaries, onOpen }: {
             {' · '}{person.insurerName ? baseName(person.insurerName) : 'Kasse nicht hinterlegt'}</p>
           {next ? <Priority value={next.priority} /> : null}</div></div>
         <div className="is-deadline"><Deadline task={next} /></div>
-        <dl className="is-case-counts"><div><dt>offene Aufgaben</dt><dd>{personalTasks.length}</dd></div>
-          <div><dt>Gespräche</dt><dd>{summary ? summary.conversations.toLocaleString('de-DE') : '–'}</dd></div>
-          <div><dt>echte KI-Antworten</dt><dd>{summary ? summary.completedAnswers.toLocaleString('de-DE') : '–'}</dd></div></dl>
-        <button type="button" className="is-button is-primary" onClick={() => onOpen(person.id)}
+        <dl className="is-case-counts"><div><dt>{personalTasks.length === 1 ? 'offene Aufgabe' : 'offene Aufgaben'}</dt>
+          <dd>{personalTasks.length}</dd></div>
+          <div><dt>{summary?.conversations === 1 ? 'Gespräch' : 'Gespräche'}</dt>
+            <dd>{summary ? summary.conversations.toLocaleString('de-DE') : '–'}</dd></div>
+          <div><dt>{summary?.completedAnswers === 1 ? 'echte KI-Antwort' : 'echte KI-Antworten'}</dt>
+            <dd>{summary ? summary.completedAnswers.toLocaleString('de-DE') : '–'}</dd></div></dl>
+        <button type="button" className="is-button is-row-action" onClick={() => onOpen(person.id)}
           aria-label={`Fall öffnen: ${baseName(person.name)}`}><span>Fall öffnen</span><Icon name="arrow" size={16} /></button>
       </article>;
     })}
@@ -52,7 +55,7 @@ export function TaskList({ people, tasks, onOpen }: {
         <h3>{person ? baseName(person.name) : 'Allgemeine Aufgabe'}</h3>
         {task.deadline_source ? <p>Quelle: {task.deadline_source}</p> : null}</div>
       <div className="is-deadline"><Deadline task={task} /></div>
-      {person ? <button type="button" className="is-button" onClick={() => onOpen(person.id)}
+      {person ? <button type="button" className="is-button is-row-action" onClick={() => onOpen(person.id)}
         aria-label={`Fall öffnen: ${baseName(person.name)} – ${task.title}`}>
         <span>Fall öffnen</span><Icon name="arrow" size={16} /></button> : null}
     </li>;

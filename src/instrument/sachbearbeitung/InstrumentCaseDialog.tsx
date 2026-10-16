@@ -48,7 +48,8 @@ export function InstrumentCaseDialog({ person, tasks, tasksError, onClose, onAsk
           <p>{person.summary || 'Noch keine Zusammenfassung hinterlegt.'}</p>
         </section></Reveal>
         <section className="is-dialog-section" aria-labelledby="is-case-tasks">
-          <CardHead icon="task" title="Offene Aufgaben" id="is-case-tasks" {...(!tasksError ? { count: personalTasks.length } : {})} />
+          <CardHead icon="task" title={personalTasks.length === 1 && !tasksError ? 'Offene Aufgabe' : 'Offene Aufgaben'}
+            id="is-case-tasks" {...(!tasksError ? { count: personalTasks.length } : {})} />
           {tasksError ? <ErrorState error={tasksError} title="Aufgaben nicht verfügbar" /> : personalTasks.length ?
             <ul className="is-case-task-details">{personalTasks.map((task) => <li key={task.id}>
               <Priority value={task.priority} />
@@ -60,7 +61,7 @@ export function InstrumentCaseDialog({ person, tasks, tasksError, onClose, onAsk
         </section>
         <div className="is-linked-grid">
           <section className="is-dialog-section" aria-labelledby="is-case-chats">
-            <CardHead icon="conversation" title="Gespeicherte Gespräche" id="is-case-chats"
+            <CardHead icon="conversation" title={chats.length === 1 ? 'Gespeichertes Gespräch' : 'Gespeicherte Gespräche'} id="is-case-chats"
               {...(!conversations.isPending && !archived.isPending && !conversations.isError && !archived.isError ? { count: chats.length } : {})} />
             {conversations.isPending || archived.isPending ? <Loading lines={2} /> : conversations.isError || archived.isError ?
               <ErrorState error={conversations.error ?? archived.error} /> : chats.length ?
@@ -71,7 +72,7 @@ export function InstrumentCaseDialog({ person, tasks, tasksError, onClose, onAsk
               <p className="is-detail-empty">Keine Gespräche mit dieser Person verknüpft.</p>}
           </section>
           <section className="is-dialog-section" aria-labelledby="is-case-docs">
-            <CardHead icon="document" title="Dokumente" id="is-case-docs"
+            <CardHead icon="document" title={docs.length === 1 ? 'Dokument' : 'Dokumente'} id="is-case-docs"
               {...(!documents.isPending && !documents.isError ? { count: docs.length } : {})} />
             {documents.isPending ? <Loading lines={2} /> : documents.isError ? <ErrorState error={documents.error} /> :
               docs.length ? <ul className="is-linked-list">{docs.map((doc) => <li key={doc.id}>

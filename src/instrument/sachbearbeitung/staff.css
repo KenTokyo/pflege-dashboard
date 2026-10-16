@@ -53,6 +53,13 @@
   background: var(--sunken);
 }
 
+[data-design='instrument'] .is-row-action:hover,
+[data-design='instrument'] .is-row-action:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
 [data-design='instrument'] .is-button:active {
   transform: translateY(1px);
 }
