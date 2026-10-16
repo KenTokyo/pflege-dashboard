@@ -72,9 +72,9 @@ Einstellungen, Zustände), B, C, D parallel.
 
 - [x] Plan, Vertrag, Bereiche (Orchestrator)
 - [x] Welle 1: A Grundlage und Rahmen
-- [ ] Welle 2: A Anmeldung/Einstellungen/Zustände, B, C, D
-- [ ] Orchestrator: Aufnahmen aller Seiten (Instrument hell/dunkel/Handy, Tagwerk unverändert), Noten, Nacharbeit
-- [ ] Commit und Push auf `main` (Vercel)
+- [x] Welle 2: A Anmeldung/Einstellungen/Zustände, B, C, D
+- [x] Orchestrator: Aufnahmen aller Seiten (Instrument hell/dunkel/Handy, Tagwerk unverändert), Noten, Nacharbeit
+- [x] Commit und Push auf `main` (Vercel)
 
 ## Bereich A – Welle 1: Arbeitsplan
 
@@ -124,3 +124,25 @@ Anmeldung, Einstellungs-Innenleben und Zustände bleiben für Welle 2. Kein neue
   Übersicht 1 bestehende Dokument-Unterzeile (Bereich B, Welle 2). Keine vollständige App-Abnahme behauptet.
 - Finale Bilder unter `.local/instrument-welle1/`, genaue Zuordnung im Bereich-A-Bericht. Temporäre Prüfansicht
   gelöscht, eigene Vite-App beendet, Port 5231 frei und Browser-Werkzeug meldet keine verbleibenden Tabs.
+
+## Abnahme durch den Orchestrator (16.10.2026)
+
+Eigene Aufnahme aller sieben Seiten (Anmeldung, Übersicht, Gespräche, Dokumente, Aufgaben, Einstellungen,
+Sachbearbeitung): Instrument dunkel/hell 1920×1080 und 390 px, Tagwerk dunkel/hell gegen Basis `6f4e230`.
+
+| Prüfung | Ergebnis |
+| --- | --- |
+| Typecheck, Lint, check:source (152 Kontrastpaare), Build | grün |
+| Vitest | 246/246 (`--maxWorkers=2`); unter Last 25 brechen einzelne `findBy` ab – Basis ebenso |
+| Tagwerk | 12 von 14 Bildern bytegleich; Einstellungen nur um die Zeile „Oberfläche: Tagwerk/Instrument“ ergänzt |
+| Instrument | 0 Ellipsen, kein Querscrollen, keine Schrift < 12 px, keine Endlos-Animation |
+
+| Bereich | Note | Beleg / Rest |
+| --- | --- | --- |
+| A Rahmen, Anmeldung, Einstellungen, Zustände | 8,5 | Iso-Zugangskarte, dichte Einstellungen mit Leitzahlen; Ordnungsnummern entfernt, Einheiten nach Zahl |
+| B Übersicht, Aufgaben, Dokumente | 8 | Kennzahl-Leisten, Pflegegrad-Skala, Fristachsen, Statusbalken; Lücke unter der Dokumentkarte |
+| C Gespräche und Chat | 8 | ruhige Lesefläche, Composer, Modellkarte; Leerzustand ohne offenes Gespräch sehr groß |
+| D Sachbearbeitung | 8 | Fallachsen, Werkbank, Falldialog; Nacharbeit (Einzahl, Doppelzahl, laute Aktionen) erledigt |
+
+Nacharbeit: D (`4e71687`) und A (`65af8c5`) nach Befund; keine Note unter 8, daher keine weitere Runde.
+
