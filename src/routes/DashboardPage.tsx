@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentDashboard } from '../instrument/uebersicht/InstrumentDashboard';
 import { Link } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'motion/react';
 import { AlarmClock, ArrowUp, CalendarDays, CircleAlert, FileText, MessageSquare, MessageSquareText, User } from 'lucide-react';
@@ -238,6 +240,12 @@ export function TaskRowView({ task, people, now }: { task: TaskRow; people: Care
 }
 
 export function DashboardPage() {
+  useDocumentTitle('Übersicht');
+  const { design } = useDesign();
+  return design === 'instrument' ? <InstrumentDashboard /> : <TagwerkDashboardPage />;
+}
+
+function TagwerkDashboardPage() {
   const { profile } = useWorkspace();
   useDocumentTitle('Übersicht');
   const reduce = useReducedMotion();

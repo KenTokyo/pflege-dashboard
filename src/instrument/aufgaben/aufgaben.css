@@ -1,0 +1,145 @@
+[data-design='instrument'] .ib-task-lead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+[data-design='instrument'] .ib-task-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 28px;
+}
+
+[data-design='instrument'] .ib-task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design='instrument'] .ib-task-list > li {
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+
+[data-design='instrument'] .ib-task-list > li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+[data-design='instrument'] .ib-task-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+[data-design='instrument'] .ib-row-number {
+  font: 12px/1.5 var(--font-mono);
+  color: var(--text-faint);
+  flex: none;
+}
+
+[data-design='instrument'] .ib-task-title h3 {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 500;
+  margin: 0;
+}
+
+[data-design='instrument'] .ib-task-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 9px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .ib-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--thing-task);
+}
+
+[data-design='instrument'] .ib-priority[data-priority='urgent'] {
+  color: var(--danger);
+}
+
+[data-design='instrument'] .ib-priority[data-priority='high'] {
+  color: var(--thing-deadline);
+}
+
+[data-design='instrument'] .ib-priority > span {
+  display: inline-flex;
+  gap: 3px;
+}
+
+[data-design='instrument'] .ib-priority i {
+  display: block;
+  width: 4px;
+  height: 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: 1px;
+}
+
+[data-design='instrument'] .ib-priority [data-filled='true'] {
+  background: currentColor;
+  border-color: currentColor;
+}
+
+[data-design='instrument'] .ib-task-description {
+  margin: 10px 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .ib-source {
+  margin: 8px 0 0;
+  color: var(--text-faint);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .ib-task-action {
+  margin-top: 12px;
+}
+
+[data-design='instrument'] .ib-task-timeline {
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+[data-design='instrument'] .ib-task-timeline-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+[data-design='instrument'] .ib-task-timeline-heading h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@media (max-width: 1000px) {
+  [data-design='instrument'] .ib-task-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .ib-task-lead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  [data-design='instrument'] .ib-task-timeline {
+    padding: 12px;
+  }
+}

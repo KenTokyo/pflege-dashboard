@@ -1,0 +1,248 @@
+[data-design='instrument'] .ib-page {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+[data-design='instrument'] .ib-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 0 4px;
+}
+
+[data-design='instrument'] .ib-page-heading h1 {
+  margin: 4px 0 0;
+  font: 500 30px/1.2 var(--font-body);
+  letter-spacing: -0.04em;
+}
+
+[data-design='instrument'] .ib-page-heading > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .ib-eyebrow,
+[data-design='instrument'] .ib-register-label {
+  margin: 0;
+  color: var(--text-faint);
+  font: 12px/1.5 var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+[data-design='instrument'] .ib-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 18px 0;
+}
+
+[data-design='instrument'] .ib-metrics > .in-metric {
+  padding: 0 24px;
+}
+
+[data-design='instrument'] .ib-metrics > .in-metric + .in-metric {
+  border-left: 1px solid var(--border);
+}
+
+[data-design='instrument'] .ib-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .ib-body {
+  padding: 20px;
+  min-width: 0;
+  flex: 1;
+}
+
+[data-design='instrument'] .ib-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .ib-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  max-width: 100%;
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font: 500 13px/20px var(--font-body);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms, transform 180ms;
+}
+
+[data-design='instrument'] .ib-button:hover {
+  background: var(--sunken);
+  border-color: var(--border-strong);
+}
+
+[data-design='instrument'] .ib-button:active {
+  transform: translateY(1px);
+}
+
+[data-design='instrument'] .ib-button:disabled {
+  cursor: not-allowed;
+  color: var(--text-faint);
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .ib-button.ib-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: transparent;
+}
+
+[data-design='instrument'] .ib-button.ib-primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--surface));
+}
+
+[data-design='instrument'] .ib-primary:disabled {
+  background: var(--surface2);
+  color: var(--text-faint);
+}
+
+[data-design='instrument'] .ib-muted,
+[data-design='instrument'] .ib-note {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .ib-note {
+  margin: 12px 0 0;
+}
+
+[data-design='instrument'] .ib-advice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .ib-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+[data-design='instrument'] .ib-list {
+  margin: 16px -20px 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-design='instrument'] .ib-list li {
+  border-top: 1px solid var(--border);
+}
+
+[data-design='instrument'] .ib-list-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 160ms;
+}
+
+[data-design='instrument'] .ib-list-link:hover {
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .ib-list-link > span {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-design='instrument'] .ib-list-link strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-design='instrument'] .ib-list-link small {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .ib-list-link time {
+  font: 12px/1.5 var(--font-mono);
+  color: var(--text-faint);
+}
+
+[data-design='instrument'] .ib-tag {
+  padding: 2px 7px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .ib-page {
+    gap: 12px;
+  }
+
+  [data-design='instrument'] .ib-page-heading h1 {
+    font-size: 26px;
+  }
+
+  [data-design='instrument'] .ib-metrics {
+    padding: 15px 0;
+  }
+
+  [data-design='instrument'] .ib-metrics > .in-metric {
+    padding: 0 12px;
+  }
+
+  [data-design='instrument'] .ib-metrics .in-metric-label {
+    font-size: 12px;
+    min-height: 34px;
+  }
+
+  [data-design='instrument'] .ib-metrics .in-metric-unit {
+    font-size: 12px;
+  }
+
+  [data-design='instrument'] .ib-metrics .in-metric-line {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 0;
+  }
+
+  [data-design='instrument'] .ib-button {
+    min-height: 44px;
+  }
+
+  [data-design='instrument'] .ib-register-label {
+    display: none;
+  }
+}

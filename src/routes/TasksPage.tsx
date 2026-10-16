@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentTasks } from '../instrument/aufgaben/InstrumentTasks';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { Shell } from '../components/Shell';
@@ -11,6 +13,12 @@ import { TaskRowView } from './DashboardPage';
 type Filter = 'all' | 'urgent' | 'week';
 
 export function TasksPage() {
+  useDocumentTitle('Aufgaben');
+  const { design } = useDesign();
+  return design === 'instrument' ? <InstrumentTasks /> : <TagwerkTasksPage />;
+}
+
+function TagwerkTasksPage() {
   useDocumentTitle('Aufgaben');
   const tasks = useOpenTasks();
   const people = useCareRecipients();

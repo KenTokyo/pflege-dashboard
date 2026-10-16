@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentDocuments } from '../instrument/dokumente/InstrumentDocuments';
 import { FileText, Info } from 'lucide-react';
 import { useState } from 'react';
 import { Shell } from '../components/Shell';
@@ -69,6 +71,12 @@ function DocItem({ doc, person }: { doc: DocumentRow; person: string }) {
 }
 
 export function DocumentsPage() {
+  useDocumentTitle('Dokumente');
+  const { design } = useDesign();
+  return design === 'instrument' ? <InstrumentDocuments /> : <TagwerkDocumentsPage />;
+}
+
+function TagwerkDocumentsPage() {
   useDocumentTitle('Dokumente');
   const docs = useDocuments();
   const people = useCareRecipients();
