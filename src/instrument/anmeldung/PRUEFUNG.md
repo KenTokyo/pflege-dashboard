@@ -199,3 +199,37 @@ Keine Änderungen an Welle-1-Startskripten nötig; deren bestehender Start-/Redu
 Eigene Browser-Tabs geschlossen (`browser_tabs: []`), eigener Port-5231-Server beendet; Port 5231 ohne Listener.
 Prüfbilder, Protokolle und synthetische Prüfansichten bleiben ignoriert unter `.local/`.
 Abschluss mit ausschließlich eigenen Pfaden auf `main`; **kein Push**. Fremde Änderungen bleiben unangetastet.
+
+## Zusatz: Einzahl und Mehrzahl der Bausteine
+
+- [x] Timeline: −2 / −1 / heute / +1 / +2 prüfen; „Seit 1 Tag“, „Seit 2 Tagen“, „In 1 Tag“, „In 2 Tagen“.
+- [x] Metric: bekannte zählbare Einheiten nach der angezeigten Zahl beugen, auch im Zählwerk und zugänglichen Text.
+- [x] Übrige Bausteintexte prüfen; Tagwerk-`src/lib/format.ts` unverändert lassen.
+- [x] Kleine Regression, Vertragsprüfungen, Browserbild und Bericht; ausschließlich eigene Pfade committen, kein Push.
+
+Geändert: `grundlage/Timeline.tsx`, `Metric.tsx`, `README.md`; neue Regression `wording.test.mjs`.
+Metric nimmt weiter eine Zeichenfolge als Einheit entgegen: beide Formen werden für elf vorhandene zählbare
+Begriffe erkannt. Beispielsweise werden aus `unit="Tage"` bei 1 „Tag“ und aus `unit="Version"` bei 2 „Versionen“.
+Feste Einheiten und Angaben wie `kg`, `%`, `von 5` bleiben wörtlich erhalten. Die sichtbare Einheit folgt auch dem
+gerundeten Zwischenwert des endlichen Zählwerks; der zugängliche Text nennt den grammatisch richtigen Endwert.
+CardHead, Segments, Reveal und DesignSwitch enthalten keine weiteren variablen Zahltexte. Die festen
+Timeline-Achsenwerte −14/+42 behalten korrekt „Tage“. Andere Bereiche und Tagwerk-Texte nicht geändert.
+
+Abnahme 16.10.2026, 19:40 Uhr:
+
+- Typecheck, Lint, Source: Exit 0; weiterhin 132 Dateien und 152 Kontrastpaare.
+- Vitest: 21 Dateien, 246/246, 10,17 s (`vitest-zahltexte.log`).
+- `node --test src/instrument/grundlage/wording.test.mjs src/instrument/grundlage/startup.test.mjs`:
+  17/17 (`zahltexte-node.log`): 12 Starttests und fünf Zähltext-Tests einschließlich vier Untertests.
+  Metric-Regression mit 88 Kombinationen aus Einheit, übergebener Wortform und Zahl; zusätzlich Rundung,
+  Dezimalwert, feste Einheit und ungültige Werte. Timeline mit fünf Tagen um Heute.
+- Echte Bausteine zusätzlich in temporärer Prüfgalerie auf Port 5231: sichtbare und zugängliche Texte korrekt.
+  1.662 beobachtete Zahl-/Einheit-Paare während des Zählwerks, **0 falsche Paare**. Nach Auftritt 0 Animationen.
+- 1920×1080 dunkel/hell und 390 px: Bilder selbst geöffnet. 390 px Scrollbreite, 0 aktive Ellipsen.
+  Belege `.local/instrument-welle2-a/zahltexte-dunkel.png`, `zahltexte-hell.png`, `zahltexte-handy.png`;
+  Metadaten `zahltexte-bilder.json`. Gestaltung unverändert, keine neue Gestaltungsnote aus dieser Textkorrektur.
+- Vorherige Browser-Falle ergänzt: HTML über Vites `/@fs/` wird roh ausgeliefert. Für eine isolierte Prüfgalerie
+  Moduldatei extern einbinden, damit Vite deren Imports auflöst. Leeres Erstbild verworfen, nur geladene Galerie gewertet.
+- Temporäre eigene Prüfdateien entfernt, eigener Tab geschlossen und Port-5231-Server beendet.
+  `git log 4bc06a2..main` berücksichtigt `86b86ae` (Chat), `4e71687` (Sachbearbeitungs-Einheiten/Aktionen)
+  und `3015e5c` (Übersicht/Aufgaben/Dokumente); keine Änderung in den gemeinsamen A-Bausteinen.

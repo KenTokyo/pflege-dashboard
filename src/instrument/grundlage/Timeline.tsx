@@ -30,8 +30,9 @@ export function Timeline({ items, today = new Date(), label = 'Termine im Zeitve
       {rows.map((item, index) => {
         const valid = Number.isFinite(item.days);
         const position = valid ? timelinePosition(item.days) : 25;
-        const status = !valid ? 'Datum nicht verfügbar' : item.days < 0 ? `Seit ${Math.abs(item.days)} Tagen überfällig`
-          : item.days === 0 ? 'Heute fällig' : `In ${item.days} Tagen`;
+        const unit = Math.abs(item.days) === 1 ? 'Tag' : 'Tagen';
+        const status = !valid ? 'Datum nicht verfügbar' : item.days < 0 ? `Seit ${Math.abs(item.days)} ${unit} überfällig`
+          : item.days === 0 ? 'Heute fällig' : `In ${item.days} ${unit}`;
         const date = calendarDate(item.date);
         const textDate = valid ? date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
         return <li key={item.id} data-position={!valid ? 'unknown' : item.days < 0 ? 'past' : item.days === 0 ? 'today' : 'future'}>

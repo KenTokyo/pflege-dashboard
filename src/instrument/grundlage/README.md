@@ -57,6 +57,10 @@ Props: `value: number`, `label: string` (Pflicht), `unit?: string`, `explanation
 Zählwerk nur im sichtbaren Bereich; Ende bei verborgenem Tab, reduzierter Bewegung, Verlassen oder Aushängen.
 Screenreader bekommen direkt den echten Endwert. Keine Live-Region für jedes Einzelbild.
 Nicht endliche Werte erscheinen als „–“ mit der zugänglichen Beschriftung „Nicht verfügbar“.
+Bekannte zählbare Einheiten werden automatisch an die angezeigte Zahl angepasst, auch während des Zählwerks:
+Tag/Tage, Minute/Minuten, Stunde/Stunden, Aufgabe/Aufgaben, Version/Versionen, Person/Personen,
+Dokument/Dokumente, Gespräch/Gespräche, Modell/Modelle, Fall/Fälle und Anfrage/Anfragen.
+Einzahl oder Mehrzahl darf übergeben werden; feste Angaben wie `kg`, `%` und `von 5` bleiben unverändert.
 
 ```tsx
 <Metric value={openTasks.length} unit="Aufgaben" label="Offen" explanation="Nach Fälligkeit sortiert" tone="task" />
@@ -71,6 +75,8 @@ Datumsstrings als `YYYY-MM-DD` oder ISO-Zeitpunkt; bei Kalendertagen wird lokale
 Feste Skala −14 bis +42 Tage, Heute immer bei 25 %. Vergangenheit links; ferne Termine als Randpunkt mit Pfeil.
 Das echte Datum und der Abstand bleiben immer lesbar, keine abgeschnittene Beschriftung.
 Sortiert aufsteigend, verändert das übergebene Array nicht. Kein Polling; nach Tageswechsel bei Navigation neu rendern.
+Abstände heißen „Seit 1 Tag überfällig“ / „Seit 2 Tagen überfällig“ und „In 1 Tag“ / „In 2 Tagen“.
+Regression: `node --test src/instrument/grundlage/wording.test.mjs`.
 
 ```tsx
 <Timeline today="2026-10-16" items={tasks.filter(task => task.due_at !== null).map(task => ({

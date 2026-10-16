@@ -7,14 +7,27 @@ export type MetricProps = {
   tone?: Thing | 'danger' | 'warning' | 'success' | 'accent'; className?: string;
 };
 
+const unitForms = [
+  ['Tag', 'Tage'], ['Minute', 'Minuten'], ['Stunde', 'Stunden'], ['Aufgabe', 'Aufgaben'],
+  ['Version', 'Versionen'], ['Person', 'Personen'], ['Dokument', 'Dokumente'], ['Gespräch', 'Gespräche'],
+  ['Modell', 'Modelle'], ['Fall', 'Fälle'], ['Anfrage', 'Anfragen'],
+] as const;
+
+function numberUnit(value: number, unit: string | undefined): string | undefined {
+  const forms = unitForms.find(([one, other]) => unit === one || unit === other);
+  return forms ? forms[Math.abs(value) === 1 ? 0 : 1] : unit;
+}
+
 /** Ein endliches Zählwerk ohne React-Render pro Bild. Stoppt bei Unsichtbarkeit und beim Aushängen. */
 export function Metric({ value, unit, label, explanation, decimals = 0, tone, className = '' }: MetricProps) {
   const ref = useRef<HTMLSpanElement>(null);
+  const unitRef = useRef<HTMLSpanElement>(null);
   const previous = useRef(0);
   const digits = Math.max(0, Math.min(20, decimals));
   const valid = Number.isFinite(value);
   const number = valid ? value : 0;
   const formatted = valid ? number.toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits }) : '–';
+  const displayUnit = numberUnit(Number(number.toFixed(digits)), unit);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -23,10 +36,15 @@ export function Metric({ value, unit, label, explanation, decimals = 0, tone, cl
     let frame = 0;
     let finished = false;
     let started = false;
+    const paint = (current: number) => {
+      el.textContent = valid
+        ? current.toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits }) : '–';
+      if (unitRef.current) unitRef.current.textContent = numberUnit(Number(current.toFixed(digits)), unit) ?? '';
+    };
     const finish = () => {
       finished = true;
       cancelAnimationFrame(frame);
-      el.textContent = formatted;
+      paint(number);
       previous.current = number;
     };
     const start = () => {
@@ -37,7 +55,7 @@ export function Metric({ value, unit, label, explanation, decimals = 0, tone, cl
         const p = Math.min(1, (performance.now() - at) / 760);
         const current = from + (number - from) * (1 - (1 - p) ** 4);
         previous.current = current;
-        el.textContent = current.toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+        paint(current);
         if (p < 1) frame = requestAnimationFrame(tick);
         else finish();
       };
@@ -60,13 +78,13 @@ export function Metric({ value, unit, label, explanation, decimals = 0, tone, cl
       document.removeEventListener('visibilitychange', onVisibility);
       media.removeEventListener('change', onMotion);
     };
-  }, [number, digits, formatted, valid]);
+  }, [number, digits, unit, valid]);
   const color = tone ? `var(--${['danger', 'warning', 'success', 'accent'].includes(tone) ? tone : `thing-${tone}`})` : undefined;
   return <div className={`in-metric ${className}`}>
     <p className="in-metric-label">{label}</p>
-    <p className="in-metric-line" aria-label={valid ? `${formatted}${unit ? ` ${unit}` : ''}` : 'Nicht verfügbar'}>
+    <p className="in-metric-line" aria-label={valid ? `${formatted}${displayUnit ? ` ${displayUnit}` : ''}` : 'Nicht verfügbar'}>
       <span ref={ref} className="in-metric-value" style={{ color }} aria-hidden="true">{formatted}</span>
-      {unit ? <span className="in-metric-unit" aria-hidden="true">{unit}</span> : null}
+      {unit ? <span ref={unitRef} className="in-metric-unit" aria-hidden="true">{displayUnit}</span> : null}
     </p>
     {explanation ? <p className="in-metric-explanation">{explanation}</p> : null}
   </div>;
