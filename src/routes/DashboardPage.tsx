@@ -1,9 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'motion/react';
 import { AlarmClock, ArrowUp, CalendarDays, CircleAlert, FileText, MessageSquare, MessageSquareText, User } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
 import { useWorkspace } from '../auth/AuthProvider';
-import { useStartConversation } from '../chat/useStartConversation';
 import { CountUp } from '../components/CountUp';
 import { MarkerCircle } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
@@ -11,16 +9,15 @@ import { EmptyState, ErrorState, Loading } from '../components/States';
 import {
   DOC_KIND_LABEL,
   DOC_STATUS_LABEL,
-  effectiveModel,
   isUrgent,
   nextTaskFor,
   recipientName,
   sortTasks,
-  titleFromQuestion,
 } from '../data/model';
-import { useAgentSettings, useCareRecipients, useConversations, useDocuments, useModels, useOpenTasks } from '../data/queries';
+import { useCareRecipients, useConversations, useDocuments, useOpenTasks } from '../data/queries';
 import { ageFrom, baseName, daysUntil, formatDate, formatLongDate, formatShortDate, greeting, initials, listWhen, relativeDays } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { useOverviewQuestion } from '../instrument/uebersicht/useOverviewQuestion';
 import type { CareRecipient, DocumentRow, TaskRow } from '../services/types';
 
 const listIn = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
@@ -115,30 +112,9 @@ function PersonCard({
 }
 
 function AskCard() {
-  const people = useCareRecipients();
-  const settings = useAgentSettings();
-  const models = useModels();
+  const { question, setQuestion, personId, setPersonId, list, chosen, pending, error, blocked, onSubmit } = useOverviewQuestion();
   const conversations = useConversations(false);
-  const { start, pending, error } = useStartConversation();
-  const [question, setQuestion] = useState('');
-  const [personId, setPersonId] = useState<string>('auto');
   const now = new Date();
-
-  const list = people.data ?? [];
-  const chosen = personId === 'auto' ? (list.length === 1 ? (list[0]?.id ?? null) : null) : personId || null;
-  const model = settings.data !== undefined && models.data ? effectiveModel(null, settings.data, models.data) : null;
-  const blocked = model !== null && !model.usable;
-
-  const onSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const text = question.trim();
-    if (!text || pending || blocked) return;
-    try {
-      await start({ title: titleFromQuestion(text), careRecipientId: chosen, firstMessage: text });
-    } catch {
-      // Fehler wird unten angezeigt; Eingabe bleibt erhalten.
-    }
-  };
 
   return (
     <section className="card ask" aria-labelledby="ask-title">
