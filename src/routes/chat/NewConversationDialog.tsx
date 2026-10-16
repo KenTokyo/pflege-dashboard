@@ -1,4 +1,7 @@
-import { X } from 'lucide-react';
+import { useDesign } from '../../app/ThemeProvider';
+import { Icon } from '../../instrument/grundlage/Icon';
+import '../../instrument/chat/dialogs.css';
+import { X } from '../../instrument/chat/ChatIcons';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { useStartConversation } from '../../chat/useStartConversation';
 import { ErrorState } from '../../components/States';
@@ -7,6 +10,7 @@ import type { CareRecipient } from '../../services/types';
 
 /** Natives <dialog>: Fokus bleibt im Dialog, Escape schließt. Unter 760 px Vollbild. */
 export function NewConversationDialog({ open, onClose, people, initialRecipientId = null }: { open: boolean; onClose: () => void; people: CareRecipient[]; initialRecipientId?: string | null }) {
+  const { design } = useDesign();
   const ref = useRef<HTMLDialogElement>(null);
   const { start, pending, error, reset } = useStartConversation();
   const [title, setTitle] = useState('');
@@ -41,10 +45,13 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
   };
 
   return (
-    <dialog ref={ref} className="dialog" aria-labelledby="new-conv-title" onClose={close} onCancel={close}>
+    <dialog ref={ref} className={`dialog ${design === 'instrument' ? 'in-chat-dialog' : ''}`} aria-labelledby="new-conv-title" onClose={close} onCancel={close}>
       <form className="dialog-inner" onSubmit={(e) => void onSubmit(e)}>
         <div className="dialog-head">
-          <h2 id="new-conv-title">Neues Gespräch</h2>
+          {design === 'instrument' ? <div className="in-chat-dialog-heading">
+            <span className="in-chat-dialog-symbol"><Icon name="conversation" size={18} /></span>
+            <h2 id="new-conv-title">Neues Gespräch</h2>
+          </div> : <h2 id="new-conv-title">Neues Gespräch</h2>}
           <button type="button" className="icon-btn" onClick={close} aria-label="Dialog schließen">
             <X className="i" size={18} aria-hidden="true" />
           </button>

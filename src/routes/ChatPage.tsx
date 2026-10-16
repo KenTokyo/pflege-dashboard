@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentEmpty } from '../instrument/chat/InstrumentEmpty';
 import { MessagesSquare, SquarePen } from 'lucide-react';
 import { useState } from 'react';
 import { Shell } from '../components/Shell';
@@ -10,9 +12,21 @@ import { Thread } from './chat/Thread';
 
 export function ChatPage({ conversationId }: { conversationId: string | null }) {
   useDocumentTitle('Gespräche');
+  const { design } = useDesign();
   const people = useCareRecipients();
   const [dialogOpen, setDialogOpen] = useState(false);
   const list = people.data ?? [];
+
+  if (design === 'instrument') return (
+    <Shell mainClassName="is-chat">
+      <div className={`in-chat-layout ${conversationId ? 'has-thread' : ''}`}>
+        <ConversationList activeId={conversationId} people={list} onNew={() => setDialogOpen(true)} />
+        {conversationId ? <Thread conversationId={conversationId} people={list} />
+          : <InstrumentEmpty onNew={() => setDialogOpen(true)} />}
+      </div>
+      <NewConversationDialog open={dialogOpen} onClose={() => setDialogOpen(false)} people={list} />
+    </Shell>
+  );
 
   return (
     <Shell mainClassName="is-chat">

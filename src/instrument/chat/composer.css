@@ -1,0 +1,144 @@
+[data-design='instrument'] .in-chat-layout .composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-width: 816px;
+  margin: 0 auto;
+  padding: 12px 28px 18px;
+  flex: none;
+}
+
+[data-design='instrument'] .in-chat-layout .composer-examples {
+  order: 2;
+  margin: 0;
+  padding: 6px 10px 12px;
+  gap: 8px;
+  max-width: none;
+  border: 1px solid var(--border-strong);
+  border-top: 0;
+  border-radius: 0 0 16px 16px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-chat-layout .composer-box {
+  order: 1;
+  margin: 0;
+  padding: 12px 12px 2px;
+  gap: 12px;
+  max-width: none;
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-chat-layout .composer-box:focus-within {
+  box-shadow: none;
+  border-color: var(--accent);
+}
+
+[data-design='instrument'] .in-chat-layout .composer-input {
+  min-height: 62px;
+  padding: 6px 2px 18px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+[data-design='instrument'] .in-chat-layout .composer-send {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  margin-bottom: 8px;
+}
+
+[data-design='instrument'] .in-chat-layout .composer-send.btn-primary svg {
+  stroke: var(--on-accent);
+}
+
+[data-design='instrument'] .in-chat-layout .question-button {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+[data-design='instrument'] .in-chat-layout .response-choice {
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+[data-design='instrument'] .in-chat-layout .response-choice-note {
+  font-size: 12px;
+  width: 100%;
+  text-align: right;
+}
+
+[data-design='instrument'] .in-chat-layout .response-choice .in-segments button {
+  min-height: 30px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+[data-design='instrument'] .in-chat-layout .honesty {
+  order: 4;
+  margin-top: 12px;
+  align-items: flex-start;
+  gap: 7px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+[data-design='instrument'] .in-chat-layout .speech-status {
+  order: 0;
+  font-size: 12px;
+}
+
+[data-design='instrument'] .in-chat-composer-meta {
+  order: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 9px;
+  color: var(--text-faint);
+  font: 12px/1.5 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .in-chat-layout .composer {
+    padding: 10px 12px 16px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .composer-examples {
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px 8px 12px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .composer-examples .question-button {
+    padding: 0 4px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .response-choice {
+    flex: 1;
+  }
+
+  [data-design='instrument'] .in-chat-layout .response-choice-note {
+    text-align: right;
+  }
+
+  [data-design='instrument'] .in-chat-layout .response-choice .in-segments button {
+    min-height: 38px;
+    padding: 4px 9px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .composer-input {
+    font-size: 16px;
+  }
+}
+
+[data-design='instrument'] .in-chat-composer-meta > :last-child {
+  flex: none;
+  white-space: nowrap;
+}

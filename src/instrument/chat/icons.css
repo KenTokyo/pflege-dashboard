@@ -1,0 +1,7 @@
+[data-design='instrument'] .in-chat-symbol > :not(.in-chat-symbol-drawing) {
+  display: none;
+}
+
+[data-design='instrument'] .in-chat-symbol-drawing {
+  visibility: visible;
+}

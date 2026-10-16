@@ -1,4 +1,4 @@
-import { CircleAlert, Info, MessageSquareText, Quote } from 'lucide-react';
+import { CircleAlert, Info, MessageSquareText, Quote } from '../../instrument/chat/ChatIcons';
 import { AnswerBody } from '../../chat/AnswerBody';
 import type { ResponseFormat } from '../../chat/responseFormat';
 import { messageModel, messageSources, REGION_LABEL, type MessageModel } from '../../data/model';
@@ -25,7 +25,7 @@ export function AgentMeta({ model, time, note }: { model: MessageModel | null; t
           {model.responseModel ? <span className="muted small">· {model.responseModel}</span> : null}
         </>
       ) : null}
-      {time ? <span className="muted">· {time}</span> : null}
+      {time ? <span className="muted in-chat-time">· {time}</span> : null}
       {note ? <span className="muted">· {note}</span> : null}
     </p>
   );

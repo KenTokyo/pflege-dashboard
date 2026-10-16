@@ -1,5 +1,8 @@
+import { InstrumentModelPicker } from '../../instrument/chat/InstrumentModelPicker';
+import { useDesign } from '../../app/ThemeProvider';
+import { Icon } from '../../instrument/grundlage/Icon';
 import { Link } from '@tanstack/react-router';
-import { Archive, ArchiveRestore, ArrowLeft, Check, Cpu, Pencil, X } from 'lucide-react';
+import { Archive, ArchiveRestore, ArrowLeft, Check, Cpu, Pencil, X } from '../../instrument/chat/ChatIcons';
 import { useState, type SubmitEvent } from 'react';
 import { ErrorState } from '../../components/States';
 import { MODE_LABEL, REGION_LABEL, modelDisplayName, type EffectiveModel } from '../../data/model';
@@ -21,6 +24,7 @@ type Props = {
 };
 
 export function ThreadHead({ conversation, people, mode, model, models, defaultModelId, busy, changingModel, modelError, onModelChange }: Props) {
+  const { design } = useDesign();
   const rename = useRenameConversation();
   const archive = useArchiveConversation();
   const assign = useAssignRecipient();
@@ -55,6 +59,8 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
         <ArrowLeft className="i" size={18} aria-hidden="true" />
       </Link>
       <div className="thread-title">
+        {design === 'instrument' ? <div className="in-thread-kicker"><Icon name="conversation" size={15} />
+          <span>{archived ? 'ARCHIVIERTES GESPRÄCH' : 'GESPRÄCH'}</span></div> : null}
         {editing ? (
           <form className="title-edit" onSubmit={(e) => void save(e)}>
             <label htmlFor="title-input" className="sr-only">
@@ -141,7 +147,11 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
             {MODE_LABEL[mode]}
           </span>
         ) : null}
-        <label className="chip-static model-picker" title={busy ? 'Während einer laufenden Antwort oder Änderung nicht änderbar' : 'Modell für die nächste Antwort'}>
+        {design === 'instrument' ? <InstrumentModelPicker available={availableModels} current={model?.model ?? null}
+          workspaceDefault={workspaceDefault} overrideId={conversation.model_override_id}
+          unavailableLabel={overrideUnavailable ? (unavailableOverride
+            ? modelDisplayName(unavailableOverride.display_name, unavailableOverride.provider) : 'Gespeichertes Modell') : null}
+          disabled={busy || models.length === 0} onChange={onModelChange} /> : <label className="chip-static model-picker" title={busy ? 'Während einer laufenden Antwort oder Änderung nicht änderbar' : 'Modell für die nächste Antwort'}>
           <Cpu className="i" size={15} aria-hidden="true" />
           <span className="sr-only">Modell für die nächste Antwort</span>
           <select
@@ -159,7 +169,7 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
             {availableModels.map((m) => <option key={m.id} value={m.id}>{modelDisplayName(m.display_name, m.provider)}</option>)}
           </select>
           {model?.model ? <span className={`region ${model.model.hosting_region === 'eu' ? 'region-eu' : ''}`}>{REGION_LABEL[model.model.hosting_region]}</span> : null}
-        </label>
+        </label>}
         <button
           type="button"
           className="btn btn-secondary btn-sm"

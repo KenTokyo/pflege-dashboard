@@ -1,7 +1,15 @@
-import { LayoutList, Pilcrow } from 'lucide-react';
+import { useDesign } from '../../app/ThemeProvider';
+import { Segments } from '../../instrument/grundlage/Segments';
+import { LayoutList, Pilcrow } from '../../instrument/chat/ChatIcons';
 import type { ResponseFormat } from '../../chat/responseFormat';
 
 export function ResponseFormatSwitch({ value, onChange, saved }: { value: ResponseFormat; onChange: (value: ResponseFormat) => void; saved: boolean | null }) {
+  const { design } = useDesign();
+  if (design === 'instrument') return <div className={`response-choice ${saved === false ? 'preference-unsaved' : ''}`}>
+    <Segments label="Antwortdarstellung" value={value} onChange={onChange}
+      options={[{ value: 'text', label: 'Text' }, { value: 'openui', label: 'OpenUI' }]} />
+    <span className="response-choice-note">{saved === false ? 'Auswahl nur für diesen Seitenaufruf.' : 'Gilt für neue Antworten.'}</span>
+  </div>;
   return (
     <div className={`response-choice ${saved === false ? 'preference-unsaved' : ''}`}>
       <div className="segmented response-switch" role="group" aria-label="Antwortdarstellung" title="Die Auswahl gilt für neue Antworten. Gespeicherte Komponentenantworten wechseln auch die Ansicht.">

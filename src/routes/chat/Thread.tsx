@@ -1,6 +1,8 @@
+import { useDesign } from '../../app/ThemeProvider';
+import { ConversationDrawing } from '../../instrument/chat/InstrumentEmpty';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { MessageSquareText } from 'lucide-react';
+import { MessageSquareText } from '../../instrument/chat/ChatIcons';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useWorkspace } from '../../auth/AuthProvider';
 import { usePendingTurn, useStreamStore } from '../../chat/ChatStreamContext';
@@ -19,6 +21,7 @@ import { ThreadHead } from './ThreadHead';
 const FINAL_STATUS = new Set<MessageRow['status']>(['completed', 'interrupted', 'failed']);
 
 export function Thread({ conversationId, people }: { conversationId: string; people: CareRecipient[] }) {
+  const { design } = useDesign();
   const ws = useWorkspace().workspace.id;
   const qc = useQueryClient();
   const store = useStreamStore();
@@ -147,7 +150,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
           <ErrorState error={messages.error} onRetry={() => void messages.refetch()} />
         ) : history.length === 0 && !turn ? (
           <div className="chat-empty">
-            <MessageSquareText className="i" size={28} aria-hidden="true" />
+            {design === 'instrument' ? <ConversationDrawing /> : <MessageSquareText className="i" size={28} aria-hidden="true" />}
             <strong className="text-[18px]" style={{ fontFamily: 'var(--font-display)' }}>
               Was möchten Sie wissen?
             </strong>
@@ -162,6 +165,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
         {turn ? (
           <PendingTurnView
             turn={turn}
+            instrument={design === 'instrument'}
             responseFormat={responseFormat.value}
             actionsDisabled={changeModel.isPending}
             showUser={!userStored}

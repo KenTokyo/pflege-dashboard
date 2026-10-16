@@ -1,4 +1,4 @@
-import { ChevronDown, Code2 } from 'lucide-react';
+import { ChevronDown, Code2 } from '../../instrument/chat/ChatIcons';
 import type { ChatActivity } from '../../../types/phase1';
 import { providerLabel } from '../../data/model';
 import { parseActivity } from '../../chat/activity';

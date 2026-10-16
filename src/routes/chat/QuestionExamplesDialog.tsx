@@ -1,4 +1,6 @@
-import { ArrowRight, BookOpenText, Compass, ListTodo, MessageSquareText, MessagesSquare, PenLine, X } from 'lucide-react';
+import { useDesign } from '../../app/ThemeProvider';
+import '../../instrument/chat/dialogs.css';
+import { ArrowRight, BookOpenText, Compass, ListTodo, MessageSquareText, MessagesSquare, PenLine, X } from '../../instrument/chat/ChatIcons';
 import { useEffect, useRef, useState } from 'react';
 import { QUESTION_GROUPS } from './questionExamples';
 
@@ -13,6 +15,7 @@ const GROUP_ICONS = { overview: Compass, tasks: ListTodo, explain: BookOpenText,
 
 /** Nur bei geöffnetem Dialog gemountet; die Auswahl startet bei jedem Öffnen neu. */
 export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName }: Props) {
+  const { design } = useDesign();
   const ref = useRef<HTMLDialogElement>(null);
   const [groupId, setGroupId] = useState<string>(QUESTION_GROUPS[0].id);
   const [selected, setSelected] = useState<string | null>(null);
@@ -26,12 +29,12 @@ export function QuestionExamplesDialog({ onClose, onChoose, hasDraft, personName
   }, []);
 
   return (
-    <dialog ref={ref} className="dialog question-dialog" aria-labelledby="question-title" aria-describedby="question-intro" onCancel={onClose}>
+    <dialog ref={ref} className={`dialog question-dialog ${design === 'instrument' ? 'in-chat-dialog' : ''}`} aria-labelledby="question-title" aria-describedby="question-intro" onCancel={onClose}>
       <div className="dialog-inner">
         <div className="dialog-head">
           <div className="question-heading">
             <span className="question-heading-icon" aria-hidden="true"><MessageSquareText className="i" size={21} /></span>
-            <div><p className="small muted">Ein guter Anfang für Ihr Anliegen</p><h2 id="question-title">Was kann ich fragen?</h2></div>
+            <div><p className="small muted">{design === 'instrument' ? `${QUESTION_GROUPS.length} Themen · bearbeitbare Fragen` : 'Ein guter Anfang für Ihr Anliegen'}</p><h2 id="question-title">Was kann ich fragen?</h2></div>
           </div>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="Beispiele schließen" title="Schließen">
             <X className="i" size={18} aria-hidden="true" />

@@ -1,4 +1,5 @@
-import { ArrowUp, MessageSquareText, Mic, MicOff, ShieldCheck, Square } from 'lucide-react';
+import { useDesign } from '../../app/ThemeProvider';
+import { ArrowUp, MessageSquareText, Mic, MicOff, ShieldCheck, Square } from '../../instrument/chat/ChatIcons';
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react';
 
 import { QuestionExamplesDialog } from './QuestionExamplesDialog';
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function Composer({ value, onChange, onSend, onStop, streaming, blockedReason, inputRef, personName = null, responseFormat, onResponseFormatChange, responseFormatSaved }: Props) {
+  const { design } = useDesign();
   const [examplesOpen, setExamplesOpen] = useState(false);
   const localRef = useRef<HTMLTextAreaElement>(null);
   const ref = inputRef ?? localRef;
@@ -146,6 +148,10 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
           </button>
         )}
       </form>
+      {design === 'instrument' ? <div className="in-chat-composer-meta">
+        <span>Enter senden · Umschalt + Enter neue Zeile</span>
+        <span aria-label={`${value.length} von ${MAX_MESSAGE} Zeichen`}>{value.length.toLocaleString('de-DE')} / 8.000</span>
+      </div> : null}
       <p id="composer-hint" className="honesty">
         <ShieldCheck className="i" size={14} aria-hidden="true" />
         {tooLong ? (

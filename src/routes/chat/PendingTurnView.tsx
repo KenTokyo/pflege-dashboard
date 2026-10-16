@@ -1,4 +1,5 @@
-import { CircleAlert, PencilLine, RefreshCw, RotateCcw, Send, X } from 'lucide-react';
+import { InstrumentProgress } from '../../instrument/chat/InstrumentProgress';
+import { CircleAlert, PencilLine, RefreshCw, RotateCcw, Send, X } from '../../instrument/chat/ChatIcons';
 import { AnswerBody } from '../../chat/AnswerBody';
 import type { ResponseFormat } from '../../chat/responseFormat';
 import { parseOpenUi } from '../../../types/openui';
@@ -9,6 +10,7 @@ import { ActivityView } from './ActivityView';
 
 type Props = {
   turn: PendingTurn;
+  instrument?: boolean;
   showUser: boolean;
   showAssistant: boolean;
   onFetchAgain: () => void;
@@ -26,7 +28,7 @@ const FAILED_TITLE: Record<string, string> = {
 };
 
 /** Laufende oder gerade beendete Anfrage, bis der gespeicherte Verlauf sie enthält. */
-export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss, actionsDisabled = false, responseFormat = 'text' }: Props) {
+export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, onSendNew, onReload, onEdit, onDismiss, actionsDisabled = false, responseFormat = 'text', instrument = false }: Props) {
   const live = turn.phase === 'sending' || turn.phase === 'streaming';
   const recovery = recoveryFor(turn);
   const preview = turn.text || (turn.presentation ? parseOpenUi(turn.presentation.source, live).text : '');
@@ -53,13 +55,14 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
             time={null}
             {...(turn.replayed ? { note: 'gespeicherte Antwort' } : {})}
           />
-          {live ? <p className="msg-status" role="status">{progress}</p> : null}
+          {live && !instrument ? <p className="msg-status" role="status">{progress}</p> : null}
           {visibleText || (!live && turn.presentation) ? (
             <div className="relative">
               <AnswerBody text={preview} presentation={turn.presentation} responseFormat={responseFormat} streaming={live} />
               {turn.phase === 'streaming' && visibleText ? <span className="caret" aria-hidden="true" /> : null}
             </div>
           ) : null}
+          {live && instrument ? <InstrumentProgress characters={preview.length} activity={turn.activity} label={progress} /> : null}
         </article>
       ) : null}
 
