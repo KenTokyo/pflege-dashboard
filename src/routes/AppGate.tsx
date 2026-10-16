@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentGate } from '../instrument/zustaende/InstrumentGate';
 import { Navigate, Outlet, useLocation } from '@tanstack/react-router';
 import { LogOut, ShieldOff } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
@@ -33,10 +35,16 @@ function ToLogin({ from }: { from: string }) {
 
 /** Geschützter Bereich: nur mit Anmeldung und aktiver Mitgliedschaft im Arbeitsbereich. */
 export function AppGate() {
+  const { design } = useDesign();
   const { state, signOut, retryWorkspace } = useAuth();
   const pathname = useLocation({ select: (l) => l.pathname });
 
   if (state.status === 'signedOut') return <ToLogin from={pathname} />;
+
+  if (design === 'instrument' && (state.status === 'loading' || state.status === 'noAccess' || state.status === 'error')) {
+    return <InstrumentGate status={state.status} error={state.status === 'error' ? state.error : undefined}
+      retry={retryWorkspace} signOut={() => signOut('manual')} />;
+  }
 
   if (state.status === 'loading') {
     return (

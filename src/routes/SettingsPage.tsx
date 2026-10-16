@@ -1,3 +1,5 @@
+import { InstrumentSettings } from '../instrument/einstellungen/InstrumentSettings';
+import { InstrumentPersona } from '../instrument/einstellungen/InstrumentPersona';
 import { Clock, Globe, Info, LogOut, Moon, Pencil, RotateCcw, ShieldCheck, Sun } from 'lucide-react';
 import { useState } from 'react';
 import { useDesign, useTheme } from '../app/ThemeProvider';
@@ -19,6 +21,7 @@ const MODE_TEXT = {
 
 function PersonaCard({ view, isAdmin }: { view: AgentSettingsView; isAdmin: boolean }) {
   const { workspace } = useWorkspace();
+  const { design } = useDesign();
   const update = useUpdateAgentSettings();
   const defaults = useDefaultPrompt();
   const [editing, setEditing] = useState(false);
@@ -38,6 +41,12 @@ function PersonaCard({ view, isAdmin }: { view: AgentSettingsView; isAdmin: bool
       { onSuccess: () => setEditing(false) },
     );
   const reset = () => update.mutate({ ...base, p_reset_to_default: true, p_persona: null, p_system_prompt: null }, { onSuccess: () => setEditing(false) });
+
+  if (design === 'instrument') return <InstrumentPersona view={view} isAdmin={isAdmin} isDefault={isDefault}
+    editing={editing} persona={persona} prompt={prompt} pending={update.isPending} error={update.error}
+    setPersona={setPersona} setPrompt={setPrompt} save={save} reset={reset}
+    cancel={() => { setPersona(view.prompt.persona); setPrompt(view.prompt.system_prompt); update.reset(); setEditing(false); }}
+    edit={() => { setPersona(view.prompt.persona); setPrompt(view.prompt.system_prompt); setEditing(true); }} />;
 
   return (
     <section className="card" aria-labelledby="persona-title">
@@ -157,6 +166,9 @@ export function SettingsPage() {
   const settings = useAgentSettings();
   const models = useModels();
   const view = settings.data ?? null;
+
+  if (design === 'instrument') return <InstrumentSettings settings={settings} models={models} modeText={MODE_TEXT}
+    persona={view ? <PersonaCard key={view.settings.revision} view={view} isAdmin={role === 'admin'} /> : null} />;
 
   return (
     <Shell>

@@ -1,0 +1,164 @@
+[data-design='instrument'] .in-login-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 40px;
+}
+
+[data-design='instrument'] .in-login-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+[data-design='instrument'] .in-login-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 480px);
+  align-items: center;
+  gap: 64px;
+  width: min(1120px, calc(100% - 80px));
+  margin: auto;
+  padding: 24px 0 64px;
+}
+
+[data-design='instrument'] .in-login-intro {
+  min-width: 0;
+}
+
+[data-design='instrument'] .in-login-intro-head {
+  margin-bottom: 28px;
+}
+
+[data-design='instrument'] .in-login-intro h1 {
+  margin: 0 0 12px;
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+[data-design='instrument'] .in-login-intro p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+[data-design='instrument'] .in-login-illustration {
+  margin: 24px 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-login-illustration .in-state-drawing {
+  display: block;
+  width: 100%;
+  height: 230px;
+}
+
+[data-design='instrument'] .in-login-scope {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+
+[data-design='instrument'] .in-login-scope > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[data-design='instrument'] .in-login-form-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-design='instrument'] .in-login-form-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+[data-design='instrument'] .in-login-form-head p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .in-login-form {
+  display: grid;
+  gap: 20px;
+  padding: 28px;
+}
+
+[data-design='instrument'] .in-login-remember {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+[data-design='instrument'] .in-login-remember input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+[data-design='instrument'] .in-login-policy {
+  padding: 16px;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+[data-design='instrument'] .in-login-policy p:last-child {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .in-login-actions {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 800px) {
+  [data-design='instrument'] .in-login-top {
+    padding: 20px;
+  }
+
+  [data-design='instrument'] .in-login-main {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    width: calc(100% - 32px);
+    margin: 12px auto 0;
+    padding-bottom: 32px;
+  }
+
+  [data-design='instrument'] .in-login-intro-head,
+  [data-design='instrument'] .in-login-illustration,
+  [data-design='instrument'] .in-login-scope,
+  [data-design='instrument'] .in-login-intro > .in-hint {
+    display: none;
+  }
+
+  [data-design='instrument'] .in-login-intro h1 {
+    font-size: 32px;
+  }
+
+  [data-design='instrument'] .in-login-form,
+  [data-design='instrument'] .in-login-form-head {
+    padding: 20px;
+  }
+}

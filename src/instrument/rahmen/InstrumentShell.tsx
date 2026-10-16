@@ -86,12 +86,11 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
       <div className="in-nav-label">Arbeitsbereich</div>
       <nav className="in-navigation" aria-label="Hauptnavigation" style={{ '--in-nav-index': selected } as CSSProperties}>
         {selected >= 0 ? <span className="in-nav-marker" aria-hidden="true" /> : null}
-        {NAV.map(({ to, label, icon, thing, exact }, index) => <Link key={to} to={to} className="in-nav-item"
+        {NAV.map(({ to, label, icon, thing, exact }) => <Link key={to} to={to} className="in-nav-item"
           activeOptions={{ exact }} activeProps={{ 'aria-current': 'page' }}>
           <Icon name={icon} thing={thing} size={18} /><span>{label}</span>
           {counts[to] !== undefined ? <span className="in-nav-count" aria-label={`${counts[to]} ${label}`}>
             {counts[to].toLocaleString('de-DE')}</span> : null}
-          <span className="in-nav-order" aria-hidden="true">0{index + 1}</span>
         </Link>)}
       </nav>
       <div className="in-sidebar-foot"><Account /></div>

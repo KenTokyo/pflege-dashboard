@@ -3,7 +3,7 @@ import './primitives.css';
 
 export type Thing = 'person' | 'deadline' | 'task' | 'document' | 'conversation' | 'ai';
 export type IconName = Thing | 'overview' | 'settings' | 'sun' | 'moon' | 'logout' | 'chevron' | 'check'
-  | 'plus' | 'close' | 'search' | 'arrow' | 'shield' | 'warning' | 'mail' | 'menu' | 'care';
+  | 'lock' | 'edit' | 'reset' | 'globe' | 'plus' | 'close' | 'search' | 'arrow' | 'shield' | 'warning' | 'mail' | 'menu' | 'care';
 
 const drawings: Record<IconName, ReactNode> = {
   person: <><circle cx="12" cy="7" r="3" /><path d="M5 21v-3a7 7 0 0 1 14 0v3M9 20h6" /></>,
@@ -31,24 +31,32 @@ const drawings: Record<IconName, ReactNode> = {
   shield: <><path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6z" /><path d="m8 12 3 3 5-6" /></>,
   warning: <><path d="m12 3 10 18H2zM12 9v5" /><circle cx="12" cy="17" r=".7" fill="currentColor" /></>,
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" /></>,
+  lock: <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" /></>,
+  edit: <><path d="m5 15 11-11 4 4L9 19l-5 1zM14 6l4 4" /></>,
+  reset: <><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6" /></>,
+  globe: <><circle cx="12" cy="12" r="9" /><ellipse cx="12" cy="12" rx="4" ry="9" /><path d="M3 12h18" /></>,
   menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   care: <><path d="M4 12V6h6m4 0h6v6m0 2v6h-6m-4 0H4v-6M8 12h8m-4-4v8" /></>,
 };
 
 const roles: Partial<Record<IconName, Thing>> = {
   person: 'person', deadline: 'deadline', task: 'task', document: 'document', conversation: 'conversation', ai: 'ai',
-  overview: 'task', settings: 'ai', care: 'person', shield: 'person', warning: 'deadline', mail: 'conversation',
+  lock: 'person', edit: 'document', reset: 'ai', globe: 'ai', overview: 'task', settings: 'ai',
+  care: 'person', shield: 'person', warning: 'deadline', mail: 'conversation',
 };
 
 export function iconThing(name: IconName): Thing | undefined {
   return roles[name];
 }
 
-export type IconProps = { name: IconName; thing?: Thing | undefined; size?: number; label?: string; className?: string };
+export type IconProps = {
+  name: IconName; thing?: Thing | undefined; tone?: 'danger' | 'warning' | 'success';
+  size?: number; label?: string; className?: string;
+};
 
 /** Eigene 24er-Zeichnungen, Strich 1,5. Die Sache bestimmt die volle Symbolfarbe. */
-export function Icon({ name, thing = roles[name], size = 18, label, className = '' }: IconProps) {
-  const style: CSSProperties = { color: thing ? `var(--thing-${thing})` : 'currentColor' };
+export function Icon({ name, thing = roles[name], tone, size = 18, label, className = '' }: IconProps) {
+  const style: CSSProperties = { color: tone ? `var(--${tone})` : thing ? `var(--thing-${thing})` : 'currentColor' };
   return <svg className={`in-icon ${className}`} width={size} height={size} viewBox="0 0 24 24" fill="none"
     stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={style}
     role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : true}>

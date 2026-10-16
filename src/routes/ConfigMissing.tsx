@@ -1,8 +1,16 @@
+import { ThemeProvider, useDesign } from '../app/ThemeProvider';
+import { InstrumentConfigMissing } from '../instrument/zustaende/InstrumentGate';
 import { Settings2 } from 'lucide-react';
 import { DemoBanner } from '../components/DemoBanner';
 
 /** Ohne öffentliche Supabase-Werte gibt es keine Anmeldung und keine Ersatzdaten. */
 export function ConfigMissing({ missing }: { missing: string[] }) {
+  return <ThemeProvider><ConfigMissingContent missing={missing} /></ThemeProvider>;
+}
+
+function ConfigMissingContent({ missing }: { missing: string[] }) {
+  const { design } = useDesign();
+  if (design === 'instrument') return <InstrumentConfigMissing missing={missing} />;
   return (
     <>
       <DemoBanner />

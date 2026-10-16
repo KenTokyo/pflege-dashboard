@@ -111,16 +111,11 @@
   background: var(--accent);
 }
 
-[data-design='instrument'] .in-nav-count,
-[data-design='instrument'] .in-nav-order {
+[data-design='instrument'] .in-nav-count {
   margin-left: auto;
   font: 12px/1.4 var(--font-mono);
   font-variant-numeric: tabular-nums;
   color: var(--text-faint);
-}
-
-[data-design='instrument'] .in-nav-count + .in-nav-order {
-  display: none;
 }
 
 [data-design='instrument'] .in-sidebar-foot {

@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentLogin } from '../instrument/anmeldung/InstrumentLogin';
 import { useSearch } from '@tanstack/react-router';
 import { ReturnTo } from '../app/returnPath';
 import { ArrowRight, CalendarClock, Clock, Info, LockKeyhole, Mail, MessageSquareText, ShieldCheck } from 'lucide-react';
@@ -20,6 +22,7 @@ const REASON: Record<SignOutReason, string> = {
 
 export function LoginPage() {
   useDocumentTitle('Anmelden');
+  const { design } = useDesign();
   const { state, signIn } = useAuth();
   const backend = useBackend();
   const [email, setEmail] = useState('');
@@ -64,6 +67,10 @@ export function LoginPage() {
       setBusy(false);
     }
   };
+
+  if (design === 'instrument') return <InstrumentLogin email={email} password={password} remember={remember} busy={busy}
+    error={error} errorId={errorId} reason={reason} emailRef={emailRef} passwordRef={passwordRef}
+    setEmail={setEmail} setPassword={setPassword} setRemember={setRemember} onSubmit={onSubmit} />;
 
   return (
     <>

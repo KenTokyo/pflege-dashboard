@@ -119,3 +119,14 @@ Ansicht, Theme und Konto erreichbar. Anmeldung/Einstellungs-Innenleben/Zustände
 
 Zusätzlicher Starttest: `node --test src/instrument/grundlage/startup.test.mjs` (12 Fälle für beide echten HTML-Skripte).
 Browser-Randfälle, Bildpfade, Messwerte, Grenzen und Bewertung stehen in [PRUEFUNG.md](PRUEFUNG.md).
+
+## Ergänzungen aus Welle 2 (A)
+
+`controls.css`: eigene Instrument-Knöpfe (`in-button`, `in-button-primary`), Felder (`in-field`,
+`in-field-label`, `in-input`, `in-input-invalid`, `in-textarea`), Hinweise (`in-hint`, `in-notice`)
+und Zustandsmarken (`in-badge`, `in-badge-good`). Nur importieren, wenn verwendet.
+Optional `tone="danger" | "warning" | "success"` für echte Zustände; Sachrolle bleibt sonst erhalten.
+Eigene Icons zusätzlich: `lock`, `edit`, `reset`, `globe`.
+Die Seitenleiste zeigt ausschließlich echte Datenzähler; keine Ordnungsnummern.
+`ConfigMissing` liefert seinen Darstellungs-Kontext selbst, weil es vor `App` gerendert wird.
+Anmeldung/Einstellungen/Zustände und ihre Sichtbelege: `../anmeldung/PRUEFUNG.md`.

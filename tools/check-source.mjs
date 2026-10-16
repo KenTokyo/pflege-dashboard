@@ -164,6 +164,19 @@ if (!/persistSession:\s*true, storage: saved\.storage, storageKey: saved\.storag
 if (!/export const API_BASE = '\/api';/.test(read('src/services/api.ts'))) problems.push("API_BASE ist nicht '/api'");
 for (const f of src) if (/127\.0\.0\.1|localhost:\d+/.test(read(f))) problems.push(`fester lokaler Host in ${f}`);
 
+// ---------- Instrument-Vertrag: Rahmen und ruhende Endzustände ----------
+if (/in-nav-order/.test(read('src/instrument/rahmen/InstrumentShell.tsx'))) {
+  problems.push('Instrument-Seitenleiste enthält Ordnungsnummern neben echten Zählern');
+}
+for (const f of files('src/instrument', /\.css$/)) {
+  if (/animation(?:-fill-mode)?\s*:[^;]*(?:forwards|\bboth\b)/.test(read(f))) {
+    problems.push(`Instrument-Auftritt hält eine fertige Animation fest: ${f}`);
+  }
+}
+if (!/<ThemeProvider><ConfigMissingContent/.test(read('src/routes/ConfigMissing.tsx'))) {
+  problems.push('Konfigurationszustand braucht seinen eigenen Darstellungs-Kontext vor App-Start');
+}
+
 // ---------- Schriftgrößen ----------
 for (const f of [...files('src/styles', /\.css$/), ...files('src/instrument', /\.css$/)]) {
   for (const m of read(f).matchAll(/font-size:\s*([\d.]+)px/g)) if (Number(m[1]) < 12) problems.push(`Schrift ${m[1]}px < 12px in ${f}`);

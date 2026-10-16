@@ -1,0 +1,156 @@
+[data-design='instrument'] .in-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--sunken);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 160ms, transform 160ms var(--in-ease);
+}
+
+[data-design='instrument'] .in-button:hover {
+  background: var(--surface2);
+}
+
+[data-design='instrument'] .in-button:active {
+  transform: translateY(1px);
+}
+
+[data-design='instrument'] .in-button-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+[data-design='instrument'] .in-button-primary:hover {
+  background: color-mix(in srgb, var(--accent) 90%, var(--surface));
+}
+
+[data-design='instrument'] .in-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+[data-design='instrument'] .in-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+}
+
+[data-design='instrument'] .in-field-label {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+[data-design='instrument'] .in-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-input:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+[data-design='instrument'] .in-input-invalid {
+  border-color: var(--danger);
+}
+
+[data-design='instrument'] .in-input input {
+  min-width: 0;
+  width: 100%;
+  padding: 12px 0;
+  border: 0;
+  outline: 0;
+  color: var(--text);
+  background: transparent;
+  font-size: 15px;
+}
+
+[data-design='instrument'] .in-input input::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
+[data-design='instrument'] .in-textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--sunken);
+  color: var(--text);
+  font: 14px/1.65 var(--font-body);
+}
+
+[data-design='instrument'] .in-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .in-hint > svg {
+  margin-top: 2px;
+}
+
+[data-design='instrument'] .in-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--sunken);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design='instrument'] .in-notice-danger {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+[data-design='instrument'] .in-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font: 12px/1.5 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .in-badge-good {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .in-button {
+    min-height: 44px;
+  }
+}
