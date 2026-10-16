@@ -1,0 +1,99 @@
+[data-design='instrument'] .in-timeline-axis {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  color: var(--text-faint);
+  font: 12px/1.4 var(--font-mono);
+}
+
+[data-design='instrument'] .in-timeline-axis b {
+  position: absolute;
+  left: 25%;
+  padding-left: 6px;
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+[data-design='instrument'] .in-timeline ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+[data-design='instrument'] .in-timeline li {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+[data-design='instrument'] .in-timeline-caption {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 14px;
+}
+
+[data-design='instrument'] .in-timeline-caption strong {
+  font-weight: 500;
+}
+
+[data-design='instrument'] .in-timeline-caption time {
+  font: 12px/1.6 var(--font-mono);
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .in-timeline-track {
+  position: relative;
+  height: 30px;
+  background: linear-gradient(var(--border), var(--border)) center / 100% 1px no-repeat;
+}
+
+[data-design='instrument'] .in-timeline-track::after {
+  content: '';
+  position: absolute;
+  left: 25%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--accent);
+}
+
+[data-design='instrument'] .in-timeline-distance {
+  position: absolute;
+  top: 12px;
+  left: var(--in-from);
+  width: var(--in-length);
+  height: 6px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(135deg, var(--in-tone) 0 1px, transparent 1px 4px);
+}
+
+[data-design='instrument'] .in-timeline-point {
+  position: absolute;
+  z-index: 1;
+  left: var(--in-point);
+  top: 10px;
+  display: grid;
+  place-items: center;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--in-tone);
+  color: var(--surface);
+  font: 12px/1 var(--font-mono);
+}
+
+[data-design='instrument'] .in-timeline-detail {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .in-timeline-detail .in-overdue {
+  color: var(--danger);
+}

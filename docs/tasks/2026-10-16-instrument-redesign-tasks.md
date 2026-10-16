@@ -71,7 +71,56 @@ Einstellungen, Zustände), B, C, D parallel.
 ## Phasen
 
 - [x] Plan, Vertrag, Bereiche (Orchestrator)
-- [ ] Welle 1: A Grundlage und Rahmen
+- [x] Welle 1: A Grundlage und Rahmen
 - [ ] Welle 2: A Anmeldung/Einstellungen/Zustände, B, C, D
 - [ ] Orchestrator: Aufnahmen aller Seiten (Instrument hell/dunkel/Handy, Tagwerk unverändert), Noten, Nacharbeit
 - [ ] Commit und Push auf `main` (Vercel)
+
+## Bereich A – Welle 1: Arbeitsplan
+
+Basis: `1ce6c50`. Gelesen: Instrument-Skill, Referenz-README, Tenet-Vertragstabelle, Seitenleisten-Ausschnitt,
+heller Gesamtentwurf und dessen HTML, Modellregeln und Modelltest. Referenzmaße: Seitenleiste 252 px,
+Kartenradius 20 px, Symbolkachel 32 px, Abstand 12 px, Kopf 16–18 px, Schrift 13–15 px.
+
+| Fläche | Frage | Leitzahl / Datenbild | Aktion |
+| --- | --- | --- | --- |
+| Seitenleiste | Welcher Bereich ist offen? | echte Listen-Zähler aus vorhandenen Hooks; gleitender Auswahlmarker | Bereich öffnen |
+| Kopf | In welchem Arbeitsbereich arbeite ich? | Arbeitsbereichsname, aktueller Bereich; keine erfundene Kennzahl | Ansicht / Hell-Dunkel wechseln |
+| Demo-Banner | Welche Daten darf ich eingeben? | tatsächlicher Demo-Zustand, keine Kennzahl | Hinweis lesen |
+| Handy-Leiste | Wie komme ich zum Bereich? | aktive Position, Sachfarben | Bereich öffnen |
+| CardHead | Was zeigt die Karte? | Titel, Quelle, echter Zähler optional | höchstens eine übergebene Aktion |
+| Metric | Wie groß ist der Wert? | echte Zahl ≥ 32 px mit Einheit, einmaliges Zählwerk | keine eigene Aktion |
+| Timeline | Liegt ein Termin vor oder nach heute? | feste Heute-Marke, vergangene Termine links, ferne am Rand gekennzeichnet | keine erfundene Aktion |
+| Segments / Reveal | Welche Ansicht / welcher Auftritt? | kontrollierte Auswahl; Rahmen → Kopf → Zahl → Bild → Aktion | Auswahl ändern |
+
+- [x] Schalter und Startskripte; Tokens dunkel/hell mit AA-Prüfung.
+- [x] Sechs Bausteine samt Props/Beispielen und sinnvollen Randfalltests.
+- [x] Rahmen und Einstellungs-Umschalter; Tagwerk-Inhalt erhalten.
+- [x] Vertragsprüfungen, Sicht 1920×1080 hell/dunkel und 390 px, Bildvergleich Tagwerk.
+- [x] Bericht mit Belegen, drei Schwächen, Bereinigung; nur Bereich-A-Pfade committen, kein Push.
+
+Lieferung/Props: [README](../../src/instrument/grundlage/README.md).
+Prüfungen, Bilder, Bewertung und Grenzen: [Bereich-A-Bericht](../../src/instrument/grundlage/PRUEFUNG.md).
+Typecheck/Lint/Source bestanden, 152 Kontrastpaare; Vitest 246/246, zusätzlicher Node-Starttest 12/12.
+Eigene Bewertung Welle 1: 9/10; Gesamtseiten erst Welle 2. Kein Push.
+
+Anmeldung, Einstellungs-Innenleben und Zustände bleiben für Welle 2. Kein neuer Anbieter-/Datenanschluss.
+
+### Browser-Findings A
+
+- Port 5231, Harness `watch: null` / HMR aus: während der Implementierung bereits geladene Module blieben im
+  Serverspeicher. Wechsel zu Einstellungen meldete fehlendes `useDesign`, obwohl der Export im Quelltext stand.
+  Ursache: gemischter alter/neuer Modulstand, nicht fehlender Export. Eigenen Server neu gestartet und normal neu
+  geladen. Nach jedem weiteren Quellschritt Server neu starten; denselben Fehler nicht blind wiederholen.
+- Erster Hintergrund-Tab wurde vom Host ersetzt; Tabs neu gelesen und danach IDs ausdrücklich mitgegeben.
+- Tagwerk-Dunkel-Aufnahmen vor und nach Umbau nach Serverneustart bytegleich (`cmp`, Exit 0).
+  Synthetische Person heißt Martha Beispielwald, nicht Martha Sommer; falscher Wartezielname
+  verursachte nur eine Prüfzeitüberschreitung. Künftig tatsächliche Überschrift aus Snapshot benutzen.
+- Handy-Kopf zunächst zu eng: Ansichtsnamen brachen mitten im Wort. Wahl in eigene volle Zeile gelegt;
+  390-px-Bilder danach angesehen, `scrollWidth === 390`. Timeline-Achsenlabels trennten anfangs nicht sauber;
+  Heute-Beschriftung rechts von der unveränderten 25-%-Marke, danach 13,203125 px Abstand.
+- Randfälle überfällig/heute/+88 Tage und Sommerzeit geprüft, Segments per Tastatur, reduzierte Bewegung,
+  Zählwerk-Endwert und 0 laufende Animationen nach Auftritt. Ellipsen-Zählung: Bausteine/Einstellungen 0;
+  Übersicht 1 bestehende Dokument-Unterzeile (Bereich B, Welle 2). Keine vollständige App-Abnahme behauptet.
+- Finale Bilder unter `.local/instrument-welle1/`, genaue Zuordnung im Bereich-A-Bericht. Temporäre Prüfansicht
+  gelöscht, eigene Vite-App beendet, Port 5231 frei und Browser-Werkzeug meldet keine verbleibenden Tabs.

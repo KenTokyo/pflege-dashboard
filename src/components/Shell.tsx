@@ -6,6 +6,8 @@ import { baseName, initials } from '../lib/format';
 import { BrandMark } from './Brand';
 import { ThemeToggle } from './ThemeToggle';
 import { StaffViewSwitch } from '../staff/StaffViewSwitch';
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentShell } from '../instrument/rahmen/InstrumentShell';
 
 const NAV = [
   { to: '/', label: 'Übersicht', icon: LayoutGrid, exact: true },
@@ -81,8 +83,10 @@ function UserMenu({ placement }: { placement: 'up' | 'down' }) {
 }
 
 export function Shell({ children, mainClassName = '' }: { children: ReactNode; mainClassName?: string }) {
+  const { design } = useDesign();
   const { workspace } = useWorkspace();
   const pathname = useLocation({ select: (location) => location.pathname });
+  if (design === 'instrument') return <InstrumentShell mainClassName={mainClassName}>{children}</InstrumentShell>;
   return (
     <div className="shell">
       <nav className="rail" aria-label="Hauptnavigation">

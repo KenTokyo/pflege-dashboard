@@ -1,0 +1,72 @@
+/* Eine Akzentfarbe, sechs Sachfarben. AA einschließlich Text 3 auf allen vier Flächen. */
+:root[data-design='instrument'] {
+  --bg: #1a1a1a;
+  --surface: #0e0e0e;
+  --surface2: #1f1f1f;
+  --sunken: #141414;
+  --text: #f2f2f2;
+  --text-muted: #b2b2b2;
+  --text-faint: #969696;
+  --border: #2b2b2b;
+  --border-strong: #777777;
+  --accent: #7ca9ff;
+  --accent-text: #a5c4ff;
+  --accent-soft: rgba(124, 169, 255, 0.12);
+  --on-accent: #101b30;
+  --danger: #f28a7b;
+  --danger-soft: rgba(242, 138, 123, 0.1);
+  --warning: #f5c76b;
+  --warning-soft: rgba(245, 199, 107, 0.1);
+  --success: #7ee2b8;
+  --success-soft: rgba(126, 226, 184, 0.1);
+  --thing-person: #7ee2b8;
+  --thing-deadline: #f5c76b;
+  --thing-task: #9ab8ff;
+  --thing-document: #c8b48a;
+  --thing-conversation: #5cc8d6;
+  --thing-ai: #b5c8dc;
+  --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-body);
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  --radius: 20px;
+  --radius-sm: 10px;
+  --icon-stroke: 1.5;
+  --focus: #a5c4ff;
+  --banner-bg: #232018;
+  --banner-text: #f5c76b;
+  --shadow: none;
+  --in-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --in-change: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root[data-design='instrument'][data-theme='hell'] {
+  --bg: #e9e9e7;
+  --surface: #ffffff;
+  --surface2: #efefec;
+  --sunken: #f6f6f4;
+  --text: #141414;
+  --text-muted: #51514e;
+  --text-faint: #62625e;
+  --border: #dcdcd7;
+  --border-strong: #82827b;
+  --accent: #2856c5;
+  --accent-text: #254fb8;
+  --accent-soft: rgba(40, 86, 197, 0.08);
+  --on-accent: #ffffff;
+  --danger: #b33529;
+  --danger-soft: rgba(179, 53, 41, 0.07);
+  --warning: #805300;
+  --warning-soft: rgba(128, 83, 0, 0.07);
+  --success: #216b49;
+  --success-soft: rgba(33, 107, 73, 0.07);
+  --thing-person: #216b49;
+  --thing-deadline: #805300;
+  --thing-task: #385eb6;
+  --thing-document: #766038;
+  --thing-conversation: #176b78;
+  --thing-ai: #4d6680;
+  --focus: #2856c5;
+  --banner-bg: #f3eddf;
+  --banner-text: #805300;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.1);
+}

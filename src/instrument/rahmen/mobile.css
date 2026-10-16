@@ -1,0 +1,143 @@
+@media (max-width: 1050px) {
+  [data-design='instrument'] .in-shell {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  [data-design='instrument'] .in-topbar,
+  [data-design='instrument'] .in-main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .in-shell {
+    display: block;
+    padding: 0 0 calc(76px + env(safe-area-inset-bottom));
+  }
+
+  [data-design='instrument'] .in-sidebar {
+    display: none;
+  }
+
+  [data-design='instrument'] .in-topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(3, 44px);
+    align-items: stretch;
+    gap: 10px 6px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  [data-design='instrument'] .in-context {
+    font-size: 12px;
+    grid-column: 1;
+    grid-row: 1;
+    align-content: center;
+    gap: 4px;
+  }
+
+  [data-design='instrument'] .in-topbar-actions {
+    display: contents;
+  }
+
+  [data-design='instrument'] .in-view-switch {
+    min-width: 0;
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  [data-design='instrument'] .in-view-switch a {
+    flex: 1;
+    min-height: 44px;
+    padding: 4px 5px;
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  [data-design='instrument'] .in-view-switch a span {
+    max-width: none;
+  }
+
+  [data-design='instrument'] .in-icon-button {
+    width: 44px;
+    height: 44px;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  [data-design='instrument'] .in-mobile-settings {
+    display: inline-flex;
+    grid-column: 3;
+  }
+
+  [data-design='instrument'] .in-mobile-account {
+    display: block;
+    grid-column: 4;
+    grid-row: 1;
+  }
+
+  [data-design='instrument'] .in-mobile-account .in-account-name,
+  [data-design='instrument'] .in-mobile-account summary > .in-icon {
+    display: none;
+  }
+
+  [data-design='instrument'] .in-mobile-account summary {
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+
+  [data-design='instrument'] .in-mobile-account .in-account-panel {
+    top: calc(100% + 10px);
+    bottom: auto;
+    right: 0;
+    left: auto;
+  }
+
+  [data-design='instrument'] .in-main {
+    padding: 20px 16px 24px;
+  }
+
+  [data-design='instrument'] .in-bottomnav {
+    position: fixed;
+    z-index: 25;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  [data-design='instrument'] .in-bottomnav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 50px;
+    padding: 4px;
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: background 180ms;
+  }
+
+  [data-design='instrument'] .in-bottomnav a[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design='instrument'] .in-nav-marker,
+  [data-design='instrument'] .in-icon-button {
+    transition: none;
+  }
+}

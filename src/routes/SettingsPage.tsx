@@ -1,6 +1,7 @@
 import { Clock, Globe, Info, LogOut, Moon, Pencil, RotateCcw, ShieldCheck, Sun } from 'lucide-react';
 import { useState } from 'react';
-import { useTheme } from '../app/ThemeProvider';
+import { useDesign, useTheme } from '../app/ThemeProvider';
+import { DesignSwitch } from '../instrument/grundlage/DesignSwitch';
 import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { Underline } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
@@ -150,6 +151,7 @@ function ModelList({ models, defaultId }: { models: ModelRow[]; defaultId: strin
 export function SettingsPage() {
   useDocumentTitle('Einstellungen');
   const { theme, setTheme } = useTheme();
+  const { design, setDesign } = useDesign();
   const { serverSession, signOut } = useAuth();
   const { role, workspace } = useWorkspace();
   const settings = useAgentSettings();
@@ -222,6 +224,7 @@ export function SettingsPage() {
             <div className="card-head">
               <h2 id="look-title">Darstellung und Sitzung</h2>
             </div>
+            <DesignSwitch value={design} onChange={setDesign} />
             <div className="set-row">
               <div>
                 <strong>Design</strong>

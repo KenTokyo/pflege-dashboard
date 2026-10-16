@@ -1,0 +1,38 @@
+@keyframes instrument-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+    filter: blur(12px);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes instrument-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+[data-design='instrument'] .in-reveal {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  min-width: 0;
+  animation: instrument-reveal 540ms var(--in-ease) var(--in-delay, 0ms) backwards;
+}
+
+[data-design='instrument'] .in-reveal[data-stage='data'] {
+  animation-duration: 650ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design='instrument'] .in-reveal {
+    animation: instrument-fade 160ms linear backwards;
+  }
+}

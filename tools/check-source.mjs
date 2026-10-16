@@ -16,9 +16,10 @@ function files(dir, re) {
 
 // ---------- Kontrast ----------
 const tokensCss = read('src/styles/tokens.css');
-function block(selector) {
-  const start = tokensCss.indexOf(selector);
-  const body = tokensCss.slice(tokensCss.indexOf('{', start) + 1, tokensCss.indexOf('}', start));
+function block(selector, css = tokensCss) {
+  const start = css.indexOf(selector);
+  if (start < 0) throw new Error(`Token-Block fehlt: ${selector}`);
+  const body = css.slice(css.indexOf('{', start) + 1, css.indexOf('}', start));
   return Object.fromEntries([...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
 }
 const dark = block(':root {');
@@ -92,6 +93,41 @@ for (const [name, t] of Object.entries(themes)) {
   if (rt < 4.5) problems.push(`Kontrast ${name}: Klebeband-Text = ${rt.toFixed(2)} < 4.5`);
 }
 
+// ---------- Instrument: vollständige eigene Palette, nicht aus Tagwerk geerbt ----------
+const instrumentCss = read('src/instrument/grundlage/tokens.css');
+const instrumentDark = block(":root[data-design='instrument'] {", instrumentCss);
+const instrumentThemes = {
+  dunkel: instrumentDark,
+  hell: { ...instrumentDark, ...block(":root[data-design='instrument'][data-theme='hell']", instrumentCss) },
+};
+const thingTokens = ['person', 'deadline', 'task', 'document', 'conversation', 'ai'].map((thing) => `thing-${thing}`);
+for (const [name, tokens] of Object.entries(instrumentThemes)) {
+  const check = (fg, bg, min = 4.5, base) => {
+    if (!tokens[fg] || !tokens[bg]) {
+      problems.push(`Instrument ${name}: Token fehlt ${fg}/${bg}`);
+      return;
+    }
+    const back = base ? over(tokens[bg], tokens[base]) : rgba(tokens[bg]).slice(0, 3);
+    const result = ratio(rgba(tokens[fg]).slice(0, 3), back);
+    pairs += 1;
+    if (result < min) problems.push(`Instrument ${name}: ${fg}/${bg} = ${result.toFixed(2)} < ${min}`);
+  };
+  for (const surface of ['bg', 'surface', 'surface2', 'sunken']) {
+    for (const text of ['text', 'text-muted', 'text-faint', 'accent-text', ...thingTokens]) check(text, surface);
+  }
+  for (const state of ['danger', 'warning', 'success']) {
+    check(state, 'surface');
+    check(state, `${state}-soft`, 4.5, 'surface');
+  }
+  check('accent-text', 'accent-soft', 4.5, 'surface');
+  check('on-accent', 'accent');
+  check('banner-text', 'banner-bg');
+  check('text-muted', 'banner-bg');
+  check('border-strong', 'surface', 3);
+  check('focus', 'bg', 3);
+  check('focus', 'surface', 3);
+}
+
 // ---------- Ruhiger Leerlauf und verbotene Muster ----------
 const src = files('src', /\.(tsx?|css)$/);
 const RULES = [
@@ -117,7 +153,8 @@ for (const f of src) {
   if (/sessionStorage/.test(s) && !authStorage && f !== 'src/services/supabaseBackend.ts') problems.push(`sessionStorage außerhalb des Anmeldespeichers in ${f}`);
   if (/persistSession:\s*true/.test(s) && f !== 'src/services/supabaseBackend.ts') problems.push(`persistSession außerhalb des Auth-Adapters in ${f}`);
   const lines = s.split('\n').length;
-  if (lines > 1200) problems.push(`${f} hat ${lines} Zeilen (> 1200)`);
+  const limit = f.startsWith('src/instrument/') ? 400 : 1200;
+  if (lines > limit) problems.push(`${f} hat ${lines} Zeilen (> ${limit})`);
   // Vertrag: Abfragen nie bei Fokus/Wiederverbindung im Hintergrund nachladen.
 }
 if (!/refetchOnWindowFocus:\s*false/.test(read('src/data/queries.ts'))) problems.push('refetchOnWindowFocus nicht abgeschaltet');
@@ -128,7 +165,7 @@ if (!/export const API_BASE = '\/api';/.test(read('src/services/api.ts'))) probl
 for (const f of src) if (/127\.0\.0\.1|localhost:\d+/.test(read(f))) problems.push(`fester lokaler Host in ${f}`);
 
 // ---------- Schriftgrößen ----------
-for (const f of files('src/styles', /\.css$/)) {
+for (const f of [...files('src/styles', /\.css$/), ...files('src/instrument', /\.css$/)]) {
   for (const m of read(f).matchAll(/font-size:\s*([\d.]+)px/g)) if (Number(m[1]) < 12) problems.push(`Schrift ${m[1]}px < 12px in ${f}`);
 }
 for (const f of src.filter((x) => x.endsWith('.tsx'))) {

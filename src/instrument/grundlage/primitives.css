@@ -1,0 +1,175 @@
+[data-design='instrument'] .in-icon {
+  display: block;
+  flex: none;
+  vertical-align: middle;
+}
+
+[data-design='instrument'] .in-card {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+[data-design='instrument'] .in-card-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-design='instrument'] .in-icon-tile {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--in-thing) 26%, var(--border));
+  background: color-mix(in srgb, var(--in-thing) 10%, var(--sunken));
+}
+
+[data-design='instrument'] .in-card-titles {
+  flex: 1;
+  min-width: 100px;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .in-card-titles h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+[data-design='instrument'] .in-card-titles p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+[data-design='instrument'] .in-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font: 12px/1.6 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+[data-design='instrument'] .in-card-end {
+  margin-left: auto;
+  max-width: 100%;
+}
+
+[data-design='instrument'] .in-metric {
+  min-width: 0;
+}
+
+[data-design='instrument'] .in-metric-label,
+[data-design='instrument'] .in-metric-explanation {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .in-metric-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 8px 0;
+}
+
+[data-design='instrument'] .in-metric-value {
+  font: 500 34px/1.1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .in-metric-unit {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .in-segments {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(var(--in-segments), minmax(0, 1fr));
+  max-width: 100%;
+  isolation: isolate;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 3px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-segments button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 36px;
+  gap: 7px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  transition: color 180ms;
+}
+
+[data-design='instrument'] .in-segments button > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+[data-design='instrument'] .in-segments button[aria-pressed='true'] {
+  color: var(--text);
+}
+
+[data-design='instrument'] .in-segments button:disabled {
+  cursor: not-allowed;
+  color: var(--text-faint);
+}
+
+[data-design='instrument'] .in-segment-thumb {
+  position: absolute;
+  z-index: -1;
+  left: 3px;
+  top: 3px;
+  bottom: 3px;
+  width: calc((100% - 6px) / var(--in-segments));
+  transform: translateX(calc(var(--in-selected) * 100%));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  transition: transform 180ms var(--in-change);
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .in-segments button {
+    min-height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design='instrument'] .in-segment-thumb {
+    transition: none;
+  }
+}
