@@ -1,0 +1,219 @@
+[data-design='instrument'] .is-dialog {
+  width: min(1020px, calc(100vw - 64px));
+  max-width: none;
+  margin: auto;
+  max-height: calc(100dvh - 64px);
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  color: var(--text);
+  background: var(--surface);
+  font-family: var(--font-body);
+  box-shadow: var(--shadow);
+}
+
+[data-design='instrument'] .is-dialog::backdrop {
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+}
+
+[data-design='instrument'] .is-dialog-layout {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 66px);
+}
+
+[data-design='instrument'] .is-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex: none;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-design='instrument'] .is-dialog-head h2 {
+  margin: 3px 0 0;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .is-dialog-head .is-kicker {
+  margin: 0;
+}
+
+[data-design='instrument'] .is-close {
+  width: 38px;
+  padding: 8px;
+  flex: none;
+}
+
+[data-design='instrument'] .is-dialog-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+[data-design='instrument'] .is-case-facts {
+  display: grid;
+  grid-template-columns: 130px minmax(150px, 0.7fr) minmax(200px, 1.3fr);
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .is-case-facts strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-design='instrument'] .is-case-facts p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+[data-design='instrument'] .is-dialog-section {
+  min-width: 0;
+}
+
+[data-design='instrument'] .is-case-task-details {
+  list-style: none;
+  margin: 0;
+  padding: 0 20px;
+}
+
+[data-design='instrument'] .is-case-task-details > li {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+[data-design='instrument'] .is-case-task-details .in-timeline {
+  margin-top: 10px;
+}
+
+[data-design='instrument'] .is-case-task-details .in-timeline li {
+  padding: 8px 0;
+  border: 0;
+}
+
+[data-design='instrument'] .is-case-task-details p,
+[data-design='instrument'] .is-case-task-details small {
+  margin: 4px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+[data-design='instrument'] .is-linked-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+[data-design='instrument'] .is-linked-grid > section + section {
+  border-left: 1px solid var(--border);
+}
+
+[data-design='instrument'] .is-linked-list {
+  margin: 0;
+  padding: 0 20px;
+  list-style: none;
+}
+
+[data-design='instrument'] .is-linked-list a {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .is-linked-list a:hover {
+  color: var(--accent-text);
+}
+
+[data-design='instrument'] .is-linked-list a > span {
+  flex: 1;
+}
+
+[data-design='instrument'] .is-linked-list small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-detail-empty {
+  padding: 16px 20px;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .is-dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  flex: none;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .is-dialog {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  [data-design='instrument'] .is-dialog-layout {
+    height: 100%;
+    max-height: none;
+  }
+
+  [data-design='instrument'] .is-dialog-head {
+    padding: max(16px, env(safe-area-inset-top)) 16px 16px;
+  }
+
+  [data-design='instrument'] .is-case-facts {
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+
+  [data-design='instrument'] .is-case-facts > p {
+    grid-column: 1 / -1;
+  }
+
+  [data-design='instrument'] .is-linked-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-design='instrument'] .is-linked-grid > section + section {
+    border-left: 0;
+  }
+
+  [data-design='instrument'] .is-dialog-foot {
+    padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+  }
+
+  [data-design='instrument'] .is-dialog-foot .is-primary {
+    flex: 1;
+  }
+}

@@ -1,3 +1,5 @@
+import { useDesign } from '../app/ThemeProvider';
+import { InstrumentStaffPage } from '../instrument/sachbearbeitung/InstrumentStaffPage';
 import { AlarmClock, ArrowDownWideNarrow, ArrowUpRight, BriefcaseBusiness, Check, MessageSquareText, RefreshCw, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Shell } from '../components/Shell';
@@ -14,6 +16,11 @@ import { NewConversationDialog } from './chat/NewConversationDialog';
 const integer = new Intl.NumberFormat('de-DE');
 
 export function StaffPage() {
+  const { design } = useDesign();
+  return design === 'instrument' ? <InstrumentStaffPage /> : <TagwerkStaffPage />;
+}
+
+function TagwerkStaffPage() {
   useDocumentTitle('Sachbearbeiter-Test');
   const people = useCareRecipients();
   const tasks = useOpenTasks();

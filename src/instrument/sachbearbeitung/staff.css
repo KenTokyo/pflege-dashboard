@@ -1,0 +1,269 @@
+[data-design='instrument'] .is-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+[data-design='instrument'] .is-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0 4px;
+}
+
+[data-design='instrument'] .is-page-head h1 {
+  margin: 4px 0 6px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+[data-design='instrument'] .is-page-head p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .is-kicker {
+  color: var(--text-faint);
+  font: 12px/1.5 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+[data-design='instrument'] .is-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  font: 500 13px/1.4 var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms, transform 180ms var(--in-change);
+}
+
+[data-design='instrument'] .is-button:hover {
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .is-button:active {
+  transform: translateY(1px);
+}
+
+[data-design='instrument'] .is-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+[data-design='instrument'] .is-primary:hover {
+  background: color-mix(in srgb, var(--accent) 88%, var(--text));
+}
+
+[data-design='instrument'] .is-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+[data-design='instrument'] .is-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+[data-design='instrument'] .is-metrics > div {
+  padding: 18px 20px;
+}
+
+[data-design='instrument'] .is-metrics > div + div {
+  border-left: 1px solid var(--border);
+}
+
+[data-design='instrument'] .is-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 20px;
+}
+
+[data-design='instrument'] .is-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .is-select select {
+  width: 230px;
+  max-width: 100%;
+  min-width: 0;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  color: var(--text);
+  background: var(--sunken);
+  font: 13px var(--font-body);
+}
+
+[data-design='instrument'] .is-workbench-slot {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .is-workbench-slot summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  list-style: none;
+}
+
+[data-design='instrument'] .is-workbench-slot summary::-webkit-details-marker {
+  display: none;
+}
+
+[data-design='instrument'] .is-workbench-slot summary > svg:last-child {
+  margin-left: auto;
+  transition: transform 180ms;
+}
+
+[data-design='instrument'] .is-workbench-slot[open] summary > svg:last-child {
+  transform: rotate(90deg);
+}
+
+[data-design='instrument'] .is-workbench {
+  padding: 0 20px 16px;
+}
+
+[data-design='instrument'] .is-workbench form {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+[data-design='instrument'] .is-workbench input {
+  min-width: 0;
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 14px var(--font-body);
+}
+
+[data-design='instrument'] .is-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+[data-design='instrument'] .is-examples button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 9px;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  text-align: left;
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-filter-feedback {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+[data-design='instrument'] .is-filter-feedback[data-error='true'] {
+  color: var(--danger);
+}
+
+[data-design='instrument'] .is-muted {
+  margin: 8px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+[data-design='instrument'] .is-board-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .is-page-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  [data-design='instrument'] .is-page-head h1 {
+    font-size: 26px;
+  }
+
+  [data-design='instrument'] .is-metrics > div {
+    padding: 12px;
+  }
+
+  [data-design='instrument'] .is-metrics .in-metric-explanation {
+    font-size: 12px;
+  }
+
+  [data-design='instrument'] .is-toolbar {
+    padding: 12px 16px;
+  }
+
+  [data-design='instrument'] .is-select {
+    width: 100%;
+  }
+
+  [data-design='instrument'] .is-select select {
+    width: 100%;
+  }
+
+  [data-design='instrument'] .is-workbench form {
+    flex-direction: column;
+  }
+
+  [data-design='instrument'] .is-button,
+  [data-design='instrument'] .is-examples button {
+    min-height: 44px;
+  }
+
+  [data-design='instrument'] .is-workbench {
+    padding: 0 16px 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .is-toolbar .in-segments {
+    width: 100%;
+  }
+
+  [data-design='instrument'] .is-toolbar .in-segments button {
+    padding-inline: 6px;
+    font-size: 12px;
+  }
+}

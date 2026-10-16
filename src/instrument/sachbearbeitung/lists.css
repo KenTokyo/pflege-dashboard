@@ -1,0 +1,246 @@
+[data-design='instrument'] .is-case-head,
+[data-design='instrument'] .is-case-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(260px, 1.4fr) minmax(140px, 0.5fr) 116px;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 20px;
+}
+
+[data-design='instrument'] .is-case-head {
+  padding-block: 12px;
+  color: var(--text-faint);
+  font: 12px/1.5 var(--font-mono);
+}
+
+[data-design='instrument'] .is-case-row {
+  border-top: 1px solid var(--border);
+  transition: background 180ms;
+}
+
+[data-design='instrument'] .is-case-row:hover,
+[data-design='instrument'] .is-task-list > li:hover {
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .is-person {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+[data-design='instrument'] .is-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--thing-person) 30%, var(--border));
+  color: var(--thing-person);
+  background: color-mix(in srgb, var(--thing-person) 10%, var(--surface));
+  font: 13px var(--font-mono);
+}
+
+[data-design='instrument'] .is-person h3,
+[data-design='instrument'] .is-task-list h3 {
+  margin: 0 0 5px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .is-person p,
+[data-design='instrument'] .is-task-person p {
+  margin: 0 0 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .is-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--thing-task);
+  font: 12px/1.5 var(--font-mono);
+}
+
+[data-design='instrument'] .is-priority i {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+[data-design='instrument'] .is-priority-high i {
+  border-radius: 0;
+  transform: rotate(45deg);
+  background: currentColor;
+}
+
+[data-design='instrument'] .is-priority-urgent i {
+  width: 9px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(50% 0, 100% 40%, 100% 100%, 0 100%, 0 40%);
+  background: currentColor;
+}
+
+[data-design='instrument'] .is-priority-low i {
+  height: 3px;
+  border-radius: 0;
+}
+
+[data-design='instrument'] .is-deadline {
+  min-width: 0;
+}
+
+[data-design='instrument'] .is-deadline .in-timeline li {
+  padding: 0;
+  border: 0;
+}
+
+[data-design='instrument'] .is-deadline .in-timeline-axis {
+  padding-bottom: 6px;
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-deadline .in-timeline-caption {
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-deadline .in-timeline-caption strong {
+  overflow-wrap: anywhere;
+}
+
+[data-design='instrument'] .is-deadline .in-timeline-detail {
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-case-counts {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+[data-design='instrument'] .is-case-counts > div {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 8px;
+}
+
+[data-design='instrument'] .is-case-counts dt {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+[data-design='instrument'] .is-case-counts dd {
+  min-width: 18px;
+  margin: 0;
+  font: 15px/1.4 var(--font-mono);
+  text-align: right;
+}
+
+[data-design='instrument'] .is-no-deadline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+[data-design='instrument'] .is-no-deadline small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-muted);
+}
+
+[data-design='instrument'] .is-task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+[data-design='instrument'] .is-task-list > li {
+  display: grid;
+  grid-template-columns: minmax(200px, 1fr) minmax(250px, 1.5fr) 116px;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  transition: background 180ms;
+}
+
+@media (max-width: 1150px) {
+  [data-design='instrument'] .is-case-head {
+    display: none;
+  }
+
+  [data-design='instrument'] .is-case-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  }
+
+  [data-design='instrument'] .is-case-row > .is-button {
+    justify-self: end;
+  }
+
+  [data-design='instrument'] .is-case-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  [data-design='instrument'] .is-case-row,
+  [data-design='instrument'] .is-task-list > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 20px 16px;
+  }
+
+  [data-design='instrument'] .is-case-row > .is-button {
+    justify-self: stretch;
+  }
+
+  [data-design='instrument'] .is-case-counts {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  [data-design='instrument'] .is-case-counts > div {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 2px;
+  }
+}
+
+[data-design='instrument'] .is-list-axis {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+[data-design='instrument'] .is-list-axis b {
+  position: absolute;
+  left: 25%;
+  padding-left: 6px;
+  color: var(--accent-text);
+  font-weight: 500;
+}
+
+@media (min-width: 1151px) {
+  [data-design='instrument'] .is-cases .in-timeline-axis {
+    display: none;
+  }
+
+  [data-design='instrument'] .is-case-row {
+    min-height: 96px;
+  }
+}
