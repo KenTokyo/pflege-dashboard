@@ -1,6 +1,7 @@
 /* Klassen nur aus src/ lesen – gleich für Produkt-Build und Prüf-Harness (anderer Vite-Root). */
 @import 'tailwindcss' source('../');
 @import './tokens.css';
+@import './instrument.css';
 
 /* Tailwind-Utilities lesen dieselben semantischen Tokens (ein Tokensystem für beide Themes). */
 @theme inline {

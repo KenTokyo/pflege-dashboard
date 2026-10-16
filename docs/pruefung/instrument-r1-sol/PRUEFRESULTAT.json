@@ -1,0 +1,139 @@
+[
+  {
+    "label": "Tagwerk ist Erstbesuch-Standard",
+    "passed": true
+  },
+  {
+    "label": "Instrument über Einstellungen gewählt",
+    "passed": true
+  },
+  {
+    "label": "Vorhandene Datensätze und Countdown",
+    "passed": true
+  },
+  {
+    "label": "Tooltip per Maus sichtbar und innerhalb der Fläche",
+    "passed": true
+  },
+  {
+    "label": "Zweiter Akzent ändert Auswahl, erhält Sachfarben",
+    "passed": true
+  },
+  {
+    "label": "Dokumente, hell: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Aufgaben, hell: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Gespräche, hell: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Einstellungen, hell: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Sachbearbeiter-Test, hell: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Dokumente, dunkel: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Aufgaben, dunkel: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Gespräche, dunkel: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Einstellungen, dunkel: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Sachbearbeiter-Test, dunkel: Rahmen und Breite",
+    "passed": true
+  },
+  {
+    "label": "Frage öffnet Gespräch und endet mit synthetischer Antwort",
+    "passed": true
+  },
+  {
+    "label": "1280×800 ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Untere Dashboard-Karten am Laptop erreichbar",
+    "passed": true
+  },
+  {
+    "label": "390px dunkel ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Handy-Menü und Design-Einstellungen erreichbar",
+    "passed": true
+  },
+  {
+    "label": "Rückwechsel zu Tagwerk erhält Hell/Dunkel",
+    "passed": true
+  },
+  {
+    "label": "Designwahl und Theme überstehen Neuladen",
+    "passed": true
+  },
+  {
+    "label": "Handy Dokumente ohne Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Handy Aufgaben ohne Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Handy Gespräche ohne Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Gespräch auf Handy bleibt lesbar",
+    "passed": true
+  },
+  {
+    "label": "Handy-Menü mit Escape schließen",
+    "passed": true
+  },
+  {
+    "label": "lang: 390px ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "lang: 1920px ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "leer: 390px ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "leer: 1920px ohne seitlichen Überlauf",
+    "passed": true
+  },
+  {
+    "label": "Keine Browser-Laufzeitfehler",
+    "passed": true
+  },
+  {
+    "browser": "Google Chrome for Testing 155.0.8059.40",
+    "viewport": [
+      "1920×1080",
+      "1280×800",
+      "390×844"
+    ],
+    "reducedMotion": true
+  }
+]

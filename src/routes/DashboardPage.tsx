@@ -22,6 +22,8 @@ import { useAgentSettings, useCareRecipients, useConversations, useDocuments, us
 import { ageFrom, baseName, daysUntil, formatDate, formatLongDate, formatShortDate, greeting, initials, listWhen, relativeDays } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import type { CareRecipient, DocumentRow, TaskRow } from '../services/types';
+import { useTheme } from '../app/ThemeProvider';
+import { InstrumentDashboard } from '../components/instrument/InstrumentDashboard';
 
 const listIn = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
 const itemIn = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.2, 0.7, 0.3, 1] as const } } };
@@ -262,6 +264,11 @@ export function TaskRowView({ task, people, now }: { task: TaskRow; people: Care
 }
 
 export function DashboardPage() {
+  const { design } = useTheme();
+  return design === 'instrument' ? <InstrumentDashboard /> : <TagwerkDashboard />;
+}
+
+function TagwerkDashboard() {
   const { profile } = useWorkspace();
   useDocumentTitle('Übersicht');
   const reduce = useReducedMotion();

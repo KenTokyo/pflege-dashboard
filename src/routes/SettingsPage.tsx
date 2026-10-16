@@ -149,7 +149,7 @@ function ModelList({ models, defaultId }: { models: ModelRow[]; defaultId: strin
 
 export function SettingsPage() {
   useDocumentTitle('Einstellungen');
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, design, setDesign } = useTheme();
   const { serverSession, signOut } = useAuth();
   const { role, workspace } = useWorkspace();
   const settings = useAgentSettings();
@@ -221,6 +221,16 @@ export function SettingsPage() {
           <section className="card" aria-labelledby="look-title">
             <div className="card-head">
               <h2 id="look-title">Darstellung und Sitzung</h2>
+            </div>
+            <div className="set-row">
+              <div>
+                <strong>Design-Option</strong>
+                <span className="small muted">Tagwerk oder die klare Instrument-Ansicht.</span>
+              </div>
+              <div className="segmented" role="group" aria-label="Design-Option wählen">
+                <button type="button" aria-pressed={design === 'tagwerk'} onClick={() => setDesign('tagwerk')}>Tagwerk</button>
+                <button type="button" aria-pressed={design === 'instrument'} onClick={() => setDesign('instrument')}>Instrument</button>
+              </div>
             </div>
             <div className="set-row">
               <div>

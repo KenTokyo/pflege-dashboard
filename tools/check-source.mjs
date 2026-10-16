@@ -16,13 +16,29 @@ function files(dir, re) {
 
 // ---------- Kontrast ----------
 const tokensCss = read('src/styles/tokens.css');
-function block(selector) {
-  const start = tokensCss.indexOf(selector);
-  const body = tokensCss.slice(tokensCss.indexOf('{', start) + 1, tokensCss.indexOf('}', start));
+function block(selector, source = tokensCss) {
+  const start = source.indexOf(selector);
+  if (start < 0) throw new Error(`Tokenblock fehlt: ${selector}`);
+  const body = source.slice(source.indexOf('{', start) + 1, source.indexOf('}', start));
   return Object.fromEntries([...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]));
 }
 const dark = block(':root {');
 const themes = { dunkel: dark, hell: { ...dark, ...block(":root[data-theme='hell']") } };
+const instrumentCss = read('src/styles/instrument.css');
+const instrumentDark = block(":root[data-design='instrument'] {", instrumentCss);
+themes['instrument-dunkel'] = instrumentDark;
+themes['instrument-hell'] = { ...instrumentDark, ...block(":root[data-design='instrument'][data-theme='hell']", instrumentCss) };
+
+function colorToken(tokens, name) {
+  let value = tokens[name];
+  for (let depth = 0; depth < 8 && /var\(--/.test(value); depth++) {
+    value = value.replace(/var\(--([\w-]+)\)/g, (_, key) => tokens[key]);
+  }
+  // Instrument leitet Akzentflächen aus genau einer Akzentfarbe ab.
+  const mix = /^color-mix\(in srgb, (#[\da-f]+) ([\d.]+)%, transparent\)$/i.exec(value);
+  if (mix) return `rgba(${rgba(mix[1]).slice(0, 3).join(',')},${Number(mix[2]) / 100})`;
+  return value;
+}
 
 function rgba(c) {
   if (c.startsWith('#')) {
@@ -79,13 +95,22 @@ const PAIRS = [
 ];
 let pairs = 0;
 for (const [name, t] of Object.entries(themes)) {
+  for (const key of Object.keys(t)) t[key] = colorToken(t, key);
   for (const [fg, bg, base, min, why] of PAIRS) {
     const back = base ? over(t[bg], t[base]) : rgba(t[bg]).slice(0, 3);
     const r = ratio(rgba(t[fg]).slice(0, 3), back);
     pairs += 1;
     if (r < min) problems.push(`Kontrast ${name}: ${fg} auf ${bg}${base ? `/${base}` : ''} = ${r.toFixed(2)} < ${min} (${why})`);
   }
-  // Klebeband: fester dunkler Text auf Marker 80 % mit Weiß gemischt (app.css .tape).
+  if (name.startsWith('instrument')) {
+    for (const fg of ['thing-person', 'thing-deadline', 'thing-document', 'thing-task', 'thing-conversation']) {
+      const r = ratio(rgba(t[fg]), rgba(t.surface));
+      pairs += 1;
+      if (r < 4.5) problems.push(`Kontrast ${name}: ${fg} auf Karte = ${r.toFixed(2)} < 4.5`);
+    }
+    continue;
+  }
+  // Tagwerk-Klebeband: fester dunkler Text auf Marker 80 % mit Weiß gemischt (app.css .tape).
   const tape = rgba(t.marker).slice(0, 3).map((v) => v * 0.8 + 255 * 0.2);
   const rt = ratio([0x1a, 0x17, 0x12], tape);
   pairs += 1;
