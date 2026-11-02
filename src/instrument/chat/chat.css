@@ -6,45 +6,45 @@
 
 [data-design='instrument'] .in-chat-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 10px;
   width: 100%;
   align-items: stretch;
   min-width: 0;
-  height: calc(100dvh - 138px);
-  min-height: 620px;
+  height: calc(100dvh - 97px);
+  min-height: 520px;
 }
 
 [data-design='instrument'] .in-chat-layout > .thread {
-  min-height: min(860px, calc(100dvh - 150px));
+  min-height: 0;
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 16px;
   background: var(--surface);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
 
 [data-design='instrument'] .in-chat-layout .thread-head {
-  padding: 18px 24px;
+  padding: 10px 16px 10px 20px;
   gap: 16px;
-  align-items: flex-start;
+  align-items: center;
   background: var(--surface);
 }
 
 [data-design='instrument'] .in-thread-kicker {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-bottom: 9px;
-  color: var(--text-muted);
-  font: 12px/1.5 var(--font-mono);
+  gap: 6px;
+  margin-bottom: 1px;
+  color: var(--text-faint);
+  font: 11px/1.5 var(--font-mono);
   letter-spacing: 0.03em;
 }
 
 [data-design='instrument'] .thread-title h1 {
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 550;
-  line-height: 1.4;
+  line-height: 1.35;
   overflow: visible;
   text-overflow: clip;
   white-space: normal;
@@ -52,12 +52,13 @@
 }
 
 [data-design='instrument'] .in-chat-layout .thread-context {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 [data-design='instrument'] .in-chat-layout .thread-tools {
-  flex: 0 1 390px;
+  flex: 0 1 380px;
   flex-wrap: wrap;
+  gap: 6px;
   align-items: center;
 }
 
@@ -227,7 +228,7 @@
 
 @media (max-width: 1199px) {
   [data-design='instrument'] .in-chat-layout {
-    grid-template-columns: 260px minmax(0, 1fr);
+    grid-template-columns: 228px minmax(0, 1fr);
   }
 }
 

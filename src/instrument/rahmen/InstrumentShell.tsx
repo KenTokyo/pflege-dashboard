@@ -40,7 +40,7 @@ function Account() {
   return <details className="in-account" ref={ref}>
     <summary aria-label={`Konto: ${baseName(profile.displayName)}`}>
       <span className="in-avatar" aria-hidden="true">{initials(profile.displayName)}</span>
-      <span className="in-account-name">{baseName(profile.displayName)}<small>{role === 'admin' ? 'Verwaltung' : 'Mitglied'}</small></span>
+      <span className="in-account-name" title={baseName(profile.displayName)}>{baseName(profile.displayName)}<small>{role === 'admin' ? 'Verwaltung' : 'Mitglied'}</small></span>
       <Icon name="chevron" size={15} />
     </summary>
     <div className="in-account-panel">
@@ -80,7 +80,7 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
       <Reveal stage="frame">
         <Link to="/" className="in-brand" aria-label="Pflege-Dashboard, Übersicht">
           <span className="in-brand-mark"><Icon name="care" size={24} /></span>
-          <span>Pflege-Dashboard<small>{workspace.name}</small></span>
+          <span>Pflege-Dashboard<small title={workspace.name}>{workspace.name}</small></span>
         </Link>
       </Reveal>
       <div className="in-nav-label">Arbeitsbereich</div>
