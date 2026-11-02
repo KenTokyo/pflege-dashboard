@@ -168,7 +168,7 @@ describe('Echter Renderer, lesbare Textfassung und sichere Fehler', () => {
     const source = 'root = Answer([Unknown("unerlaubte Komponente")])';
     const turn: PendingTurn = { conversationId: SEED_CONVERSATION, clientRequestId: 'synthetisch', content: 'Frage', phase: 'failed',
       text: '', model: null, messageId: null, replayed: false, usage: null, activity: [], responseFormat: 'openui',
-      presentation: presentation(source, 'invalid'), error: new AppError('PRESENTATION_INVALID'),
+      presentation: presentation(source, 'invalid'), error: new AppError('PRESENTATION_INVALID'), suggestTitle: false, suggestedTitle: null,
     };
     const view = render(<PendingTurnView turn={turn} showUser={false} showAssistant responseFormat="openui"
       onFetchAgain={() => undefined} onSendNew={() => undefined} onReload={() => undefined} onEdit={() => undefined} onDismiss={() => undefined} />);
@@ -182,7 +182,7 @@ describe('Echter Renderer, lesbare Textfassung und sichere Fehler', () => {
     const source = 'root = Answer([Text("**Unterlagen** prüfen."), Notice("Einordnung", "Noch offen';
     const turn: PendingTurn = { conversationId: SEED_CONVERSATION, clientRequestId: 'synthetisch', content: 'Frage', phase: 'aborted',
       text: '', model: null, messageId: null, replayed: false, usage: null, activity: [], responseFormat: 'openui',
-      presentation: presentation(source, 'interrupted'), error: new AppError('REQUEST_ABORTED'),
+      presentation: presentation(source, 'interrupted'), error: new AppError('REQUEST_ABORTED'), suggestTitle: false, suggestedTitle: null,
     };
     render(<PendingTurnView turn={turn} showUser={false} showAssistant responseFormat="openui"
       onFetchAgain={() => undefined} onSendNew={() => undefined} onReload={() => undefined} onEdit={() => undefined} onDismiss={() => undefined} />);

@@ -12,6 +12,7 @@ import { GeminiProvider } from "./gemini.js";
 import { OPENUI_CATALOG_VERSION, parseOpenUi,
   type ChatPresentation } from '../../types/openui.js';
 import { reservedFormatInstructions } from './format-binding.js';
+import { suggestTitle } from './title.js';
 export type Dependencies = {
   env: Environment;
   platform: Platform;
@@ -97,6 +98,7 @@ export function chatHandler(deps: Dependencies) {
         !Array.isArray(data.attachmentIds) ||
         data.attachmentIds.length !== 0 ||
         (data.responseFormat !== undefined && data.responseFormat !== 'text' && data.responseFormat !== 'openui') ||
+        (data.suggestTitle !== undefined && typeof data.suggestTitle !== "boolean") ||
         Object.keys(data).some(
           (k) =>
             ![
@@ -106,6 +108,7 @@ export function chatHandler(deps: Dependencies) {
               "content",
               "attachmentIds",
               "responseFormat",
+              "suggestTitle",
             ].includes(k),
         )
       )
@@ -146,7 +149,10 @@ export function chatHandler(deps: Dependencies) {
       const responseFormat = context.responseFormat ?? 'text';
       if (responseFormat !== payload.p_response_format) throw new AppError('INTERNAL_ERROR');
       let reportActivity: ActivityReporter = async () => {};
-      const provider =
+      const conversationId = data.conversationId;
+      const question = data.content;
+      // Eigene Instanz je Aufruf: Der Titelaufruf meldet keine Schritte in den Ablauf der Antwort.
+      const createProvider = (report: ActivityReporter): Provider | undefined =>
         deps.provider ??
         (context.model.provider === "opencode"
           ? new OpenCodeProvider(
@@ -161,8 +167,8 @@ export function chatHandler(deps: Dependencies) {
                   }),
                 );
               },
-              data.conversationId,
-              (activity) => reportActivity(activity),
+              conversationId,
+              report,
             )
           : context.model.provider === "gemini"
             ? new GeminiProvider(
@@ -177,13 +183,12 @@ export function chatHandler(deps: Dependencies) {
                     }),
                   );
                 },
-                (activity) => reportActivity(activity),
+                report,
               )
             : context.model.provider === "openai"
-              ? new OpenAIProvider(key ?? "", fetch, (activity) =>
-                  reportActivity(activity),
-                )
+              ? new OpenAIProvider(key ?? "", fetch, report)
               : undefined);
+      const provider = createProvider((activity) => reportActivity(activity));
       const controller = new AbortController();
       let cancelled = false;
       let output = "";
@@ -415,6 +420,15 @@ export function chatHandler(deps: Dependencies) {
                 await liveCheck();
                 if (!provider)
                   throw new AppError("PROVIDER_NOT_CONFIGURED", 503);
+                // Titel nur für die erste Frage eines unbenannten Gesprächs; läuft parallel zur Antwort.
+                const titleProvider =
+                  data.suggestTitle === true &&
+                  context.input.filter((m) => m.role === "user").length <= 1
+                    ? createProvider(async () => {})
+                    : undefined;
+                const title = titleProvider
+                  ? suggestTitle(titleProvider, context, question, controller.signal)
+                  : Promise.resolve(null);
                 let textStarted = false;
                 for await (const part of provider.stream(
                   context,
@@ -498,6 +512,8 @@ export function chatHandler(deps: Dependencies) {
                   costMicrousd: result.costMicrousd,
                 });
                 if (presentation) await send('message.presentation.final', { presentation });
+                const suggested = await title;
+                if (suggested) await send("conversation.title", { title: suggested });
                 await send("message.completed", {
                   messageId: prepared.messageId,
                   replayed: false,

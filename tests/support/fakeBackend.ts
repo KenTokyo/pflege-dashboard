@@ -16,7 +16,7 @@ export const TEST_PASSWORD = 'nur-synthetisch';
 
 /** Ablauf einer synthetischen Antwort. */
 export type ChatScript =
-  | { kind: 'answer'; chunks: string[]; holdBeforeComplete?: boolean; sources?: { title: string; url: string }[] }
+  | { kind: 'answer'; chunks: string[]; holdBeforeComplete?: boolean; sources?: { title: string; url: string }[]; title?: string }
   | { kind: 'openui'; chunks: string[]; holdBeforeComplete?: boolean; cutBeforeComplete?: boolean; sources?: { title: string; url: string }[] }
   | { kind: 'http_error'; code: Phase1Code }
   | { kind: 'stream_error'; afterChunks: string[]; code: Phase1Code }
@@ -367,6 +367,8 @@ export function createFakeBackend(options: FakeOptions = {}): FakeBackend {
         }
         if (storedPresentation) emit('message.presentation.final', { presentation: storedPresentation });
         emit('usage.final', { inputTokens: 812, outputTokens: 164, costMicrousd: 0 });
+        // Wie der Node-Server: KI-Titel nur auf Wunsch und vor message.completed.
+        if (!stored && request.suggestTitle && script.kind === 'answer' && script.title) emit('conversation.title', { title: script.title });
         emit('message.completed', { messageId, replayed: Boolean(stored) });
       },
     },

@@ -3,6 +3,7 @@ import { chatHandler, sessionHandler } from "../runtime/handler.ts";
 import { AppError } from "../runtime/errors.ts";
 import { type Context, OpenAIProvider, sseData } from "../runtime/provider.ts";
 import { cors, platform } from "../runtime/platform.ts";
+import { cleanTitle } from "../runtime/title.ts";
 const w = "10000000-0000-4000-8000-000000000001",
   c = "10000000-0000-4000-8000-000000000050",
   r = "40000000-0000-4000-8000-000000000001";
@@ -98,6 +99,25 @@ describe("actual Node handler with MOCK provider, no live Auth account", () => {
       p_status: "completed",
       p_user_id: u,
     });
+  });
+  it("sends an AI title before completed only when asked for the first question", async () => {
+    const types = async (extra: Record<string, unknown>) => {
+      const res = await chatHandler(setup().deps)(request(extra));
+      return (await res.text()).split("\n").filter((l) => l.startsWith("data:")).map((l) => JSON.parse(l.slice(5)));
+    };
+    const asked = await types({ suggestTitle: true });
+    expect(asked.map((x) => x.type)).toEqual([
+      "message.started", "message.delta", "message.delta", "usage.final", "conversation.title", "message.completed",
+    ]);
+    expect(asked[4].data).toEqual({ title: "Guten Tag" });
+    expect((await types({})).some((x) => x.type === "conversation.title")).toBe(false);
+    expect((await chatHandler(setup().deps)(request({ suggestTitle: "ja" }))).status).toBe(400);
+  });
+  it("cleans model titles", () => {
+    expect(cleanTitle('Titel: „Widerspruch gegen Pflegegrad."\nErklärung')).toBe("Widerspruch gegen Pflegegrad");
+    expect(cleanTitle("**Pflegegeld beantragen**")).toBe("Pflegegeld beantragen");
+    expect(cleanTitle("  ")).toBeNull();
+    expect(cleanTitle("Wort ".repeat(30))!.length).toBeLessThanOrEqual(60);
   });
   it("uses trusted actor, never a payload actor", async () => {
     const x = setup();

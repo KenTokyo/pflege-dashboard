@@ -1,6 +1,6 @@
 import { useState, type SubmitEvent } from 'react';
 import { useStartConversation } from '../../chat/useStartConversation';
-import { effectiveModel, titleFromQuestion } from '../../data/model';
+import { effectiveModel, UNTITLED_CONVERSATION } from '../../data/model';
 import { useAgentSettings, useCareRecipients, useModels } from '../../data/queries';
 
 /** Gemeinsamer Frage-Einstieg: Tagwerk und Instrument verwenden denselben Schreibweg. */
@@ -20,7 +20,7 @@ export function useOverviewQuestion() {
     const text = question.trim();
     if (!text || pending || blocked) return;
     try {
-      await start({ title: titleFromQuestion(text), careRecipientId: chosen, firstMessage: text });
+      await start({ title: UNTITLED_CONVERSATION, careRecipientId: chosen, firstMessage: text });
     } catch {
       // Der Hook zeigt den Fehler an; der Entwurf bleibt erhalten.
     }

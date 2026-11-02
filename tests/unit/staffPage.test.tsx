@@ -95,6 +95,20 @@ describe('Sachbearbeiter-Test: angemeldete Arbeitsansicht', () => {
     expect(fake.state.conversations.some((c) => c.title === 'Neues Gespräch')).toBe(false);
   });
 
+  it('Gespräch ohne Titel übernimmt den KI-Titel des Servers', async () => {
+    const { user, fake } = await signedInApp({ modelOperational: true, chat: () => ({ kind: 'answer', chunks: ['Vier Wochen.'], title: 'Widerspruchsfrist klären' }) }, '/sachbearbeitung');
+    await user.click(await screen.findByRole('button', { name: 'Fall öffnen: Martha Beispielwald' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Martha Beispielwald' })).getByRole('button', { name: 'KI zu diesem Fall fragen' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Neues Gespräch' })).getByRole('button', { name: 'Gespräch anlegen' }));
+    await user.type(await screen.findByPlaceholderText('Nachricht an den Sachbearbeiter …'), 'Welche Frist gilt für den Widerspruch?{Enter}');
+    await waitFor(() => expect(fake.state.conversations.find((c) => c.care_recipient_id === MARTHA && c.title === 'Widerspruchsfrist klären')).toBeTruthy());
+    expect(fake.calls.chat[0]?.suggestTitle).toBe(true);
+    // Zweite Frage im selben Gespräch: kein neuer Titelwunsch, Titel bleibt.
+    await user.type(screen.getByPlaceholderText('Nachricht an den Sachbearbeiter …'), 'Und danach?{Enter}');
+    await waitFor(() => expect(fake.calls.chat).toHaveLength(2));
+    expect(fake.calls.chat[1]?.suggestTitle).toBeUndefined();
+  });
+
   it('Escape schließt die Fallansicht; native Fokusfalle bleibt Browserprüfpunkt', async () => {
     const { user } = await signedInApp({}, '/sachbearbeitung');
     await user.click(await screen.findByRole('button', { name: 'Fall öffnen: Martha Beispielwald' }));

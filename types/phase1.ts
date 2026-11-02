@@ -44,6 +44,8 @@ export type ChatRequestV1 = {
   content: string;
   attachmentIds: [];
   responseFormat?: ResponseFormat;
+  /** Erste Frage eines unbenannten Gesprächs: Server schlägt einen kurzen Titel vor. */
+  suggestTitle?: boolean;
 };
 export type Phase1Code =
   | "AUTH_REQUIRED"
@@ -132,6 +134,8 @@ type Data = {
     outputTokens: number;
     costMicrousd: number;
   };
+  /** Nur auf Wunsch (suggestTitle), immer vor message.completed. */
+  "conversation.title": { title: string };
   "message.completed": { messageId: string; replayed: boolean };
   error: Phase1Error;
 };

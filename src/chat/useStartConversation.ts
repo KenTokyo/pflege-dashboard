@@ -17,7 +17,7 @@ export function useStartConversation() {
   const attempt = useRef<{ fingerprint: string; key: string } | null>(null);
 
   const start = async (input: { title: string; careRecipientId: string | null; firstMessage?: string }) => {
-    const fingerprint = JSON.stringify([input.title, input.careRecipientId]);
+    const fingerprint = JSON.stringify([input.title, input.careRecipientId, input.firstMessage ?? null]);
     if (attempt.current?.fingerprint !== fingerprint) attempt.current = { fingerprint, key: newId() };
     const row = await create.mutateAsync({
       p_workspace_id: workspace.id,

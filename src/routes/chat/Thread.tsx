@@ -45,6 +45,8 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   const mode = conv ? (conv.mode_override ?? settings.data?.version.mode ?? null) : null;
   const live = turn?.phase === 'sending' || turn?.phase === 'streaming';
   const archived = conv?.archived_at != null;
+  // Unbenanntes Gespräch: der Server schlägt zur ersten Frage einen KI-Titel vor (prüft selbst, ob es die erste ist).
+  const wantsTitle = conv?.title === UNTITLED_CONVERSATION;
 
   let blockedReason: string | null = null;
   if (archived) blockedReason = 'Dieses Gespräch ist archiviert. Zum Weiterschreiben bitte wiederherstellen.';
@@ -58,11 +60,11 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
     if (!modelKnown) return;
     const text = takeDraftHandoff(conversationId);
     if (!text) return;
-    if (modelUsable && !archived) store.send(conversationId, text, responseFormat.value);
+    if (modelUsable && !archived) store.send(conversationId, text, responseFormat.value, wantsTitle);
     // Einmalige Übernahme aus einem externen Speicher (Dashboard-Übergabe), kein abgeleiteter Zustand.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     else setDraft(text);
-  }, [conversationId, modelKnown, modelUsable, archived, store, responseFormat.value]);
+  }, [conversationId, modelKnown, modelUsable, archived, store, responseFormat.value, wantsTitle]);
 
   // Gespeicherten Verlauf mit der lokalen Anfrage abgleichen.
   // Der Server legt die Antwortzeile schon beim Start an (Status „streaming“) und füllt sie später.
@@ -81,11 +83,14 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
     if (turn?.phase === 'completed' && assistantFinal && turn.activity.length === 0) store.dismiss(conversationId);
   }, [turn?.phase, turn?.activity.length, assistantFinal, store, conversationId]);
 
-  // Gespräch ohne eigenen Titel: die erste Frage wird einmalig zum Titel.
+  // Gespräch ohne eigenen Titel: einmalig den KI-Vorschlag übernehmen; ohne Vorschlag nach Ende der Antwort die gekürzte erste Frage.
   const firstQuestion = stored.find((m) => m.role === 'user')?.content ?? turn?.content ?? '';
+  const suggestedTitle = turn?.suggestedTitle ?? null;
+  const answerRunning = turn?.phase === 'sending' || turn?.phase === 'streaming';
   useEffect(() => {
     if (!conv || conv.title !== UNTITLED_CONVERSATION || archived || autoTitled.current === conv.id) return;
-    const title = titleFromQuestion(firstQuestion);
+    if (!suggestedTitle && answerRunning) return;
+    const title = suggestedTitle ?? titleFromQuestion(firstQuestion);
     if (title === UNTITLED_CONVERSATION) return;
     autoTitled.current = conv.id;
     rename.mutate(
@@ -93,7 +98,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
       // Bei Revisionskonflikt nach dem Neuladen noch einmal versuchen; andere Fehler zeigt der Kopf nicht, Titel bleibt.
       { onError: (error) => { if (error.code === 'REVISION_CONFLICT') autoTitled.current = null; } },
     );
-  }, [conv, archived, firstQuestion, rename]);
+  }, [conv, archived, firstQuestion, suggestedTitle, answerRunning, rename]);
 
   // Am Ende des Verlaufs bleiben, solange der Nutzer nicht hochgescrollt hat.
   useLayoutEffect(() => {
@@ -132,7 +137,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
     const text = draft.trim();
     if (!text) return;
     stickToBottom.current = true;
-    store.send(conversationId, text, responseFormat.value);
+    store.send(conversationId, text, responseFormat.value, wantsTitle);
     setDraft('');
   };
 
@@ -187,7 +192,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
             showUser={!userStored}
             showAssistant={!assistantFinal}
             onFetchAgain={() => store.fetchAgain(conversationId)}
-            onSendNew={() => store.send(conversationId, turn.content, responseFormat.value)}
+            onSendNew={() => store.send(conversationId, turn.content, responseFormat.value, turn.suggestTitle)}
             onReload={() => void qc.invalidateQueries({ queryKey: keys.messages(ws, conversationId) })}
             onEdit={() => {
               setDraft(turn.content);

@@ -20,6 +20,9 @@ export type PendingTurn = {
   activity: ChatActivity[];
   responseFormat: ResponseFormat;
   presentation: ChatPresentation | null;
+  /** Erste Frage eines unbenannten Gesprächs: Server soll einen Titel vorschlagen. */
+  suggestTitle: boolean;
+  suggestedTitle: string | null;
 };
 
 /** Was der Nutzer nach einem Fehler sinnvoll tun kann (Vertrag v1.0: keine automatische bezahlte Wiederholung). */
@@ -100,14 +103,14 @@ export class StreamStore {
   }
 
   /** Neuer Request mit neuer ID. */
-  send(conversationId: string, content: string, responseFormat: ResponseFormat = 'text'): void {
-    this.start(conversationId, content, newId(), responseFormat);
+  send(conversationId: string, content: string, responseFormat: ResponseFormat = 'text', suggestTitle = false): void {
+    this.start(conversationId, content, newId(), responseFormat, suggestTitle);
   }
 
   /** Gleicher Request erneut (gleiche ID): Replay oder echter Serverzustand. */
   fetchAgain(conversationId: string): void {
     const turn = this.turns.get(conversationId);
-    if (turn) this.start(conversationId, turn.content, turn.clientRequestId, turn.responseFormat);
+    if (turn) this.start(conversationId, turn.content, turn.clientRequestId, turn.responseFormat, turn.suggestTitle);
   }
 
   abort(conversationId: string): void {
@@ -149,7 +152,7 @@ export class StreamStore {
     return this.disposed || (this.o.isCurrent ? !this.o.isCurrent() : false);
   }
 
-  private start(conversationId: string, content: string, clientRequestId: string, responseFormat: ResponseFormat): void {
+  private start(conversationId: string, content: string, clientRequestId: string, responseFormat: ResponseFormat, suggestTitle: boolean): void {
     if (this.stale() || this.isActive(conversationId)) return;
     const controller = new AbortController();
     const unregister = this.o.registerStream(controller);
@@ -168,6 +171,8 @@ export class StreamStore {
       activity: [],
       responseFormat,
       presentation: responseFormat === 'openui' ? { format: 'openui', catalogVersion: OPENUI_CATALOG_VERSION, source: '', state: 'streaming' } : null,
+      suggestTitle,
+      suggestedTitle: null,
     };
     this.turns.set(conversationId, turn);
     this.emit();
@@ -186,6 +191,7 @@ export class StreamStore {
       content,
       attachmentIds: [],
       responseFormat,
+      ...(suggestTitle ? { suggestTitle: true } : {}),
     };
 
     this.o.chat
@@ -218,6 +224,9 @@ export class StreamStore {
               break;
             case 'usage.final':
               update({ usage: { inputTokens: event.data.inputTokens, outputTokens: event.data.outputTokens } }, false);
+              break;
+            case 'conversation.title':
+              update({ suggestedTitle: event.data.title });
               break;
             case 'message.completed':
               update({ phase: 'completed', messageId: event.data.messageId, replayed: turn.replayed || event.data.replayed });

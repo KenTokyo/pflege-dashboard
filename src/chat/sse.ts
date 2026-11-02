@@ -60,7 +60,7 @@ export class SseParser {
   }
 }
 
-const TYPES = new Set(['message.activity', 'message.started', 'message.delta', 'message.presentation.delta', 'message.presentation.final', 'usage.final', 'message.completed', 'error']);
+const TYPES = new Set(['message.activity', 'message.started', 'message.delta', 'message.presentation.delta', 'message.presentation.final', 'usage.final', 'conversation.title', 'message.completed', 'error']);
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 const isString = (v: unknown): v is string => typeof v === 'string';
 const isCount = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0;
@@ -94,6 +94,8 @@ function validData(type: string, data: Record<string, unknown>): boolean {
     }
     case 'usage.final':
       return isCount(data.inputTokens) && isCount(data.outputTokens) && isCount(data.costMicrousd);
+    case 'conversation.title':
+      return isString(data.title) && data.title.trim().length > 0 && data.title.length <= 120;
     case 'message.completed':
       return isString(data.messageId) && typeof data.replayed === 'boolean';
     case 'error':
