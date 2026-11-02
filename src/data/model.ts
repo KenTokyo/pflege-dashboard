@@ -157,10 +157,18 @@ export function documentStatusCounts(docs: readonly DocumentRow[]) {
 }
 
 /** Titel für ein neues Gespräch aus der ersten Frage: gekürzt, 1–120 Zeichen. */
+/** Platzhalter für Gespräche ohne eigenen Titel; die erste Frage ersetzt ihn automatisch. */
+export const UNTITLED_CONVERSATION = 'Neues Gespräch';
+
+/** Titel aus einer Frage: erste Zeile, höchstens 60 Zeichen, an einer Wortgrenze gekürzt. */
 export function titleFromQuestion(text: string): string {
-  const clean = text.replace(/\s+/g, ' ').trim();
-  if (!clean) return 'Neues Gespräch';
-  return clean.length <= 60 ? clean : `${clean.slice(0, 57).trimEnd()} …`;
+  const firstLine = text.trim().split(/\n/, 1)[0] ?? '';
+  const clean = firstLine.replace(/\s+/g, ' ').trim();
+  if (!clean) return UNTITLED_CONVERSATION;
+  if (clean.length <= 60) return clean;
+  const cut = clean.slice(0, 58);
+  const space = cut.lastIndexOf(' ');
+  return `${(space > 30 ? cut.slice(0, space) : cut).replace(/[\s,;:.–-]+$/, '')} …`;
 }
 
 const ROLE_RANK: Record<string, number> = { system: 0, user: 1, assistant: 2 };

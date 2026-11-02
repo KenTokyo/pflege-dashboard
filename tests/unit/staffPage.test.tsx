@@ -78,10 +78,21 @@ describe('Sachbearbeiter-Test: angemeldete Arbeitsansicht', () => {
     const newDialog = screen.getByRole('dialog', { name: 'Neues Gespräch' });
     expect(within(newDialog).getByLabelText<HTMLSelectElement>('Bezug zu einer Person').value).toBe(MARTHA);
     expect(fake.calls.chat).toHaveLength(0);
-    await user.type(within(newDialog).getByLabelText('Titel'), 'Fragen zur Vertretung');
+    await user.type(within(newDialog).getByLabelText(/^Titel/), 'Fragen zur Vertretung');
     await user.click(within(newDialog).getByRole('button', { name: 'Gespräch anlegen' }));
     await waitFor(() => expect(fake.state.conversations.find((c) => c.title === 'Fragen zur Vertretung')?.care_recipient_id).toBe(MARTHA));
     expect(fake.calls.chat).toHaveLength(0);
+  });
+
+  it('Gespräch ohne Titel bekommt die erste Frage als Titel', async () => {
+    const { user, fake } = await signedInApp({ modelOperational: true }, '/sachbearbeitung');
+    await user.click(await screen.findByRole('button', { name: 'Fall öffnen: Martha Beispielwald' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Martha Beispielwald' })).getByRole('button', { name: 'KI zu diesem Fall fragen' }));
+    await user.click(within(screen.getByRole('dialog', { name: 'Neues Gespräch' })).getByRole('button', { name: 'Gespräch anlegen' }));
+    await waitFor(() => expect(fake.state.conversations.some((c) => c.title === 'Neues Gespräch' && c.care_recipient_id === MARTHA)).toBe(true));
+    await user.type(await screen.findByPlaceholderText('Nachricht an den Sachbearbeiter …'), 'Welche Frist gilt für den Widerspruch?{Enter}');
+    await waitFor(() => expect(fake.state.conversations.find((c) => c.care_recipient_id === MARTHA && c.title === 'Welche Frist gilt für den Widerspruch?')).toBeTruthy());
+    expect(fake.state.conversations.some((c) => c.title === 'Neues Gespräch')).toBe(false);
   });
 
   it('Escape schließt die Fallansicht; native Fokusfalle bleibt Browserprüfpunkt', async () => {

@@ -9,8 +9,8 @@ import { usePendingTurn, useStreamStore } from '../../chat/ChatStreamContext';
 import { takeDraftHandoff } from '../../chat/draftHandoff';
 import { useResponseFormat } from '../../chat/responseFormat';
 import { EmptyState, ErrorState, Loading } from '../../components/States';
-import { effectiveModel } from '../../data/model';
-import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels, useSetConversationModel } from '../../data/queries';
+import { effectiveModel, titleFromQuestion, UNTITLED_CONVERSATION } from '../../data/model';
+import { keys, useAgentSettings, useArchiveConversation, useConversation, useMessages, useModels, useRenameConversation, useSetConversationModel } from '../../data/queries';
 import { messageFor } from '../../services/errors';
 import type { CareRecipient, MessageRow } from '../../services/types';
 import { Composer } from './Composer';
@@ -31,6 +31,8 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   const models = useModels();
   const restore = useArchiveConversation();
   const changeModel = useSetConversationModel();
+  const rename = useRenameConversation();
+  const autoTitled = useRef<string | null>(null);
   const turn = usePendingTurn(conversationId);
   const responseFormat = useResponseFormat();
   const [draft, setDraft] = useState('');
@@ -78,6 +80,20 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
   useEffect(() => {
     if (turn?.phase === 'completed' && assistantFinal && turn.activity.length === 0) store.dismiss(conversationId);
   }, [turn?.phase, turn?.activity.length, assistantFinal, store, conversationId]);
+
+  // Gespräch ohne eigenen Titel: die erste Frage wird einmalig zum Titel.
+  const firstQuestion = stored.find((m) => m.role === 'user')?.content ?? turn?.content ?? '';
+  useEffect(() => {
+    if (!conv || conv.title !== UNTITLED_CONVERSATION || archived || autoTitled.current === conv.id) return;
+    const title = titleFromQuestion(firstQuestion);
+    if (title === UNTITLED_CONVERSATION) return;
+    autoTitled.current = conv.id;
+    rename.mutate(
+      { conversation: conv, title },
+      // Bei Revisionskonflikt nach dem Neuladen noch einmal versuchen; andere Fehler zeigt der Kopf nicht, Titel bleibt.
+      { onError: (error) => { if (error.code === 'REVISION_CONFLICT') autoTitled.current = null; } },
+    );
+  }, [conv, archived, firstQuestion, rename]);
 
   // Am Ende des Verlaufs bleiben, solange der Nutzer nicht hochgescrollt hat.
   useLayoutEffect(() => {

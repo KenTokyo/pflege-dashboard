@@ -5,6 +5,7 @@ import { X } from '../../instrument/chat/ChatIcons';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { useStartConversation } from '../../chat/useStartConversation';
 import { ErrorState } from '../../components/States';
+import { UNTITLED_CONVERSATION } from '../../data/model';
 import { baseName } from '../../lib/format';
 import type { CareRecipient } from '../../services/types';
 
@@ -35,9 +36,10 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
   const trimmed = title.trim();
   const onSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!trimmed || trimmed.length > 120 || pending) return;
+    if (trimmed.length > 120 || pending) return;
     try {
-      await start({ title: trimmed, careRecipientId: selectedPersonId || null });
+      // Ohne Titel benennt die erste Frage das Gespräch automatisch (siehe Thread).
+      await start({ title: trimmed || UNTITLED_CONVERSATION, careRecipientId: selectedPersonId || null });
       close();
     } catch {
       // Fehler wird im Dialog angezeigt.
@@ -58,18 +60,19 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
         </div>
         <div className="dialog-body">
           <div className="field">
-            <label htmlFor="new-conv-name">Titel</label>
+            <label htmlFor="new-conv-name">Titel <span className="label-optional">(optional)</span></label>
             <div className="input">
               <input
                 id="new-conv-name"
                 value={title}
                 maxLength={120}
-                required
+                aria-describedby="new-conv-name-note"
                 autoFocus
-                placeholder="z. B. Widerspruch vorbereiten"
+                placeholder="Leer lassen – entsteht aus der ersten Frage"
                 onChange={(e) => setTitle(e.target.value)}
               />
             </div>
+            <p className="note" id="new-conv-name-note">Ohne Titel benennt der Sachbearbeiter das Gespräch nach Ihrer ersten Frage.</p>
           </div>
           <div className="field">
             <label htmlFor="new-conv-person">Bezug zu einer Person</label>
@@ -91,7 +94,7 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
           <button type="button" className="btn btn-ghost" onClick={close}>
             Abbrechen
           </button>
-          <button type="submit" className="btn btn-primary" disabled={!trimmed || pending}>
+          <button type="submit" className="btn btn-primary" disabled={pending}>
             {pending ? 'Wird angelegt …' : 'Gespräch anlegen'}
           </button>
         </div>

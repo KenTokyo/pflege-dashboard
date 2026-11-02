@@ -171,6 +171,7 @@
 
   .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .field > label, .field-label { font-size: var(--fs-small); font-weight: 700; }
+  .label-optional { font-weight: 400; color: var(--text-muted); }
   .input {
     display: flex; align-items: center; gap: 9px; min-width: 0;
     min-height: 44px; padding: 0 12px;
