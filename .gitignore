@@ -15,3 +15,5 @@ coverage/
 playwright-report/
 test-results/
 /.notedrill/chat-bilder/
+.vercel
+.env*
