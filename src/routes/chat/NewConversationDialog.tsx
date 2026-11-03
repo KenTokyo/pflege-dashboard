@@ -8,6 +8,7 @@ import { ErrorState } from '../../components/States';
 import { UNTITLED_CONVERSATION } from '../../data/model';
 import { baseName } from '../../lib/format';
 import type { CareRecipient } from '../../services/types';
+import { Select } from '../../components/Select';
 
 /** Natives <dialog>: Fokus bleibt im Dialog, Escape schließt. Unter 760 px Vollbild. */
 export function NewConversationDialog({ open, onClose, people, initialRecipientId = null }: { open: boolean; onClose: () => void; people: CareRecipient[]; initialRecipientId?: string | null }) {
@@ -77,14 +78,9 @@ export function NewConversationDialog({ open, onClose, people, initialRecipientI
           <div className="field">
             <label htmlFor="new-conv-person">Bezug zu einer Person</label>
             <div className="input">
-              <select id="new-conv-person" value={selectedPersonId} onChange={(e) => setPersonId(e.target.value)}>
-                <option value="">Allgemein (ohne Person)</option>
-                {people.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {baseName(p.name)} · {p.care_grade === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${p.care_grade}`}
-                  </option>
-                ))}
-              </select>
+              <Select id="new-conv-person" className="sel-field" value={selectedPersonId} onChange={setPersonId}
+                options={[{ value: '', label: 'Allgemein (ohne Person)' },
+                  ...people.map((p) => ({ value: p.id, label: baseName(p.name), hint: p.care_grade === 0 ? 'Kein Pflegegrad' : `Pflegegrad ${p.care_grade}` }))]} />
             </div>
             <p className="note">Der Sachbearbeiter berücksichtigt dann Pflegegrad, Kasse und offene Aufgaben dieser Person.</p>
           </div>

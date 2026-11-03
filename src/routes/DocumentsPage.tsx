@@ -10,6 +10,7 @@ import { baseName, formatDate } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import type { DocumentRow, Enums } from '../services/types';
 import { DocStatus } from './DashboardPage';
+import { Select } from '../components/Select';
 
 type Filter = 'all' | Enums['document_status'];
 const FILTERS: { id: Filter; label: string }[] = [
@@ -45,22 +46,9 @@ function DocItem({ doc, person }: { doc: DocumentRow; person: string }) {
         <label htmlFor={`st-${doc.id}`} className="sr-only">
           Status von {doc.title}
         </label>
-        <select
-          id={`st-${doc.id}`}
-          className="status-select"
-          value={doc.status}
-          disabled={mark.isPending}
-          onChange={(e) => {
-            const next = STATUSES.find((s) => s === e.target.value);
-            if (next && next !== doc.status) mark.mutate({ id: doc.id, status: next, revision: doc.revision });
-          }}
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {DOC_STATUS_LABEL[s]}
-            </option>
-          ))}
-        </select>
+        <Select id={`st-${doc.id}`} size="sm" nativeClassName="status-select" value={doc.status} disabled={mark.isPending}
+          options={STATUSES.map((s) => ({ value: s, label: DOC_STATUS_LABEL[s] }))}
+          onChange={(next) => { if (next !== doc.status) mark.mutate({ id: doc.id, status: next, revision: doc.revision }); }} />
       </div>
       <details className="doc-preview">
         <summary className="cursor-pointer font-bold">Text anzeigen</summary>

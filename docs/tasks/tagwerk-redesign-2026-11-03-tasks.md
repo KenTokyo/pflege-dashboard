@@ -88,3 +88,19 @@ Anforderungen, daher kein Speicher); Seitenleiste zeigt dann „Demo-Hinweis“ 
 Arbeitsbereichs-Schalter `demoBanner` gilt weiter; Instrument unverändert. Test `tests/unit/demoNotice.test.tsx`
 (249 grün), Typecheck/Lint grün, Bilder 1920×1080 + 390 px ohne Überlauf, Leerlauf 0 Animationen.
 `src/components/DemoBanner.tsx`, `src/components/demoNotice.ts`
+
+## Folgeauftrag: Auswahlfelder, Gesprächskopf, Knöpfe, Glas-Popups
+
+Keine nativen Standard-Auswahlfelder mehr, Gesprächskopf modern und aufklappbar, Primär/Sekundär mit dezent runden
+Ecken in Blau oder Rot (Wahl: Blau, passt zum Indigo-Akzent; Rot bleibt Gefahr). Nachtrag: Popups als Glas
+(durchscheinend, Weichzeichner) und runder wie die NoteTree-Lernbücher.
+
+## Phase 7 – Bedienteile und Glas (Frontend) [x]
+Ergebnis: `Select` (Knopf role combobox + Glas-Liste als Popover, gleitende Markierung, Tastatur Pfeile/Pos1/Ende/
+Enter/Esc/Tippen, Wert am Knopf) ersetzt alle Tagwerk-Selects (Gesprächskopf, Übersicht, Dokumente, Sachbearbeitung,
+Neues Gespräch); Instrument behält native Felder. Gesprächskopf: Titel + Zeile mit Person/Modell/Modus/Region als
+Aufklapp-Knopf, darunter Feld-Leiste (Höhe per Rasterzeile, Inhalt federt nach). Knöpfe: Primär Blau mit Lichtkante und
+farbigem Schatten (AA 4,87/5,43 als neues Prüfpaar), Sekundär Glasfläche, Ecken 11 px. Glas-Tokens `--glass*`,
+Popups 18–20 px rund (Menü, Liste, Dialog, Demo-Hinweis). Demo-Hinweis im Gespräch über der Eingabe.
+Tests: Hilfen `tests/support/select.ts`, neuer Tastaturtest; 251 grün, Typecheck/Lint/Build/Bundle grün.
+`src/components/Select.tsx`, `src/routes/chat/TagwerkThreadHead.tsx`, `src/styles/controls.css`

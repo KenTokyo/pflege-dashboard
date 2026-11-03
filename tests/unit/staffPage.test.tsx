@@ -4,6 +4,7 @@ import { AppError } from '../../src/services/errors';
 import { signedInApp } from '../support/renderApp';
 import { MARTHA } from '../support/seed';
 import { createFakeBackend } from '../support/fakeBackend';
+import { pickOption } from '../support/select';
 
 beforeEach(() => {
   HTMLDialogElement.prototype.showModal = function () { this.open = true; };
@@ -59,7 +60,7 @@ describe('Sachbearbeiter-Test: angemeldete Arbeitsansicht', () => {
     await user.type(input, 'Offene Aufgaben nach Frist{Enter}');
     await screen.findByRole('heading', { name: /Offene Aufgaben/ });
     expect(screen.getByText('Offene Aufgaben · alle Personen · nach Frist')).toBeTruthy();
-    await user.selectOptions(screen.getByLabelText(/Sortieren nach/), 'priority');
+    await pickOption(user, screen.getByLabelText(/Sortieren nach/), 'priority');
     const list = screen.getByRole('region', { name: /Offene Aufgaben/ });
     expect(within(list).getAllByRole('heading', { level: 3 })[0]?.textContent).toBe('Widerspruch mit Beratungsstelle prüfen');
     await user.clear(input);
@@ -76,7 +77,7 @@ describe('Sachbearbeiter-Test: angemeldete Arbeitsansicht', () => {
     await within(dialog).findByRole('link', { name: /Widerspruch vorbereiten/ });
     await user.click(within(dialog).getByRole('button', { name: 'KI zu diesem Fall fragen' }));
     const newDialog = screen.getByRole('dialog', { name: 'Neues Gespräch' });
-    expect(within(newDialog).getByLabelText<HTMLSelectElement>('Bezug zu einer Person').value).toBe(MARTHA);
+    expect(within(newDialog).getByLabelText<HTMLButtonElement>('Bezug zu einer Person').value).toBe(MARTHA);
     expect(fake.calls.chat).toHaveLength(0);
     await user.type(within(newDialog).getByLabelText(/^Titel/), 'Fragen zur Vertretung');
     await user.click(within(newDialog).getByRole('button', { name: 'Gespräch anlegen' }));

@@ -14,6 +14,9 @@
   --fs-h2: 15.5px;
   --radius: 12px;
   --radius-sm: 8px;
+  /* Rund wie die NoteTree-Lernbücher: Knöpfe/Felder weich, schwebende Flächen (Popups) deutlich rund. */
+  --radius-btn: 11px;
+  --radius-pop: 20px;
   --row-h: 40px;
   --control-h: 38px;
   --icon-stroke: 1.8;
@@ -42,6 +45,17 @@
   --success: #4fdc9c;
   --success-soft: rgba(79, 220, 156, 0.12);
   --marker: #c8f135;
+  /* Primärknopf: kräftiges Blau mit weißer Schrift (Akzent bleibt Indigo für Fokus, Links, Auswahl). */
+  --primary: #3566f0;
+  --primary-hover: #4272f5;
+  --on-primary: #ffffff;
+  /* Glas für alles, was schwebt (Menüs, Auswahllisten, Dialoge, Hinweise). */
+  --glass: rgba(24, 26, 33, 0.7);
+  --glass-strong: rgba(20, 22, 28, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glass-blur: blur(22px) saturate(1.6);
+  --shadow-pop: 0 28px 64px -16px rgba(0, 0, 0, 0.7), 0 2px 10px rgba(0, 0, 0, 0.35);
   --focus: #aab0ff;
   --banner-bg: #15172a;
   --banner-text: #c5c9ff;
@@ -77,6 +91,15 @@
   --success: #12754a;
   --success-soft: rgba(18, 117, 74, 0.09);
   --marker: #b5dc22;
+  --primary: #2f5ee6;
+  --primary-hover: #2a55d4;
+  --on-primary: #ffffff;
+  --glass: rgba(255, 255, 255, 0.7);
+  --glass-strong: rgba(255, 255, 255, 0.84);
+  --glass-border: rgba(20, 24, 40, 0.1);
+  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --glass-blur: blur(22px) saturate(1.8);
+  --shadow-pop: 0 28px 64px -18px rgba(20, 24, 40, 0.26), 0 2px 10px rgba(20, 24, 40, 0.07);
   --focus: #4b52d8;
   --banner-bg: #eceaff;
   --banner-text: #2c2a86;

@@ -8,9 +8,10 @@ import { ErrorState } from '../../components/States';
 import { MODE_LABEL, REGION_LABEL, modelDisplayName, type EffectiveModel } from '../../data/model';
 import { useArchiveConversation, useAssignRecipient, useRenameConversation } from '../../data/queries';
 import { baseName } from '../../lib/format';
+import { TagwerkThreadHead } from './TagwerkThreadHead';
 import type { AppError, CareRecipient, ConversationRow, Enums, ModelRow } from '../../services/types';
 
-type Props = {
+export type ThreadHeadProps = {
   conversation: ConversationRow;
   people: CareRecipient[];
   mode: Enums['agent_mode'] | null;
@@ -23,7 +24,13 @@ type Props = {
   onModelChange: (modelId: string | null) => void;
 };
 
-export function ThreadHead({ conversation, people, mode, model, models, defaultModelId, busy, changingModel, modelError, onModelChange }: Props) {
+/** Tagwerk hat einen eigenen, aufklappbaren Kopf; Instrument behält diesen. */
+export function ThreadHead(props: ThreadHeadProps) {
+  const { design } = useDesign();
+  return design === 'instrument' ? <ClassicThreadHead {...props} /> : <TagwerkThreadHead {...props} />;
+}
+
+function ClassicThreadHead({ conversation, people, mode, model, models, defaultModelId, busy, changingModel, modelError, onModelChange }: ThreadHeadProps) {
   const { design } = useDesign();
   const rename = useRenameConversation();
   const archive = useArchiveConversation();

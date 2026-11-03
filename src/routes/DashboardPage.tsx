@@ -23,6 +23,7 @@ import { ageFrom, baseName, daysUntil, formatDate, formatLongDate, formatShortDa
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { useOverviewQuestion } from '../instrument/uebersicht/useOverviewQuestion';
 import type { CareRecipient, DocumentRow, TaskRow } from '../services/types';
+import { Select } from '../components/Select';
 
 const listIn = { hidden: {}, show: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } } };
 const itemIn = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: SPRING.soft } };
@@ -156,14 +157,8 @@ function AskCard() {
         <div className="flex items-center gap-2 small muted">
           <User className="i" size={15} aria-hidden="true" />
           <label htmlFor="ask-person">Bezug:</label>
-          <select id="ask-person" className="person-select" value={personId} onChange={(e) => setPersonId(e.target.value)}>
-            <option value="auto">Allgemein</option>
-            {list.map((p) => (
-              <option key={p.id} value={p.id}>
-                {baseName(p.name)}
-              </option>
-            ))}
-          </select>
+          <Select id="ask-person" size="sm" nativeClassName="person-select" value={personId} onChange={setPersonId}
+            options={[{ value: 'auto', label: 'Allgemein' }, ...list.map((p) => ({ value: p.id, label: baseName(p.name) }))]} />
         </div>
       ) : chosen ? (
         <p className="flex items-center gap-1.5 small muted">

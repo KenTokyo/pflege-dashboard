@@ -5,6 +5,7 @@ import { PendingTurnView } from '../../src/routes/chat/PendingTurnView';
 import { AppError } from '../../src/services/errors';
 import { MODEL_OPENAI, SEED_CONVERSATION, type SeedState } from '../support/seed';
 import { signedInApp } from '../support/renderApp';
+import { modelPicker, pickOption } from '../support/select';
 
 const THREAD = `/gespraeche/${SEED_CONVERSATION}`;
 const GEMINI = '10000000-0000-4000-8000-000000000033';
@@ -121,7 +122,7 @@ describe('Modellauswahl pro Gespräch', () => {
     }, THREAD);
     const input = await screen.findByLabelText(/Nachricht an den Sachbearbeiter/);
     await user.type(input, 'Meine erste Frage');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }), GEMINI);
+    await pickOption(user, await modelPicker(user), GEMINI);
     await waitFor(() => expect(fake.state.conversations[0]?.model_override_id).toBe(GEMINI));
     expect(fake.calls.chat).toHaveLength(0);
     expect((input as HTMLTextAreaElement).value).toBe('Meine erste Frage');
@@ -136,9 +137,10 @@ describe('Modellauswahl pro Gespräch', () => {
     act(() => history.push('/aufgaben'));
     await screen.findByRole('heading', { name: 'Offene Aufgaben und Fristen', level: 1 });
     act(() => history.push(THREAD));
-    await waitFor(() => expect(screen.getByRole<HTMLSelectElement>('combobox', { name: 'Modell für die nächste Antwort' }).value).toBe(GEMINI));
+    await modelPicker(user);
+    await waitFor(() => expect(screen.getByRole<HTMLButtonElement>('combobox', { name: 'Modell für die nächste Antwort' }).value).toBe(GEMINI));
     expect(await screen.findByText('Antwort auf: Meine erste Frage')).toBeTruthy();
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }), '');
+    await pickOption(user, await modelPicker(user), '');
     await waitFor(() => expect(fake.state.conversations[0]?.model_override_id).toBeNull());
     await user.type(screen.getByLabelText(/Nachricht an den Sachbearbeiter/), 'Jetzt mit Standard{Enter}');
     await screen.findByText('Antwort auf: Jetzt mit Standard');
@@ -154,7 +156,7 @@ describe('Modellauswahl pro Gespräch', () => {
     const original = fake.state.conversations[0];
     fake.hold.add('rename');
     await user.type(input, 'Entwurf');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }), GEMINI);
+    await pickOption(user, await modelPicker(user), GEMINI);
     expect(await screen.findByText('Modell wird gespeichert …')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Nachricht senden' }).hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }).hasAttribute('disabled')).toBe(true);
@@ -170,7 +172,7 @@ describe('Modellauswahl pro Gespräch', () => {
     const { fake, user } = await signedInApp({ modelOperational: true, extend: withBothProviders }, THREAD);
     await screen.findByLabelText(/Nachricht an den Sachbearbeiter/);
     fake.state.conversations = fake.state.conversations.map((c) => ({ ...c, revision: c.revision + 1 }));
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }), GEMINI);
+    await pickOption(user, await modelPicker(user), GEMINI);
     expect(await screen.findByText(/inzwischen geändert/)).toBeTruthy();
     expect(fake.state.conversations[0]?.model_override_id).toBeNull();
     expect(fake.calls.chat).toHaveLength(0);
@@ -181,7 +183,7 @@ describe('Modellauswahl pro Gespräch', () => {
     await user.type(await screen.findByLabelText(/Nachricht an den Sachbearbeiter/), 'Frage{Enter}');
     const retry = await screen.findByRole('button', { name: 'Neu senden' });
     fake.hold.add('rename');
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }), GEMINI);
+    await pickOption(user, await modelPicker(user), GEMINI);
     await screen.findByText('Modell wird gespeichert …');
     expect(retry.hasAttribute('disabled')).toBe(true);
     await user.click(retry);
@@ -229,7 +231,7 @@ describe('Sichtbare Wartephase', () => {
     const { user } = await signedInApp({ modelOperational: true, extend: withBothProviders, chat: () => ({ kind: 'answer', chunks: [], holdBeforeComplete: true }) }, THREAD);
     await user.type(await screen.findByLabelText(/Nachricht an den Sachbearbeiter/), 'Frage{Enter}');
     expect(await screen.findByText('Denkt nach …')).toBeTruthy();
-    expect(screen.getByRole('combobox', { name: 'Modell für die nächste Antwort' }).hasAttribute('disabled')).toBe(true);
+    expect((await modelPicker(user)).hasAttribute('disabled')).toBe(true);
     await user.click(screen.getByRole('button', { name: 'Antwort abbrechen' }));
     expect(await screen.findByText('Antwort abgebrochen')).toBeTruthy();
     expect(screen.queryByText('Denkt nach …')).toBeNull();
