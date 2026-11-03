@@ -76,3 +76,15 @@ versendeten Schreiben (≤ 3), Marker-Strich unter heute, ein Tag „KW“. Einm
 Handy: Tage untereinander, leere Tage außer heute ausgeblendet, kein Überlauf (390 px). „Heute“-Spalte rechts
 entfällt: die Wochenkarte füllt die Breite und markiert heute selbst. Monoschrift-Fehler behoben (Theme-Variable
 zeigte auf sich selbst). `src/routes/dashboard/WeekBand.tsx`, `src/styles/week.css`
+
+## Folgeauftrag: Demo-Hinweis als schließbares Popup
+
+Der Balken „Demo – keine echten Daten eingeben“ wird eine schwebende Karte, die man schließen kann.
+
+## Phase 6 – Demo-Hinweis als Popup (Frontend) [x]
+Ergebnis: Karte unten rechts mit Lime-Klebeband „Demo“, Schild-Symbol, Schließen-Knopf (Handy 44 px, über der
+Handy-Leiste). Feder-Auftritt nach der Seite, kürzere Ausfahrt. Geschlossen nur bis zum Neuladen (Pflicht aus den
+Anforderungen, daher kein Speicher); Seitenleiste zeigt dann „Demo-Hinweis“ zum Zurückholen, Fokus springt dorthin.
+Arbeitsbereichs-Schalter `demoBanner` gilt weiter; Instrument unverändert. Test `tests/unit/demoNotice.test.tsx`
+(249 grün), Typecheck/Lint grün, Bilder 1920×1080 + 390 px ohne Überlauf, Leerlauf 0 Animationen.
+`src/components/DemoBanner.tsx`, `src/components/demoNotice.ts`

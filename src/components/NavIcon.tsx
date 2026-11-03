@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
  * Eigene Symbole für den Tagwerk-Rahmen (statt Lucide): 20er-Raster, Strich 1,7, je eine leise Farbplatte
  * (currentColor 18 %), damit die Bereichsfarbe als Fläche im Symbol sitzt und nie als Kartenfläche.
  */
-export type NavIconName = 'overview' | 'chat' | 'docs' | 'tasks' | 'settings' | 'sun' | 'moon' | 'collapse' | 'expand' | 'logout' | 'staff' | 'care';
+export type NavIconName = 'overview' | 'chat' | 'docs' | 'tasks' | 'settings' | 'sun' | 'moon' | 'collapse' | 'expand' | 'logout' | 'staff' | 'care' | 'shield' | 'close';
 
 const PLATE = { fill: 'currentColor', fillOpacity: 0.18, stroke: 'none' } as const;
 
@@ -68,6 +68,12 @@ const drawings: Record<NavIconName, ReactNode> = {
     <path d="M10 16.6s-6.4-3.7-6.4-8.2A3.4 3.4 0 0 1 10 6.2a3.4 3.4 0 0 1 6.4 2.2c0 4.5-6.4 8.2-6.4 8.2Z" {...PLATE} />
     <path d="M10 16.6s-6.4-3.7-6.4-8.2A3.4 3.4 0 0 1 10 6.2a3.4 3.4 0 0 1 6.4 2.2c0 4.5-6.4 8.2-6.4 8.2Z" />
   </>,
+  shield: <>
+    <path d="M10 2.8 16 5v4.6c0 3.8-2.6 6.4-6 7.6-3.4-1.2-6-3.8-6-7.6V5Z" {...PLATE} />
+    <path d="M10 2.8 16 5v4.6c0 3.8-2.6 6.4-6 7.6-3.4-1.2-6-3.8-6-7.6V5Z" />
+    <path d="M10 7v3.4M10 13.2v.1" />
+  </>,
+  close: <path d="m5.4 5.4 9.2 9.2M14.6 5.4l-9.2 9.2" />,
 };
 
 export function NavIcon({ name, size = 20, className = '' }: { name: NavIconName; size?: number; className?: string }) {

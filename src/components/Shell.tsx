@@ -5,6 +5,7 @@ import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { baseName, initials } from '../lib/format';
 import { BrandMark } from './Brand';
 import { NavIcon, type NavIconName } from './NavIcon';
+import { setDemoNoticeOpen, useDemoNoticeOpen } from './demoNotice';
 import { StaffViewSwitch } from '../staff/StaffViewSwitch';
 import { useDesign, useRail, useTheme } from '../app/ThemeProvider';
 import { InstrumentShell } from '../instrument/rahmen/InstrumentShell';
@@ -145,6 +146,7 @@ const typing = (t: EventTarget | null) =>
 export function TagwerkFrame({ children }: { children: ReactNode }) {
   const { workspace } = useWorkspace();
   const { railOpen, toggleRail } = useRail();
+  const demoOpen = useDemoNoticeOpen();
   const pathname = useLocation({ select: (location) => location.pathname });
   const mainRef = useRef<HTMLElement>(null);
   const railRef = useRef<HTMLElement>(null);
@@ -220,6 +222,13 @@ export function TagwerkFrame({ children }: { children: ReactNode }) {
           </LayoutGroup>
 
           <div className="rail-foot">
+            {workspace.demoBanner && !demoOpen ? (
+              <button type="button" id="demo-reopen" className="rail-item rail-demo" onClick={() => { setDemoNoticeOpen(true); }}
+                aria-label="Demo-Hinweis zeigen" data-tip="Demo-Hinweis" {...tipProps}>
+                <NavIcon name="shield" className="rail-icon" />
+                <span className="rail-label">Demo-Hinweis</span>
+              </button>
+            ) : null}
             <ThemeRow {...tipProps} />
             <button type="button" className="rail-item" onClick={toggleRail} aria-expanded={railOpen}
               aria-label={railOpen ? 'Seitenleiste einklappen' : 'Seitenleiste aufklappen'} data-tip="Aufklappen [" {...tipProps}>
