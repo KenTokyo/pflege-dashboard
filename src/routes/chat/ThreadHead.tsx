@@ -59,8 +59,6 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
         <ArrowLeft className="i" size={18} aria-hidden="true" />
       </Link>
       <div className="thread-title">
-        {design === 'instrument' ? <div className="in-thread-kicker"><Icon name="conversation" size={15} />
-          <span>{archived ? 'ARCHIVIERTES GESPRÄCH' : 'GESPRÄCH'}</span></div> : null}
         {editing ? (
           <form className="title-edit" onSubmit={(e) => void save(e)}>
             <label htmlFor="title-input" className="sr-only">
@@ -96,7 +94,9 @@ export function ThreadHead({ conversation, people, mode, model, models, defaultM
           </form>
         ) : (
           <div className="flex min-w-0 items-center gap-1">
+            {design === 'instrument' ? <Icon name="conversation" size={16} /> : null}
             <h1 title={conversation.title}>{conversation.title}</h1>
+            {design === 'instrument' && archived ? <span className="in-thread-badge">Archiviert</span> : null}
             <button
               type="button"
               className="icon-btn"

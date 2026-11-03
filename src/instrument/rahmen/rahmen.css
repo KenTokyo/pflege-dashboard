@@ -1,21 +1,24 @@
+/* Desktop: schmale Symbolleiste wie Tagwerk, keine eigene Kopfzeile. Mobil: mobile.css. */
 [data-design='instrument'] .in-shell {
   display: grid;
-  grid-template-columns: 208px minmax(0, 1fr);
+  grid-template-columns: 80px minmax(0, 1fr);
   flex: 1;
   min-width: 0;
-  padding: 10px;
-  gap: 10px;
+  padding: 8px;
+  gap: 8px;
 }
 
 [data-design='instrument'] .in-sidebar {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   align-self: start;
   position: sticky;
-  top: 10px;
+  z-index: 20;
+  top: 8px;
   min-width: 0;
-  height: calc(100dvh - 53px);
-  min-height: 400px;
+  height: calc(100dvh - 49px);
+  min-height: 460px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
@@ -23,67 +26,56 @@
 }
 
 [data-design='instrument'] .in-brand {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 14px 12px 10px;
-  font-size: 13px;
-  font-weight: 600;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 12px 0 10px;
   text-decoration: none;
-  overflow-wrap: anywhere;
-}
-
-[data-design='instrument'] .in-brand > span:last-child {
-  min-width: 0;
 }
 
 [data-design='instrument'] .in-brand-mark {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   flex: none;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--sunken);
 }
 
-[data-design='instrument'] .in-brand small {
-  display: block;
-  margin-top: 1px;
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 11.5px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  font-weight: 400;
-}
-
-[data-design='instrument'] .in-nav-label {
-  padding: 8px 16px 4px;
-  color: var(--text-faint);
-  font: 12px/1.5 var(--font-mono);
-}
-
 [data-design='instrument'] .in-navigation {
-  --in-nav-h: 38px;
+  --in-nav-h: 58px;
   position: relative;
-  margin: 0 6px;
+  display: grid;
+  margin: 2px 6px 0;
 }
 
 [data-design='instrument'] .in-nav-item {
   position: relative;
+  z-index: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 9px;
-  min-height: var(--in-nav-h);
-  padding: 6px 10px;
+  justify-content: center;
+  gap: 5px;
+  height: var(--in-nav-h);
+  padding: 4px 2px;
   color: var(--text-muted);
-  font-size: 13.5px;
-  line-height: 1.4;
+  font-size: 10.5px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-align: center;
   text-decoration: none;
   border-radius: 10px;
   transition: color 180ms, background 180ms;
+}
+
+[data-design='instrument'] .in-nav-item > span:not(.in-nav-count) {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 [data-design='instrument'] .in-nav-item:hover {
@@ -113,37 +105,107 @@
   position: absolute;
   left: -6px;
   width: 3px;
-  top: 11px;
-  bottom: 11px;
+  top: 16px;
+  bottom: 16px;
   border-radius: 0 3px 3px 0;
   background: var(--accent);
 }
 
 [data-design='instrument'] .in-nav-count {
-  margin-left: auto;
-  font: 12px/1.4 var(--font-mono);
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 7px);
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: var(--sunken);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font: 10px/1.3 var(--font-mono);
   font-variant-numeric: tabular-nums;
-  color: var(--text-faint);
+  text-align: center;
 }
 
 [data-design='instrument'] .in-sidebar-foot {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
   margin-top: auto;
-  padding: 8px;
+  padding: 8px 6px 10px;
   border-top: 1px solid var(--border);
+}
+
+[data-design='instrument'] .in-rail-views {
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--sunken);
+}
+
+[data-design='instrument'] .in-rail-views a {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  border-radius: 8px;
+  color: var(--text-muted);
+  transition: background 180ms, color 180ms;
+}
+
+[data-design='instrument'] .in-rail-views a:hover,
+[data-design='instrument'] .in-rail-views a[aria-current='page'] {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+/* Hinweise der Symbolleiste öffnen nach rechts. */
+[data-design='instrument'] .in-rail-tip,
+[data-design='instrument'] .in-sidebar .in-control-tip {
+  position: absolute;
+  z-index: 40;
+  left: calc(100% + 10px);
+  right: auto;
+  top: 50%;
+  translate: 0 -50%;
+  width: max-content;
+  max-width: 240px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface2);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms;
+}
+
+[data-design='instrument'] .in-rail-tip small {
+  display: block;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+[data-design='instrument'] :is(.in-brand, .in-rail-views a):is(:hover, :focus-visible) .in-rail-tip,
+[data-design='instrument'] .in-sidebar .in-icon-button:is(:hover, :focus-visible) .in-control-tip {
+  visibility: visible;
+  opacity: 1;
 }
 
 [data-design='instrument'] .in-workspace {
   min-width: 0;
 }
 
+/* Desktop braucht keine Kopfzeile: Navigation, Ansicht und Design sitzen in der Symbolleiste. */
 [data-design='instrument'] .in-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 0 12px 8px;
-  min-height: 44px;
+  display: none;
 }
 
 [data-design='instrument'] .in-context {
@@ -273,13 +335,22 @@
   background: var(--surface2);
 }
 
+[data-design='instrument'] .in-sidebar .in-account summary {
+  padding: 3px;
+}
+
+[data-design='instrument'] .in-sidebar .in-account-name,
+[data-design='instrument'] .in-sidebar .in-account summary > .in-icon {
+  display: none;
+}
+
 [data-design='instrument'] .in-avatar {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   flex: none;
-  border-radius: 9px;
+  border-radius: 10px;
   border: 1px solid var(--border-strong);
   background: var(--sunken);
   font: 12px/1 var(--font-mono);
@@ -313,11 +384,22 @@
   background: var(--surface2);
 }
 
+[data-design='instrument'] .in-sidebar .in-account-panel {
+  bottom: 0;
+  left: calc(100% + 14px);
+}
+
 [data-design='instrument'] .in-account-panel p {
   padding: 8px;
   margin: 0 0 6px;
   border-bottom: 1px solid var(--border);
   color: var(--text-muted);
+}
+
+[data-design='instrument'] .in-account-panel p strong {
+  display: block;
+  color: var(--text);
+  font-weight: 500;
 }
 
 [data-design='instrument'] .in-account-panel :is(a, button) {

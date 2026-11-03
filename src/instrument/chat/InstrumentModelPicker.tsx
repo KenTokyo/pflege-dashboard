@@ -18,6 +18,7 @@ type Props = {
 export function InstrumentModelPicker({ available, current, workspaceDefault, overrideId, unavailableLabel, disabled, onChange }: Props) {
   const ref = useRef<HTMLDetailsElement>(null);
   const label = current ? modelDisplayName(current.display_name, current.provider) : 'Kein Modell freigegeben';
+  const detail = `${overrideId ? 'Für dieses Gespräch' : 'Standard aus Einstellungen'}${current ? ` · ${REGION_LABEL[current.hosting_region]}` : ''}`;
   const choose = (id: string | null) => {
     if (ref.current) {
       ref.current.open = false;
@@ -31,10 +32,9 @@ export function InstrumentModelPicker({ available, current, workspaceDefault, ov
       ref.current.querySelector('summary')?.focus();
     }
   }}>
-    <summary aria-label={`Modell für die nächste Antwort: ${label}`} aria-disabled={disabled}
+    <summary aria-label={`Modell für die nächste Antwort: ${label}`} aria-disabled={disabled} title={`${label} · ${detail}`}
       onClick={(event) => { if (disabled) event.preventDefault(); }}>
-      <Icon name="ai" size={16} /><span>{label}<small>{overrideId ? 'Für dieses Gespräch' : 'Standard aus Einstellungen'}
-        {current ? ` · ${REGION_LABEL[current.hosting_region]}` : ''}</small></span><Icon name="chevron" size={14} />
+      <Icon name="ai" size={16} /><span>{label}<small>{detail}</small></span><Icon name="chevron" size={14} />
     </summary>
     <fieldset className="in-chat-model-options" disabled={disabled}>
       <legend className="sr-only">Modell für die nächste Antwort</legend>

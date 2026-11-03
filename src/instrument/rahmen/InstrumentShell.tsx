@@ -44,7 +44,7 @@ function Account() {
       <Icon name="chevron" size={15} />
     </summary>
     <div className="in-account-panel">
-      <p>{workspace.name}</p>
+      <p><strong>{baseName(profile.displayName)}</strong>{workspace.name}</p>
       <Link to="/einstellungen" onClick={() => { if (ref.current) ref.current.open = false; }}>
         <Icon name="settings" /><span>Einstellungen</span>
       </Link>
@@ -78,22 +78,32 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
   return <div className="in-shell">
     <aside className="in-sidebar">
       <Reveal stage="frame">
-        <Link to="/" className="in-brand" aria-label="Pflege-Dashboard, Übersicht">
-          <span className="in-brand-mark"><Icon name="care" size={24} /></span>
-          <span>Pflege-Dashboard<small title={workspace.name}>{workspace.name}</small></span>
+        <Link to="/" className="in-brand" aria-label={`Pflege-Dashboard, ${workspace.name}, Übersicht`}>
+          <span className="in-brand-mark"><Icon name="care" size={22} /></span>
+          <span className="in-rail-tip" role="tooltip">Pflege-Dashboard<small>{workspace.name}</small></span>
         </Link>
       </Reveal>
-      <div className="in-nav-label">Arbeitsbereich</div>
       <nav className="in-navigation" aria-label="Hauptnavigation" style={{ '--in-nav-index': selected } as CSSProperties}>
         {selected >= 0 ? <span className="in-nav-marker" aria-hidden="true" /> : null}
         {NAV.map(({ to, label, icon, thing, exact }) => <Link key={to} to={to} className="in-nav-item"
           activeOptions={{ exact }} activeProps={{ 'aria-current': 'page' }}>
-          <Icon name={icon} thing={thing} size={18} /><span>{label}</span>
+          <Icon name={icon} thing={thing} size={19} /><span>{label}</span>
           {counts[to] !== undefined ? <span className="in-nav-count" aria-label={`${counts[to]} ${label}`}>
             {counts[to].toLocaleString('de-DE')}</span> : null}
         </Link>)}
       </nav>
-      <div className="in-sidebar-foot"><Account /></div>
+      <div className="in-sidebar-foot">
+        <nav className="in-rail-views" aria-label="Demo-Ansicht wechseln">
+          <Link to="/" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }} aria-label="Kundenansicht">
+            <Icon name="person" size={17} /><span className="in-rail-tip" role="tooltip">Kundenansicht</span>
+          </Link>
+          <Link to="/sachbearbeitung" activeProps={{ 'aria-current': 'page' }} aria-label="Sachbearbeiter-Test">
+            <Icon name="ai" size={17} /><span className="in-rail-tip" role="tooltip">Sachbearbeiter-Test</span>
+          </Link>
+        </nav>
+        <ThemeButton />
+        <Account />
+      </div>
     </aside>
 
     <div className="in-workspace">

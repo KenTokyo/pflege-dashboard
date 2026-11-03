@@ -6,12 +6,12 @@
 
 [data-design='instrument'] .in-chat-layout {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 280px minmax(0, 1fr);
   gap: 10px;
   width: 100%;
   align-items: stretch;
   min-width: 0;
-  height: calc(100dvh - 97px);
+  height: calc(100dvh - 49px);
   min-height: 520px;
 }
 
@@ -24,46 +24,86 @@
   box-shadow: var(--shadow);
 }
 
+/* Kopf in einer Zeile: Titel · Bezug · Modus · Modell · Archivieren (wie Tagwerk, nur dichter). */
 [data-design='instrument'] .in-chat-layout .thread-head {
-  padding: 10px 16px 10px 20px;
-  gap: 16px;
+  flex-wrap: nowrap;
   align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 10px 8px 18px;
   background: var(--surface);
 }
 
-[data-design='instrument'] .in-thread-kicker {
-  display: flex;
+[data-design='instrument'] .in-chat-layout .thread-title {
+  flex-direction: row;
   align-items: center;
+  gap: 14px;
+  flex: 1 1 auto;
+}
+
+[data-design='instrument'] .in-chat-layout .thread-title > div:first-of-type,
+[data-design='instrument'] .in-chat-layout .title-edit {
+  flex: 0 1 auto;
+  min-width: 140px;
   gap: 6px;
-  margin-bottom: 1px;
-  color: var(--text-faint);
-  font: 11px/1.5 var(--font-mono);
-  letter-spacing: 0.03em;
+}
+
+[data-design='instrument'] .in-chat-layout .title-edit {
+  flex: 1 1 auto;
+}
+
+[data-design='instrument'] .in-chat-layout .thread-title > div:first-of-type > .in-icon {
+  flex: none;
 }
 
 [data-design='instrument'] .thread-title h1 {
-  font-size: 17px;
+  min-width: 0;
+  font-size: 16px;
   font-weight: 550;
   line-height: 1.35;
-  overflow: visible;
-  text-overflow: clip;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-design='instrument'] .in-thread-badge {
+  flex: none;
+  padding: 2px 7px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font: 11px/1.4 var(--font-mono);
 }
 
 [data-design='instrument'] .in-chat-layout .thread-context {
-  margin-top: 4px;
+  flex: 0 1 280px;
+  min-width: 150px;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+[data-design='instrument'] .in-chat-layout .thread-person {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+[data-design='instrument'] .in-chat-layout .assign-label {
+  flex: none;
+  color: var(--text-faint);
+  font-size: 12px;
 }
 
 [data-design='instrument'] .in-chat-layout .thread-tools {
-  flex: 0 1 380px;
-  flex-wrap: wrap;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
   gap: 6px;
   align-items: center;
 }
 
 [data-design='instrument'] .in-chat-layout .chip-mode {
   order: 0;
+  min-height: 36px;
   background: var(--sunken);
   color: var(--text-muted);
   font-weight: 400;
@@ -81,26 +121,54 @@
 }
 
 [data-design='instrument'] .in-chat-layout .person-select {
-  text-overflow: clip;
+  min-width: 0;
+  min-height: 36px;
+  width: 100%;
   max-width: 100%;
   flex: 1;
+  text-overflow: ellipsis;
 }
 
-[data-design='instrument'] .in-chat-layout .model-picker {
-  min-height: 40px;
-  flex: 1 1 100%;
-  flex-wrap: wrap;
-  padding: 4px 12px;
+[data-design='instrument'] .in-chat-layout .in-chat-model-picker {
+  flex: 0 1 260px;
+  min-width: 170px;
 }
 
-[data-design='instrument'] .in-chat-layout .model-picker select {
-  text-overflow: clip;
-  max-width: none;
+[data-design='instrument'] .in-chat-layout .in-chat-model-picker > summary {
+  min-height: 36px;
+  padding: 4px 10px;
+}
+
+[data-design='instrument'] .in-chat-layout .in-chat-model-picker summary > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-design='instrument'] .in-chat-layout .in-chat-model-picker summary small {
+  display: none;
+}
+
+[data-design='instrument'] .in-chat-layout .in-chat-model-options {
+  left: auto;
+  right: 0;
+  width: 300px;
 }
 
 [data-design='instrument'] .in-chat-layout .thread-tools > .btn {
-  order: 1;
-  margin-left: auto;
+  order: 3;
+  min-height: 36px;
+}
+
+@media (max-width: 1499px) {
+  [data-design='instrument'] .in-chat-layout .thread-tools > .btn {
+    width: 36px;
+    padding: 0;
+  }
+
+  [data-design='instrument'] .in-chat-layout .thread-tools .btn-label {
+    display: none;
+  }
 }
 
 [data-design='instrument'] .in-chat-model-name {
@@ -228,11 +296,16 @@
 
 @media (max-width: 1199px) {
   [data-design='instrument'] .in-chat-layout {
-    grid-template-columns: 228px minmax(0, 1fr);
+    grid-template-columns: 236px minmax(0, 1fr);
   }
 }
 
 @media (max-width: 1023px) {
+  [data-design='instrument'] .in-chat-layout .thread-head,
+  [data-design='instrument'] .in-chat-layout .thread-title {
+    flex-wrap: wrap;
+  }
+
   [data-design='instrument'] .in-chat-layout {
     grid-template-columns: minmax(0, 1fr);
     height: auto;
@@ -246,15 +319,29 @@
 }
 
 @media (max-width: 767px) {
+  /* Handy: Zurück + Titel, darunter Bezug, darunter eine Werkzeugzeile. */
   [data-design='instrument'] .in-chat-layout .thread-head {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    padding: 16px 12px;
+    align-items: center;
+    padding: 10px 12px;
     gap: 8px;
   }
 
+  [data-design='instrument'] .in-chat-layout .thread-title {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .thread-context {
+    flex: none;
+    min-width: 0;
+  }
+
   [data-design='instrument'] .thread-title h1 {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   [data-design='instrument'] .in-chat-layout > .thread {
@@ -264,28 +351,37 @@
 
   [data-design='instrument'] .in-chat-layout .thread-tools {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     grid-column: 1 / -1;
   }
 
   [data-design='instrument'] .in-chat-layout .thread-tools .chip-mode {
     display: inline-flex;
     flex: none;
+    min-height: 40px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .in-chat-model-picker {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  [data-design='instrument'] .in-chat-layout .in-chat-model-picker > summary {
+    min-height: 40px;
+  }
+
+  [data-design='instrument'] .in-chat-layout .in-chat-model-options {
+    width: min(300px, calc(100vw - 48px));
   }
 
   [data-design='instrument'] .in-chat-layout .thread-tools .btn-label {
-    display: inline;
+    display: none;
   }
 
   [data-design='instrument'] .in-chat-layout .thread-tools .btn {
-    width: auto;
+    width: 44px;
     min-height: 40px;
-    padding: 0 12px;
-    margin-left: auto;
-  }
-
-  [data-design='instrument'] .in-chat-layout .model-picker {
-    order: 3;
+    padding: 0;
   }
 }
 
