@@ -3,9 +3,8 @@
  * mit synthetischem Test-Transport statt Supabase. Läuft nur über vite.harness.config.ts, nie im
  * Produkt-Build. Keine echten Konten, keine Netzaufrufe, keine KI-Kosten.
  */
-import '@fontsource/atkinson-hyperlegible-next/400.css';
-import '@fontsource/atkinson-hyperlegible-next/700.css';
-import '@fontsource-variable/bricolage-grotesque/index.css';
+import '@fontsource-variable/geist/index.css';
+import '@fontsource-variable/geist-mono/index.css';
 import '../../src/styles/app.css';
 import { QueryClient } from '@tanstack/react-query';
 import { StrictMode } from 'react';

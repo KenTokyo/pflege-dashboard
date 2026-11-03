@@ -33,7 +33,7 @@ function TagwerkTasksPage() {
 
   return (
     <Shell>
-      <div className="list-page">
+      <div className="list-page mo-fly">
         <header className="page-head">
           <div>
             <p className="eyebrow">Nach Dringlichkeit sortiert</p>

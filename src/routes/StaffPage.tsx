@@ -47,7 +47,7 @@ function TagwerkStaffPage() {
   return <Shell mainClassName="staff-main">
     <header className="page-head staff-page-head"><div><p className="eyebrow">Gemeinsamer Demo-Arbeitsbereich</p><h1>Die richtigen Fälle im Blick.</h1><p className="staff-intro">Sachbearbeiter-Test · Dieser Sichtwechsel ändert keine Zugriffsrechte.</p></div><button type="button" className="btn btn-secondary" onClick={refresh} disabled={refreshing}><RefreshCw className="i" size={16} aria-hidden="true" />{refreshing ? 'Wird aktualisiert …' : 'Aktualisieren'}</button></header>
 
-    <section className="staff-metrics" aria-label="Überblick aus gespeicherten Daten" aria-busy={refreshing}>
+    <section className="staff-metrics mo-fly" aria-label="Überblick aus gespeicherten Daten" aria-busy={refreshing}>
       <div className="staff-metric"><span className="staff-metric-icon"><Users size={18} className="i" aria-hidden="true" /></span><div><span>Pflegefälle</span><strong>{stat(people.isError ? undefined : people.data?.length)}</strong><small>Fiktive Personen</small></div></div>
       <div className="staff-metric staff-metric-urgent"><span className="staff-metric-icon"><AlarmClock size={18} className="i" aria-hidden="true" /></span><div><span>Dringende Aufgaben</span><strong>{stat(tasks.isError || tasks.isPending ? undefined : urgent)}</strong><small>{tasks.isError || tasks.isPending ? 'Aufgaben noch unbekannt' : `von ${integer.format(taskList.length)} offenen Aufgaben`}</small></div></div>
       <div className="staff-metric"><span className="staff-metric-icon"><MessageSquareText size={18} className="i" aria-hidden="true" /></span><div><span>Gespeicherte Gespräche</span><strong>{stat(metrics?.totals.conversations)}</strong><small>Mit Beispielen und Archiv</small></div></div>

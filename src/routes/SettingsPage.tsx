@@ -7,6 +7,7 @@ import { DesignSwitch } from '../instrument/grundlage/DesignSwitch';
 import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { Underline } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
+import { Segmented } from '../components/Segmented';
 import { ErrorState, Loading } from '../components/States';
 import { MODE_LABEL, REGION_LABEL, modelDisplayName, providerLabel } from '../data/model';
 import { useAgentSettings, useDefaultPrompt, useModels, useUpdateAgentSettings } from '../data/queries';
@@ -178,7 +179,7 @@ export function SettingsPage() {
           <h1>Einstellungen</h1>
         </div>
       </header>
-      <div className="settings">
+      <div className="settings mo-fly">
         <div className="set-col">
           <section className="card" aria-labelledby="mode-title">
             <div className="card-head">
@@ -242,16 +243,11 @@ export function SettingsPage() {
                 <strong>Design</strong>
                 <span className="small muted">Ihre Wahl wird auf diesem Gerät gespeichert.</span>
               </div>
-              <div className="segmented" role="group" aria-label="Design wählen">
-                <button type="button" aria-pressed={theme === 'dunkel'} onClick={() => setTheme('dunkel')}>
-                  <Moon className="i" size={15} aria-hidden="true" />
-                  Dunkel
-                </button>
-                <button type="button" aria-pressed={theme === 'hell'} onClick={() => setTheme('hell')}>
-                  <Sun className="i" size={15} aria-hidden="true" />
-                  Hell
-                </button>
-              </div>
+              <Segmented label="Design wählen" value={theme} onChange={setTheme}
+                options={[
+                  { value: 'dunkel', label: 'Dunkel', icon: <Moon className="i" size={15} aria-hidden="true" /> },
+                  { value: 'hell', label: 'Hell', icon: <Sun className="i" size={15} aria-hidden="true" /> },
+                ]} />
             </div>
             <div className="set-row">
               <div>

@@ -1,6 +1,5 @@
-import '@fontsource/atkinson-hyperlegible-next/400.css';
-import '@fontsource/atkinson-hyperlegible-next/700.css';
-import '@fontsource-variable/bricolage-grotesque/index.css';
+import '@fontsource-variable/geist/index.css';
+import '@fontsource-variable/geist-mono/index.css';
 import './styles/app.css';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

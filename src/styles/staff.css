@@ -1,32 +1,34 @@
 /* Sachbearbeiter: flache Arbeitsflächen aus denselben Tagwerk-Tokens. */
 @layer components {
-  .staff-view-switch { display: flex; width: fit-content; max-width: 100%; margin-bottom: 20px; padding: 4px; gap: 4px; background: var(--surface2); border-radius: 12px; }
-  .staff-view-switch a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 700; color: var(--text-muted); }
-  .staff-view-switch a[aria-current='page'] { color: var(--accent-text); background: var(--surface); box-shadow: 0 1px 3px color-mix(in srgb, var(--text) 7%, transparent); }
+  .staff-view-switch { display: flex; width: fit-content; max-width: 100%; margin-bottom: 18px; padding: 3px; gap: 2px; background: var(--sunken); border: 1px solid var(--border); border-radius: 11px; }
+  .staff-view-switch a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 6px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--text-muted); }
+  .staff-view-switch a > :not(.seg-ink) { position: relative; z-index: 1; }
+  .staff-view-switch a { position: relative; text-decoration: none; transition: color 150ms var(--mo-ease-out); }
+  .staff-view-switch a[aria-current='page'] { color: var(--text); }
+  .staff-view-switch a[aria-current='page'] .nav-icon { color: var(--accent-text); }
   .staff-view-switch a:hover { color: var(--text); }
   .staff-main { --staff-rule: color-mix(in srgb, var(--border) 70%, transparent); }
   .staff-page-head { align-items: center; margin-bottom: 24px; }
   .staff-intro { color: var(--text-muted); margin-top: 7px; font-size: 14px; }
   .staff-main .btn, .staff-dialog .btn, .staff-dialog .icon-btn { min-height: 44px; }
-  .staff-main .btn:active:not(:disabled), .staff-dialog .btn:active:not(:disabled), .staff-view-switch a:active { transform: scale(0.96); }
   .staff-main .btn, .staff-dialog .btn { transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), color 150ms cubic-bezier(0.2, 0, 0, 1), transform 150ms cubic-bezier(0.2, 0, 0, 1); }
   .staff-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 24px; }
   .staff-metric { display: flex; align-items: flex-start; gap: 12px; background: var(--surface); padding: 20px 16px; border-radius: var(--radius); }
   .staff-metric-icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-text); flex: none; }
   .staff-metric > div { min-width: 0; display: flex; flex-direction: column; }
   .staff-metric span:not(.staff-metric-icon) { font-size: 13px; color: var(--text-muted); }
-  .staff-metric strong { font: 720 32px/1.35 var(--font-display); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .staff-metric strong { font: 600 32px/1.2 var(--font-mono); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
   .staff-metric small { color: var(--text-muted); font-size: 12px; }
   .staff-metric-urgent { background: color-mix(in srgb, var(--surface) 80%, var(--warning-soft)); }
   .staff-metric-urgent .staff-metric-icon { color: var(--warning); background: var(--warning-soft); }
   .staff-metric-success .staff-metric-icon { color: var(--success); background: var(--success-soft); }
   .staff-section-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .staff-section-head > div { min-width: 0; }
-  .staff-section-head h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-size: 18px; font-weight: 750; }
+  .staff-section-head h2 { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; font-size: 18px; font-weight: 650; }
   .staff-section-head p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
   .staff-source { flex: none; font-size: 12px; color: var(--text-muted); padding: 5px 8px; background: var(--surface2); border-radius: 6px; }
   .staff-workbench-slot { border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 85%, var(--accent-soft)); margin-bottom: 24px; }
-  .staff-workbench-slot > summary { cursor: pointer; min-height: 48px; padding: 12px 18px; color: var(--accent-text); font-size: 14px; font-weight: 700; }
+  .staff-workbench-slot > summary { cursor: pointer; min-height: 48px; padding: 12px 18px; color: var(--accent-text); font-size: 14px; font-weight: 600; }
   .staff-workbench-slot > summary > span { font-weight: 400; font-size: 13px; color: var(--text-muted); margin-left: 12px; }
   .staff-workbench { padding: 4px 20px 20px; }
   .staff-workbench .staff-section-head h2 > svg { color: var(--accent-text); }
@@ -40,7 +42,7 @@
   .staff-filter-error { color: var(--danger); }
   .staff-board { margin-bottom: 24px; }
   .staff-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 10px; padding: 3px; }
-  .staff-tabs button { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 12px; border-radius: 7px; font-weight: 700; font-size: 14px; color: var(--text-muted); }
+  .staff-tabs button { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 12px; border-radius: 7px; font-weight: 600; font-size: 14px; color: var(--text-muted); }
   .staff-tabs button[aria-pressed='true'] { color: var(--accent-text); background: var(--surface); }
   .staff-toolbar { display: flex; align-items: flex-end; gap: 12px 18px; flex-wrap: wrap; margin: 0 0 16px; }
   .staff-select { display: flex; flex-direction: column; gap: 5px; min-width: 160px; max-width: 100%; font-size: 12px; color: var(--text-muted); }
@@ -55,7 +57,7 @@
   .staff-case-row + .staff-case-row { border-top: 1px solid var(--staff-rule); }
   .staff-person { display: flex; gap: 12px; align-items: center; min-width: 0; }
   .staff-person > div { min-width: 0; }
-  .staff-avatar { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 13px; font-weight: 700; }
+  .staff-avatar { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--accent-soft); color: var(--accent-text); font-size: 13px; font-weight: 600; }
   .staff-avatar-1 { color: var(--warning); background: var(--warning-soft); }
   .staff-avatar-2 { color: var(--success); background: var(--success-soft); }
   .staff-person h3 { font-size: 16px; font-weight: 730; overflow-wrap: anywhere; }
@@ -64,7 +66,7 @@
   .staff-next strong { font-size: 14px; }
   .staff-next span, .staff-conversation-count span { font-size: 12px; color: var(--text-muted); }
   .staff-next span { overflow-wrap: anywhere; }
-  .staff-conversation-count strong { font: 700 22px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+  .staff-conversation-count strong { font: 600 22px/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
   .staff-text-urgent { color: var(--danger); }
   .staff-row-actions { display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
   .staff-row-actions .btn { font-size: 13px; padding-inline: 10px; }
@@ -72,7 +74,7 @@
   .staff-task-list > li { display: flex; gap: 16px; align-items: center; padding: 16px 0; }
   .staff-task-list > li + li { border-top: 1px solid var(--staff-rule); }
   .staff-task-title { flex: 1; min-width: 0; }
-  .staff-task-title h3 { font-size: 16px; font-weight: 700; margin-top: 7px; }
+  .staff-task-title h3 { font-size: 16px; font-weight: 600; margin-top: 7px; }
   .staff-task-title p, .staff-task-title small { color: var(--text-muted); font-size: 13px; }
   .staff-task-title small { font-size: 12px; display: block; margin-top: 3px; }
   .staff-task-due { display: flex; flex-direction: column; font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -85,17 +87,17 @@
   .staff-usage-totals > span { padding: 0 5px; }
   .staff-usage-list > li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(110px, 0.5fr) minmax(160px, 1fr); gap: 20px; padding: 17px 0; border-bottom: 1px solid var(--staff-rule); }
   .staff-usage-list > li > div { display: flex; flex-direction: column; min-width: 0; }
-  .staff-usage-list strong { font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .staff-usage-list strong { font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .staff-usage-list span { font-size: 12px; color: var(--text-muted); overflow-wrap: anywhere; }
   .staff-usage-note { margin-top: 14px; max-width: 80ch; }
   .staff-dialog { width: min(760px, calc(100vw - 48px)); }
   .staff-dialog .icon-btn { min-width: 44px; }
   .staff-dialog .dialog-body { gap: 24px; }
-  .staff-dialog h3 { font-size: 17px; font-weight: 750; margin-bottom: 8px; }
+  .staff-dialog h3 { font-size: 17px; font-weight: 650; margin-bottom: 8px; }
   .staff-dialog h2 { overflow-wrap: anywhere; }
   .staff-facts { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
   .staff-facts dt { color: var(--text-muted); font-size: 12px; margin-bottom: 4px; }
-  .staff-facts dd { font-size: 15px; font-weight: 700; }
+  .staff-facts dd { font-size: 15px; font-weight: 600; }
   .staff-case-summary { padding: 14px 16px; border-radius: var(--radius-sm); background: var(--accent-soft); font-size: 14px; }
   .staff-detail-list > li { display: flex; gap: 18px; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--border); }
   .staff-detail-list > li:last-child { border-bottom: 0; }
@@ -117,7 +119,7 @@
 }
 @media (max-width: 767px) {
   .staff-view-switch { width: 100%; gap: 2px; margin-bottom: 20px; }
-  .staff-view-switch a { flex: 1; padding-inline: 8px; font-size: 13px; gap: 6px; }
+  .staff-view-switch a { flex: 1; min-height: 44px; padding-inline: 8px; font-size: 13px; gap: 6px; }
   .staff-view-switch svg { width: 16px; }
   .staff-page-head { gap: 16px; }
   .staff-page-head > button { min-height: 44px; }
@@ -155,5 +157,4 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .staff-main .btn, .staff-dialog .btn, .staff-view-switch a { transition: none; }
-  .staff-main .btn:active:not(:disabled), .staff-dialog .btn:active:not(:disabled), .staff-view-switch a:active { transform: none; }
 }

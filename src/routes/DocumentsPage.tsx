@@ -85,7 +85,7 @@ function TagwerkDocumentsPage() {
 
   return (
     <Shell>
-      <div className="list-page">
+      <div className="list-page mo-fly">
         <header className="page-head">
           <div>
             <p className="eyebrow">Arbeitsbereich</p>

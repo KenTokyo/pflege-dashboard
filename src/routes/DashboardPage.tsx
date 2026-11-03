@@ -7,6 +7,7 @@ import { useWorkspace } from '../auth/AuthProvider';
 import { CountUp } from '../components/CountUp';
 import { MarkerCircle } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
+import { SPRING } from '../motion/tokens';
 import { EmptyState, ErrorState, Loading } from '../components/States';
 import {
   DOC_KIND_LABEL,
@@ -22,8 +23,8 @@ import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { useOverviewQuestion } from '../instrument/uebersicht/useOverviewQuestion';
 import type { CareRecipient, DocumentRow, TaskRow } from '../services/types';
 
-const listIn = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
-const itemIn = { hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: [0.2, 0.7, 0.3, 1] as const } } };
+const listIn = { hidden: {}, show: { transition: { staggerChildren: 0.045, delayChildren: 0.08 } } };
+const itemIn = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: SPRING.soft } };
 
 export function DocStatus({ status }: { status: DocumentRow['status'] }) {
   if (status === 'draft') return <span className="tape">{DOC_STATUS_LABEL.draft}</span>;
@@ -280,7 +281,7 @@ function TagwerkDashboardPage() {
         </div>
       </header>
 
-      <div className="dash">
+      <div className="dash mo-fly">
         <section className="persons" aria-label="Pflegebedürftige">
           {people.isPending || tasks.isPending ? (
             <div className="card">

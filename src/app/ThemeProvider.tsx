@@ -7,6 +7,10 @@ type ThemeContextValue = { theme: Theme; stored: boolean; setTheme: (theme: Them
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 type DesignContextValue = { design: Design; setDesign: (design: Design) => void };
 const DesignContext = createContext<DesignContextValue | null>(null);
+/** Tagwerk-Seitenleiste: aufgeklappt (Standard) oder als Symbolleiste; geräteweit gespeichert. */
+type RailContextValue = { railOpen: boolean; toggleRail: () => void };
+const RailContext = createContext<RailContextValue | null>(null);
+const RAIL_KEY = 'pflege-dashboard:rail';
 
 const storage = (): Storage | null => {
   try {
@@ -44,6 +48,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
   const designValue = useMemo(() => ({ design, setDesign }), [design, setDesign]);
 
+  const [railOpen, setRailOpen] = useState(() => {
+    try {
+      return storage()?.getItem(RAIL_KEY) !== 'zu';
+    } catch {
+      return true;
+    }
+  });
+  const toggleRail = useCallback(() => {
+    setRailOpen((open) => {
+      try {
+        storage()?.setItem(RAIL_KEY, open ? 'zu' : 'auf');
+      } catch {
+        // Gesperrter Speicher: Wahl gilt nur für diese Sitzung.
+      }
+      return !open;
+    });
+  }, []);
+  const railValue = useMemo(() => ({ railOpen, toggleRail }), [railOpen, toggleRail]);
+
   useEffect(() => {
     applyTheme(document.documentElement, state.theme);
   }, [state.theme]);
@@ -66,7 +89,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [state, setTheme],
   );
   return <ThemeContext.Provider value={value}>
-    <DesignContext.Provider value={designValue}>{children}</DesignContext.Provider>
+    <DesignContext.Provider value={designValue}>
+      <RailContext.Provider value={railValue}>{children}</RailContext.Provider>
+    </DesignContext.Provider>
   </ThemeContext.Provider>;
 }
 
@@ -78,6 +103,12 @@ export function useDesign(): DesignContextValue {
 
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('ThemeProvider fehlt');
+  return ctx;
+}
+
+export function useRail(): RailContextValue {
+  const ctx = useContext(RailContext);
   if (!ctx) throw new Error('ThemeProvider fehlt');
   return ctx;
 }

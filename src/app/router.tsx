@@ -11,6 +11,7 @@ import { Loading } from '../components/States';
 import { AppGate } from '../routes/AppGate';
 import { safeReturnPath } from './returnPath';
 import { LoginPage } from '../routes/LoginPage';
+import { pageCutTypes } from '../motion/pageCut';
 
 // Seiten nach Bedarf laden: Markdown und Chat nur, wenn der Chat geöffnet wird.
 const DashboardPage = lazyRouteComponent(() => import('../routes/DashboardPage'), 'DashboardPage');
@@ -62,6 +63,8 @@ export function createAppRouter(history?: RouterHistory) {
     ...(history ? { history } : {}),
     defaultPreload: false,
     scrollRestoration: false,
+    // Tagwerk: Bereichswechsel als Kamerafahrt (src/motion/motion.css); sonst kein Übergang.
+    defaultViewTransition: { types: pageCutTypes },
     defaultPendingComponent: () => (
       <div className="p-6">
         <Loading label="Seite wird geladen …" />

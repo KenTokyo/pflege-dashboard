@@ -8,6 +8,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { ChatStreamProvider } from '../chat/ChatStreamContext';
 import { DemoBanner } from '../components/DemoBanner';
 import { BrandMark } from '../components/Brand';
+import { TagwerkFrame } from '../components/Shell';
 import { ErrorState, Loading } from '../components/States';
 
 function Centered({ children }: { children: ReactNode }) {
@@ -89,7 +90,7 @@ export function AppGate() {
     <>
       {state.workspace.workspace.demoBanner ? <DemoBanner /> : null}
       <ChatStreamProvider key={`${state.workspace.workspace.id}:${state.epoch}`}>
-        <Outlet />
+        {design === 'instrument' ? <Outlet /> : <TagwerkFrame><Outlet /></TagwerkFrame>}
       </ChatStreamProvider>
     </>
   );
