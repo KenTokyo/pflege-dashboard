@@ -62,3 +62,17 @@ Ergebnis: View Transition `tg-page` mit Richtung aus Navigationsreihenfolge (Rou
 
 ## Phase 4 – Prüfen (Node, Bilder 1920×1080 dunkel/hell), Commit + Push [x]
 Typecheck, Lint, 248 Tests, Build, Bundle grün. `check:source`: Tagwerk grün; zwei alte Instrument-Fehler aus 3d58325 (`rahmen.css` 429 Zeilen, 10,5 px) unverändert. Bewegungsprüfung (Chrome for Testing 156, 1920×1080): 10 schnelle Klicks → 1 `main`, keine Rest-Verschiebung, Leerlauf 0 Animationen; Menü, Tooltip, Taste `[`, Dialog auf/zu geprüft.
+
+## Folgeauftrag: Übersicht als Tagesplan mit Einzeichnungen
+
+Vorschlag umsetzen: Fristen der Woche als Wochenband (Tage, Farbe je Person), Überfälliges mit rotem Handkreis,
+Erledigtes mit Lime-Haken (Studio Graffiti), Leerraum rechts nutzen.
+
+## Phase 5 – Wochenplan in der Übersicht (Frontend) [x]
+Lesen: `src/routes/DashboardPage.tsx`, Skill studio-graffiti (Stundenplan-Regeln).
+Ergebnis: Karte „Diese Woche“ über volle Breite: Noch offen · Mo–Fr · Wochenende · Später; Fristen, Dokumente und
+Gespräche der Woche als Einträge in Personenfarbe; ein Handkreis um die älteste offene Frist, Haken hinter
+versendeten Schreiben (≤ 3), Marker-Strich unter heute, ein Tag „KW“. Einmaliger Auftritt, danach 0 Animationen.
+Handy: Tage untereinander, leere Tage außer heute ausgeblendet, kein Überlauf (390 px). „Heute“-Spalte rechts
+entfällt: die Wochenkarte füllt die Breite und markiert heute selbst. Monoschrift-Fehler behoben (Theme-Variable
+zeigte auf sich selbst). `src/routes/dashboard/WeekBand.tsx`, `src/styles/week.css`

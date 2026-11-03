@@ -8,6 +8,7 @@ import { CountUp } from '../components/CountUp';
 import { MarkerCircle } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
 import { SPRING } from '../motion/tokens';
+import { WeekBand } from './dashboard/WeekBand';
 import { EmptyState, ErrorState, Loading } from '../components/States';
 import {
   DOC_KIND_LABEL,
@@ -282,6 +283,7 @@ function TagwerkDashboardPage() {
       </header>
 
       <div className="dash mo-fly">
+        <WeekBand now={now} />
         <section className="persons" aria-label="Pflegebedürftige">
           {people.isPending || tasks.isPending ? (
             <div className="card">

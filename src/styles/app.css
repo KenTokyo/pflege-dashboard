@@ -2,6 +2,7 @@
 @import 'tailwindcss' source('../');
 @import './tokens.css';
 @import '../motion/motion.css';
+@import './week.css';
 
 /* Tailwind-Utilities lesen dieselben semantischen Tokens (ein Tokensystem für beide Themes). */
 @theme inline {
@@ -29,7 +30,6 @@
   --radius-card: var(--radius);
   --radius-control: var(--radius-sm);
   --font-weight-bold: 600;
-  --font-mono: var(--font-mono);
 }
 
 @layer base {
@@ -350,8 +350,8 @@
   .dash {
     display: grid; gap: 16px; min-width: 0;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1.3fr);
-    grid-template-rows: auto auto 1fr;
-    grid-template-areas: 'persons ask' 'tasks ask' 'tasks docs';
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: 'week week' 'persons ask' 'tasks ask' 'tasks docs';
     align-items: start;
   }
   .persons { grid-area: persons; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; min-width: 0; }
@@ -625,7 +625,7 @@
   .bottomnav a[aria-current='page'] .nav-icon { color: var(--hue, var(--accent-text)); }
   .bottom-ink { position: absolute; inset: 6px 10px; z-index: 0; border-radius: 12px; background: var(--surface2); }
   .main { padding: 20px 20px 28px; }
-  .dash { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: 'persons' 'ask' 'tasks' 'docs'; }
+  .dash { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: 'week' 'persons' 'ask' 'tasks' 'docs'; }
   .chat-layout { grid-template-columns: minmax(0, 1fr); }
   .chat-layout.has-thread .conv-list { display: none; }
   .chat-layout:not(.has-thread) .thread { display: none; }
