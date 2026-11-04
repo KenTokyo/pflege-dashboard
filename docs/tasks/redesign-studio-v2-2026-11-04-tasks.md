@@ -94,3 +94,7 @@ Bauer: Claude Opus 5.5, Denkstufe High. Bilder: GPT-6 Luna (Codex), Denkstufe Hi
   Ergebnis: `npm run check` grün (nach Auslagerung `src/instrument/rahmen/tips.css`, Schrift 12 px; Instrument-Links
   „Übersicht“ → `/uebersicht`). Harness lädt jetzt `public/` (Figur fehlte in Prüfbildern). Offen: `npm run shots`
   erwartet noch Dashboard nach Login und alte Hauptnavigation.
+- [x] 6 Leiter, Nacharbeit „weitermachen“: Sichtwechsel Kunde/Sachbearbeiter in die Topbar (Handy: im Inhalt, je
+  nur einmal im DOM); `npm run shots` auf Chat zuerst umgestellt (veraltet seit 06.10.: Abmeldetext, „angemeldet
+  bleiben“ vorausgewählt); Handy-Bedienziele ≥ 40 px. Ergebnis: 47 Bilder, 0 Probleme, Leerlauf ruhig; `check` grün.
+  `src/components/Shell.tsx`, `tools/shots.mjs`, `src/styles/app.css`

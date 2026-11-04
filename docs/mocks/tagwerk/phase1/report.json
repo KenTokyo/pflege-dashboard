@@ -1,10 +1,10 @@
 {
-  "browser": "Google Chrome for Testing 154.0.8037.92",
+  "browser": "Google Chrome for Testing 156.0.8078.48",
   "shots": [
     "login-dunkel.png",
     "login-fehler-dunkel.png",
+    "neu-dunkel.png",
     "dashboard-dunkel.png",
-    "gespraeche-dunkel.png",
     "dokumente-dunkel.png",
     "aufgaben-dunkel.png",
     "chat-ohne-modell-dunkel.png",
@@ -16,8 +16,8 @@
     "chat-abriss-dunkel.png",
     "login-hell.png",
     "login-fehler-hell.png",
+    "neu-hell.png",
     "dashboard-hell.png",
-    "gespraeche-hell.png",
     "dokumente-hell.png",
     "aufgaben-hell.png",
     "chat-ohne-modell-hell.png",
@@ -28,21 +28,24 @@
     "chat-anbieter-hell.png",
     "chat-abriss-hell.png",
     "telefon-login-dunkel.png",
+    "telefon-neu-dunkel.png",
     "telefon-dashboard-dunkel.png",
     "telefon-dashboard-unten-dunkel.png",
-    "telefon-gespraeche-dunkel.png",
+    "telefon-seitenleiste-dunkel.png",
     "telefon-chat-dunkel.png",
     "telefon-einstellungen-dunkel.png",
     "telefon-login-hell.png",
+    "telefon-neu-hell.png",
     "telefon-dashboard-hell.png",
     "telefon-dashboard-unten-hell.png",
-    "telefon-gespraeche-hell.png",
+    "telefon-seitenleiste-hell.png",
     "telefon-chat-hell.png",
     "telefon-einstellungen-hell.png",
     "tablet-login-dunkel.png",
+    "tablet-neu-dunkel.png",
     "tablet-dashboard-dunkel.png",
     "tablet-dashboard-unten-dunkel.png",
-    "tablet-gespraeche-dunkel.png",
+    "tablet-seitenleiste-dunkel.png",
     "tablet-chat-dunkel.png",
     "tablet-einstellungen-dunkel.png"
   ],
@@ -62,14 +65,14 @@
       "overflow": []
     },
     {
-      "name": "dashboard-dunkel",
+      "name": "neu-dunkel",
       "scrollW": 1280,
       "tiny": 0,
       "small": 0,
       "overflow": []
     },
     {
-      "name": "gespraeche-dunkel",
+      "name": "dashboard-dunkel",
       "scrollW": 1280,
       "tiny": 0,
       "small": 0,
@@ -153,14 +156,14 @@
       "overflow": []
     },
     {
-      "name": "dashboard-hell",
+      "name": "neu-hell",
       "scrollW": 1280,
       "tiny": 0,
       "small": 0,
       "overflow": []
     },
     {
-      "name": "gespraeche-hell",
+      "name": "dashboard-hell",
       "scrollW": 1280,
       "tiny": 0,
       "small": 0,
@@ -237,6 +240,13 @@
       "overflow": []
     },
     {
+      "name": "telefon-neu-dunkel",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
       "name": "telefon-dashboard-dunkel",
       "scrollW": 390,
       "tiny": 0,
@@ -251,7 +261,7 @@
       "overflow": []
     },
     {
-      "name": "telefon-gespraeche-dunkel",
+      "name": "telefon-seitenleiste-dunkel",
       "scrollW": 390,
       "tiny": 0,
       "small": 0,
@@ -279,6 +289,13 @@
       "overflow": []
     },
     {
+      "name": "telefon-neu-hell",
+      "scrollW": 390,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
       "name": "telefon-dashboard-hell",
       "scrollW": 390,
       "tiny": 0,
@@ -293,7 +310,7 @@
       "overflow": []
     },
     {
-      "name": "telefon-gespraeche-hell",
+      "name": "telefon-seitenleiste-hell",
       "scrollW": 390,
       "tiny": 0,
       "small": 0,
@@ -321,6 +338,13 @@
       "overflow": []
     },
     {
+      "name": "tablet-neu-dunkel",
+      "scrollW": 768,
+      "tiny": 0,
+      "small": 0,
+      "overflow": []
+    },
+    {
       "name": "tablet-dashboard-dunkel",
       "scrollW": 768,
       "tiny": 0,
@@ -335,7 +359,7 @@
       "overflow": []
     },
     {
-      "name": "tablet-gespraeche-dunkel",
+      "name": "tablet-seitenleiste-dunkel",
       "scrollW": 768,
       "tiny": 0,
       "small": 0,
@@ -358,6 +382,12 @@
   ],
   "idle": [
     {
+      "where": "neu-dunkel",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
       "where": "dashboard-dunkel",
       "raf": 0,
       "timeouts": 0,
@@ -371,6 +401,12 @@
     },
     {
       "where": "chat-antwort-dunkel",
+      "raf": 0,
+      "timeouts": 0,
+      "runningAnimations": 0
+    },
+    {
+      "where": "neu-hell",
       "raf": 0,
       "timeouts": 0,
       "runningAnimations": 0
@@ -397,7 +433,7 @@
   "problems": [],
   "console": [],
   "cleanup": {
-    "browserPid": 81601,
-    "watcherPid": 81643
+    "browserPid": 28574,
+    "watcherPid": 28634
   }
 }

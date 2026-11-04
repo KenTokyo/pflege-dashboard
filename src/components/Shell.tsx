@@ -1,5 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from 'react';
 import { useAuth, useWorkspace } from '../auth/AuthProvider';
 import { baseName, initials } from '../lib/format';
 import { BrandMark } from './Brand';
@@ -128,6 +128,17 @@ function UserMenu({ tipProps, onNavigate }: { tipProps: TipProps; onNavigate: ()
   );
 }
 
+/** Telefon (≤ 640 px, wie app.css): der Sichtwechsel steht dann im Inhalt statt in der schmalen Topbar. */
+const PHONE = '(max-width: 640px)';
+const subscribePhone = (cb: () => void) => {
+  if (typeof window.matchMedia !== 'function') return () => {};
+  const mq = window.matchMedia(PHONE);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+};
+const isPhone = () => typeof window.matchMedia === 'function' && window.matchMedia(PHONE).matches;
+const usePhone = () => useSyncExternalStore(subscribePhone, isPhone, () => false);
+
 const typing = (t: EventTarget | null) =>
   t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 
@@ -143,6 +154,8 @@ export function TagwerkFrame({ children }: { children: ReactNode }) {
   const demoOpen = useDemoNoticeOpen();
   const pathname = useLocation({ select: (location) => location.pathname });
   const route = routeOf(pathname);
+  const switchable = route === 'uebersicht' || route === 'sachbearbeitung';
+  const phone = usePhone();
   const activeId = route === 'thread' ? decodeURIComponent(pathname.split('/')[2] ?? '') : null;
   const [drawer, setDrawer] = useState(false);
   const [tip, setTip] = useState<{ label: string; top: number } | null>(null);
@@ -257,6 +270,7 @@ export function TagwerkFrame({ children }: { children: ReactNode }) {
             <NavIcon name="menu" size={17} />
           </button>
           <span className="topbar-title">{TITLE[route]}</span>
+          {switchable && !phone ? <div className="topbar-switch"><StaffViewSwitch /></div> : null}
           {route !== 'new' ? (
             <Link to="/" className="ibtn topbar-new" aria-label="Neues Gespräch">
               <NavIcon name="compose" size={17} />
@@ -264,7 +278,7 @@ export function TagwerkFrame({ children }: { children: ReactNode }) {
           ) : null}
         </header>
         <main id="main" tabIndex={-1} className={`content content-${route}`}>
-          {route === 'uebersicht' || route === 'sachbearbeitung' ? <div className="content-switch"><StaffViewSwitch /></div> : null}
+          {switchable && phone ? <div className="content-switch"><StaffViewSwitch /></div> : null}
           {children}
         </main>
       </div>

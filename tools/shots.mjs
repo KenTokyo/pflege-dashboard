@@ -1,4 +1,4 @@
-/* global window, document, getComputedStyle */
+/* global window, document, getComputedStyle, PopStateEvent */
 // Bildaufnahmen der Phase-1-App über den Prüf-Harness (synthetischer Test-Transport, echtes Login-Formular).
 // Genau ein unsichtbarer Chrome for Testing (Version des Nutzer-Chrome), höchstens 1280×720, keine
 // Drosselungs-Flags, try/finally, Zeitlimit, Wächterprozess, vollständige Bereinigung inkl. Vite-Server.
@@ -113,7 +113,9 @@ async function audit(page, name) {
         if (parseFloat(cs.fontSize) < 12) out.tiny.push(`${el.tagName} ${cs.fontSize} "${el.textContent.trim().slice(0, 24)}"`);
       }
       if (phone && el.matches('a[href], button, input, select, textarea') && !el.closest('.skip') && !el.matches('.skip')) {
-        if (rect.height < 40 || rect.width < 40) out.small.push(`${el.tagName} ${Math.round(rect.width)}×${Math.round(rect.height)} "${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 24)}"`);
+        // Häkchen und Auswahlpunkte: Ziel ist ihre Beschriftung (ein Tipp darauf schaltet um).
+        const target = el.matches('input[type=checkbox], input[type=radio]') && el.closest('label') ? el.closest('label').getBoundingClientRect() : rect;
+        if (target.height < 40 || target.width < 40) out.small.push(`${el.tagName} ${Math.round(rect.width)}×${Math.round(rect.height)} "${(el.getAttribute('aria-label') || el.textContent || '').trim().slice(0, 24)}"`);
       }
     }
     return out;
@@ -144,6 +146,14 @@ async function login(page, path, szenario = 'seed') {
   await page.getByLabel('E-Mail-Adresse').waitFor({ state: 'detached' });
 }
 
+/** Seitenwechsel ohne Neuladen über den Router (Chat zuerst: Bereiche liegen teils im Kontomenü). */
+async function go(page, path) {
+  await page.evaluate((p) => {
+    window.history.pushState({}, '', p);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, path);
+}
+
 async function sendInThread(page, text) {
   const box = page.getByLabel('Nachricht an den Sachbearbeiter');
   await box.fill(text);
@@ -166,34 +176,40 @@ async function themeRun(browser, t) {
       await settle(page, 300);
       await shot(page, `login-fehler-${t}`);
       await page.getByLabel('Passwort').fill(PASSWORD);
+      // Ohne gespeicherte Anmeldung, damit die 15-Minuten-Abmeldung unten greift (Vorgabe ist „angemeldet bleiben“).
+      await page.getByRole('checkbox').first().uncheck();
       await page.getByRole('button', { name: 'Anmelden' }).click();
+      // Chat zuerst (V2): nach der Anmeldung steht das neue Gespräch, die Übersicht liegt unter /uebersicht.
+      await page.getByRole('heading', { name: 'Wobei kann ich helfen?' }).waitFor();
+      await settle(page);
+      await shot(page, `neu-${t}`);
+      await idleCheck(page, `neu-${t}`);
+      await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Übersicht' }).click();
       await page.getByRole('heading', { name: 'Offene Aufgaben und Fristen' }).waitFor();
       await settle(page);
       await shot(page, `dashboard-${t}`);
       await idleCheck(page, `dashboard-${t}`);
       for (const [label, name, heading] of [
-        ['Gespräche', 'gespraeche', null],
         ['Dokumente', 'dokumente', 'Dokumente'],
         ['Aufgaben', 'aufgaben', 'Aufgaben'],
       ]) {
         await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: label }).click();
-        if (heading) await page.getByRole('heading', { name: heading, level: 1 }).waitFor();
+        await page.getByRole('heading', { name: heading, level: 1 }).waitFor();
         await settle(page, 900);
         await shot(page, `${name}-${t}`);
       }
-      await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Gespräche' }).click();
-      await page.getByRole('link', { name: /Widerspruch vorbereiten/ }).first().click();
+      await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: /Widerspruch vorbereiten/ }).first().click();
       await page.getByLabel('Nachricht an den Sachbearbeiter').waitFor();
       await settle(page, 900);
       await shot(page, `chat-ohne-modell-${t}`);
       await idleCheck(page, `chat-ohne-modell-${t}`);
-      await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link', { name: 'Einstellungen' }).click();
+      await go(page, '/einstellungen');
       await page.getByRole('heading', { name: 'Einstellungen', level: 1 }).waitFor();
       await settle(page, 900);
       await shot(page, `einstellungen-${t}`);
       // 15 Minuten ohne Aktivität (Uhr vorgespult, keine echte Wartezeit).
       await page.evaluate(() => window.__harness.advance(15 * 60 * 1000));
-      await page.getByText('Sie wurden nach 15 Minuten ohne Aktivität abgemeldet.').waitFor();
+      await page.getByText(/wegen längerer Inaktivität abgelaufen/).waitFor();
       // Server-Ende und Widerruf laufen nach der lokalen Abmeldung begrenzt im Hintergrund.
       const ended = await page
         .waitForFunction(() => window.__harness.calls.end === 1 && window.__harness.calls.signOut === 1, null, { timeout: 9000 })
@@ -213,6 +229,10 @@ async function themeRun(browser, t) {
       await page.getByLabel('E-Mail-Adresse').fill(EMAIL);
       await page.getByLabel('Passwort').fill(PASSWORD);
       await page.getByRole('button', { name: 'Anmelden' }).click();
+      await page.getByRole('heading', { name: 'Wobei kann ich helfen?' }).waitFor();
+      await go(page, '/uebersicht');
+      await page.getByRole('heading', { name: 'Offene Aufgaben und Fristen' }).waitFor();
+      await settle(page, 900);
       await page.getByLabel('Ihre Frage an den Sachbearbeiter').fill('Was muss in einen Widerspruch gegen den Pflegegrad?');
       await page.getByRole('button', { name: /^Fragen/ }).click();
       await page.getByText(/eine Pflegeberatung klären/).waitFor({ timeout: 15_000 });
@@ -261,22 +281,29 @@ async function narrowRun(browser) {
         await page.getByLabel('E-Mail-Adresse').fill(EMAIL);
         await page.getByLabel('Passwort').fill(PASSWORD);
         await page.getByRole('button', { name: 'Anmelden' }).click();
+        await page.getByRole('heading', { name: 'Wobei kann ich helfen?' }).waitFor();
+        await settle(page);
+        await shot(page, `${label}-neu-${t}`);
+        await go(page, '/uebersicht');
         await page.getByRole('heading', { name: 'Offene Aufgaben und Fristen' }).waitFor();
         await settle(page);
         await shot(page, `${label}-dashboard-${t}`);
-        await page.evaluate(() => window.scrollTo(0, 640));
+        await page.evaluate(() => document.getElementById('main')?.scrollTo(0, 640));
         await settle(page, 700);
         await shot(page, `${label}-dashboard-unten-${t}`);
-        await page.getByRole('navigation', { name: /Hauptnavigation/ }).getByRole('link', { name: 'Gespräche' }).click();
-        await page.getByRole('link', { name: /Widerspruch vorbereiten/ }).first().waitFor();
-        await settle(page, 700);
-        await shot(page, `${label}-gespraeche-${t}`);
+        if (width < 900) {
+          // Seitenleiste ist hier eine Schublade (Gesprächsliste, Übersicht, Dokumente, Aufgaben).
+          await page.getByRole('button', { name: 'Navigation öffnen' }).click();
+          await page.getByRole('link', { name: /Widerspruch vorbereiten/ }).first().waitFor();
+          await settle(page, 700);
+          await shot(page, `${label}-seitenleiste-${t}`);
+        }
         await page.getByRole('link', { name: /Widerspruch vorbereiten/ }).first().click();
         await sendInThread(page, 'Was muss in einen Widerspruch?');
         await page.getByRole('link', { name: 'BMG: Pflegegrade' }).waitFor({ timeout: 15_000 });
         await settle(page, 700);
         await shot(page, `${label}-chat-${t}`);
-        await page.getByRole('link', { name: 'Einstellungen' }).first().click();
+        await go(page, '/einstellungen');
         await page.getByRole('heading', { name: 'Einstellungen', level: 1 }).waitFor();
         await settle(page, 700);
         await shot(page, `${label}-einstellungen-${t}`);

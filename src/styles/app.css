@@ -400,6 +400,8 @@
   .content:focus { outline: none; }
   /* Umschalter Kundenansicht/Sachbearbeiter-Test (staff.css) auf derselben Spalte wie die Seite. */
   .content-switch { max-width: 1160px; margin: 0 auto 18px; }
+  /* Desktop: Sichtwechsel rechts in der Topbar wie ein Linear-Ansichtsschalter. */
+  .topbar-switch { display: flex; flex: none; align-items: center; }
   .content-new { padding: 0; }
   .content-thread { display: flex; padding: 0; overflow: hidden; }
 }
@@ -770,4 +772,19 @@
   .login-top { position: static; margin-bottom: 18px; }
   .login { place-items: start center; padding: 12px 16px 32px; }
   .login-col { max-width: none; }
+}
+
+/* Sichtwechsel in der Topbar: ohne den Außenabstand aus staff.css (ungeschichtet, darum hier ohne Ebene). */
+.topbar-switch .sf-switch { margin: 0; }
+
+/* ---------- Telefon: jedes Bedienziel mindestens 40 × 40 px (Daumen) ----------
+   Ohne Ebene und mit .shell/.login davor, damit es auch die später geladenen Seitenstile (overview.css, staff.css) schlägt. */
+@media (max-width: 640px) {
+  .login .input input, .shell .input input { min-height: 40px; }
+  .login .login-remember { min-height: 40px; }
+  .shell :is(.sf-switch a, .lt-seg button, .segmented button) { min-height: 40px; min-width: 40px; justify-content: center; }
+  .shell :is(.lt-link, .side-archive, .th-summary) { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; min-width: 40px; }
+  .shell .ask-input { min-height: 40px; }
+  .shell .lt-row.is-link { min-height: 40px; }
+  .shell .side-brand { min-height: 40px; }
 }
