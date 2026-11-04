@@ -1,0 +1,17 @@
+Use case: app-chat-avatar
+Asset type: square transparent PNG portrait for a care dashboard chat welcome character
+Input images: The two provided images are STYLE REFERENCES ONLY: soft polished 3D character rendering, centered bust, friendly proportions, calm studio light. Do not copy their person, hair, clothes, symbols, logos, or identity.
+Scene/backdrop: transparent alpha background, no ground plane, no cast shadow, no circle or backdrop.
+Subject: an original German female care nurse, about 45 years old, warm competent face with fine smile lines, short gray-blond hair, optional simple discreet glasses. Wearing a deep berry-red/bordeaux nursing tunic with a fine stand collar and a tiny blank unmarked name badge. No stethoscope.
+Style/medium: high-quality softly rendered stylized 3D figure, refined and mature, subtle natural skin texture, soft shapes, calm and trustworthy, not childish, no glossy cartoon look.
+Composition/framing: square 1024x1024, head and upper chest bust. Camera straight-on at eye level. Keep head near upper center with a consistent generous margin, shoulders cut off at the lower edge. Centered and symmetrical framing, face sized to fill a similar portion as a professional app avatar portrait.
+Lighting/mood: same lighting for a three-state avatar set: soft studio key from upper left, gentle fill, subtle rim light, calm warm expression.
+Pose/expression: look directly into camera, open friendly slight smile, welcoming the user.
+Color palette: natural skin tones, short gray-blond hair, deep berry-red/bordeaux tunic.
+Materials/textures: finely detailed but gentle skin and cloth, restrained specular response.
+Text: none.
+Constraints: fully isolated clean alpha cutout, preserve full head and shoulders within frame, no cropped hair, no lettering on badge.
+Avoid: logos, brand marks, text, watermark, jewelry, extra people, background, floor shadow, circle, pose props, dramatic lighting.
+
+Modell: GPT-6 Luna (Codex, eingebaute Bildgenerierung)
+Vorlagen: /Users/kentoky/Documents/React Projects/oalab/service-oalab/apps/web/public/brand/omed-welcome.webp und omed-thinking.webp (nur Stilreferenz; nicht verändert)

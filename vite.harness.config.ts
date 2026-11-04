@@ -9,6 +9,8 @@ const root = fileURLToPath(new URL('./tests/harness', import.meta.url));
 export default defineConfig({
   root,
   envDir: root,
+  // Dieselben öffentlichen Dateien wie die App (Pflege-Figur unter /figur/).
+  publicDir: fileURLToPath(new URL('./public', import.meta.url)),
   plugins: [react(), tailwindcss()],
   server: { port: 5199, strictPort: true, host: '127.0.0.1', hmr: false, watch: null },
   logLevel: 'warn',

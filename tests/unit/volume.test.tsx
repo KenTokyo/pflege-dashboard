@@ -2,7 +2,7 @@
  * Datenumfang: Oberfläche zeigt große Bestände vollständig (synthetischer Transport, kein Konto).
  * Das vollständige Laden selbst prüft supabaseBackend.test.ts gegen eine PostgREST-Nachbildung.
  */
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { SeedState } from '../support/seed';
 import { MARTHA, SEED_CONVERSATION } from '../support/seed';
@@ -80,7 +80,7 @@ describe('Datenumfang', () => {
   });
 
   it('Dashboard zählt alle offenen Aufgaben (auch „in Bearbeitung“), die Aufgabenseite listet alle', async () => {
-    const { user } = await signedInApp({ extend: manyTasks });
+    const { user } = await signedInApp({ extend: manyTasks }, '/uebersicht');
     const tasks = await screen.findByRole('region', { name: 'Offene Aufgaben und Fristen' });
     expect(await within(tasks).findByText('130')).toBeTruthy(); // 2 Seed + 128
     await user.click(within(tasks).getByRole('link', { name: 'Alle anzeigen' }));
@@ -90,7 +90,8 @@ describe('Datenumfang', () => {
 
   it('Gesprächsliste zeigt alle 231 Gespräche', async () => {
     await signedInApp({ extend: manyConversations }, '/gespraeche');
-    const list = await screen.findByRole('list', { name: 'Gespräche' });
-    expect(within(list).getAllByRole('listitem')).toHaveLength(231);
+    // Seitenleiste: Gespräche in Zeitgruppen (Heute, Letzte 7 Tage, Älter), zusammen alle 231.
+    const side = await screen.findByRole('region', { name: 'Gespräche' });
+    await waitFor(() => expect(within(side).getAllByRole('listitem')).toHaveLength(231));
   });
 });

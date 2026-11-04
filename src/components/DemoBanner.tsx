@@ -1,18 +1,17 @@
-import { AnimatePresence, motion } from 'motion/react';
 import { useDesign } from '../app/ThemeProvider';
 import { InstrumentDemoBanner } from '../instrument/rahmen/InstrumentDemoBanner';
-import { SPRING } from '../motion/tokens';
 import { setDemoNoticeOpen, useDemoNoticeOpen } from './demoNotice';
 import { NavIcon } from './NavIcon';
 
 /**
- * Pflichthinweis der Demo als schwebende Karte unten rechts, schließbar. Erscheint nach jedem Neuladen wieder;
- * im Tagwerk-Rahmen holt „Demo-Hinweis“ in der Seitenleiste ihn zurück. Der Arbeitsbereich kann ihn ganz ausschalten.
+ * Pflichthinweis der Demo als ruhige Karte unten rechts, schließbar (blendet weich ein, V2 ohne Federn).
+ * Erscheint nach jedem Neuladen wieder; „Demo-Hinweis“ in der Seitenleiste holt ihn zurück.
  */
 export function DemoBanner() {
   const { design } = useDesign();
   const open = useDemoNoticeOpen();
   if (design === 'instrument') return <InstrumentDemoBanner />;
+  if (!open) return null;
 
   const close = () => {
     setDemoNoticeOpen(false);
@@ -21,23 +20,15 @@ export function DemoBanner() {
   };
 
   return (
-    <AnimatePresence>
-      {open ? (
-        <motion.aside key="demo" className="demo-pop" role="note" aria-label="Demo-Hinweis"
-          initial={{ opacity: 0, y: 22, scale: 0.94, rotate: -1.2 }}
-          animate={{ opacity: 1, y: 0, scale: 1, rotate: 0, transition: { ...SPRING.soft, delay: 0.32 } }}
-          exit={{ opacity: 0, y: 12, scale: 0.96, transition: { duration: 0.18, ease: [0.5, 0, 0.75, 0] } }}>
-          <span className="tape" aria-hidden="true">Demo</span>
-          <span className="demo-pop-icon" aria-hidden="true"><NavIcon name="shield" size={20} /></span>
-          <div className="demo-pop-text">
-            <strong>Demo – keine echten Daten eingeben</strong>
-            <span>Alle Personen und Vorgänge sind fiktiv.</span>
-          </div>
-          <button type="button" className="demo-pop-close" onClick={close} aria-label="Demo-Hinweis schließen" title="Schließen">
-            <NavIcon name="close" size={16} />
-          </button>
-        </motion.aside>
-      ) : null}
-    </AnimatePresence>
+    <aside className="demo-pop" role="note" aria-label="Demo-Hinweis">
+      <span className="demo-pop-icon" aria-hidden="true"><NavIcon name="shield" size={16} /></span>
+      <div className="demo-pop-text">
+        <strong>Demo – keine echten Daten eingeben</strong>
+        <span>Alle Personen und Vorgänge sind fiktiv.</span>
+      </div>
+      <button type="button" className="ibtn ibtn-sm demo-pop-close" onClick={close} aria-label="Demo-Hinweis schließen" title="Schließen">
+        <NavIcon name="close" size={14} />
+      </button>
+    </aside>
   );
 }

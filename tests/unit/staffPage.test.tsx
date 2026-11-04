@@ -19,7 +19,7 @@ describe('Sachbearbeiter-Test: angemeldete Arbeitsansicht', () => {
     expect(fake.state.workspace.role).toBe('member');
     expect(screen.getByText(/ändert keine Zugriffsrechte/)).toBeTruthy();
     await user.click(screen.getByRole('link', { name: 'Kundenansicht' }));
-    await waitFor(() => expect(history.location.pathname).toBe('/'));
+    await waitFor(() => expect(history.location.pathname).toBe('/uebersicht'));
     await screen.findByRole('heading', { name: /Guten (Morgen|Tag|Abend)/ });
     await user.click(await screen.findByRole('link', { name: 'Sachbearbeiter-Test' }));
     await screen.findByRole('heading', { name: 'Die richtigen Fälle im Blick.' });

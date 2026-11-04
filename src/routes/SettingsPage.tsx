@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useDesign, useTheme } from '../app/ThemeProvider';
 import { DesignSwitch } from '../instrument/grundlage/DesignSwitch';
 import { useAuth, useWorkspace } from '../auth/AuthProvider';
-import { Underline } from '../components/Graffiti';
 import { Shell } from '../components/Shell';
 import { Segmented } from '../components/Segmented';
 import { ErrorState, Loading } from '../components/States';
@@ -179,7 +178,7 @@ export function SettingsPage() {
           <h1>Einstellungen</h1>
         </div>
       </header>
-      <div className="settings mo-fly">
+      <div className="settings fx-fall">
         <div className="set-col">
           <section className="card" aria-labelledby="mode-title">
             <div className="card-head">
@@ -197,7 +196,6 @@ export function SettingsPage() {
                   <div>
                     <span className="mode-title">
                       {MODE_LABEL[view.version.mode]}
-                      <Underline />
                     </span>
                     <p className="small muted mt-1.5">{MODE_TEXT[view.version.mode]}</p>
                   </div>

@@ -2,11 +2,12 @@ import { useDesign } from '../app/ThemeProvider';
 import { InstrumentLogin } from '../instrument/anmeldung/InstrumentLogin';
 import { useSearch } from '@tanstack/react-router';
 import { ReturnTo } from '../app/returnPath';
-import { ArrowRight, CalendarClock, Clock, Info, LockKeyhole, Mail, MessageSquareText, ShieldCheck } from 'lucide-react';
+import { Clock, Info, LockKeyhole, Mail } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type SubmitEvent } from 'react';
 import { useAuth, type SignOutReason } from '../auth/AuthProvider';
 import { DemoBanner } from '../components/DemoBanner';
-import { BrandMark, Spray, TagLine } from '../components/Brand';
+import { BrandMark } from '../components/Brand';
+import { CareFigure, FIGURE } from '../components/CareFigure';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { useBackend } from '../services/BackendContext';
@@ -75,65 +76,25 @@ export function LoginPage() {
   return (
     <>
       <DemoBanner />
-      <div className="login-mobile-top">
-        <span className="topbar-brand">
-          <BrandMark size={30} />
-          Pflege-Dashboard
-        </span>
-        <ThemeToggle />
-      </div>
       <div className="login">
-        <section className="login-side" aria-labelledby="claim">
-          <Spray className="g-spray login-spray" />
-          <div className="login-brand relative flex items-center gap-2.5">
-            <BrandMark size={40} />
-            <span className="text-[18px] font-bold" style={{ fontFamily: 'var(--font-display)' }}>
-              Pflege-Dashboard
-            </span>
+        <div className="login-top">
+          <span className="login-brand">
+            <BrandMark size={24} />
+            Pflege-Dashboard
+          </span>
+          <ThemeToggle />
+        </div>
+        <div className="login-col fx-fall">
+          <div className="login-host">
+            <CareFigure pose="greet" />
+            <div className="host-bubble">
+              <p className="host-from">{FIGURE.from}</p>
+              <h1 id="login-title">Anmelden</h1>
+            </div>
           </div>
-          <h1 id="claim" className="login-claim relative">
-            Pflegeanträge ohne Papierchaos.
-          </h1>
-          <TagLine />
-          <p className="login-sub relative">
-            Ihr KI-Sachbearbeiter für Fragen zu Pflegegrad, Fristen und Schreiben – rund um die Uhr, mit Angabe des antwortenden
-            Modells.
-          </p>
-          <ul className="login-points relative">
-            <li>
-              <CalendarClock className="i" size={20} aria-hidden="true" />
-              <span>
-                <strong>Fristen im Blick</strong>
-                <span>Offene Aufgaben nach Dringlichkeit sortiert.</span>
-              </span>
-            </li>
-            <li>
-              <MessageSquareText className="i" size={20} aria-hidden="true" />
-              <span>
-                <strong>KI-Sachbearbeiter</strong>
-                <span>Antworten im Gesprächsverlauf, bezogen auf die gewählte Person.</span>
-              </span>
-            </li>
-            <li>
-              <ShieldCheck className="i" size={20} aria-hidden="true" />
-              <span>
-                <strong>Ehrlich statt verbindlich</strong>
-                <span>Keine Rechts- oder Medizinberatung. Unsicherheit wird benannt.</span>
-              </span>
-            </li>
-          </ul>
-        </section>
-
-        <section className="login-panel" aria-labelledby="login-title">
-          <div className="login-panel-top">
-            <ThemeToggle />
-          </div>
-          <div className="login-card">
+          <section className="login-card" aria-labelledby="login-title">
             <form className="login-form" onSubmit={(e) => void onSubmit(e)} noValidate aria-describedby={error ? errorId : undefined}>
-              <h2 id="login-title" className="login-title">
-                Anmelden
-              </h2>
-              <p className="login-lead">Ihr Arbeitsbereich für Pflegeanträge, Fristen und Schreiben.</p>
+              <p className="login-lead">Ihr Arbeitsbereich für Pflegeanträge, Fristen und Schreiben – mit einem KI-Sachbearbeiter, der Unsicherheiten benennt.</p>
 
               {reason && !error ? (
                 <div className="alert" role="status">
@@ -148,14 +109,10 @@ export function LoginPage() {
                 </div>
               ) : null}
 
-              <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => {
-                setEmail('test@test.de');
-                passwordRef.current?.focus();
-              }}>Demo-Zugang verwenden</button>
               <div className="field">
                 <label htmlFor="email">E-Mail-Adresse</label>
                 <div className={`input ${error?.code === 'INVALID_CREDENTIALS' || error?.code === 'INVALID_EMAIL' ? 'is-invalid' : ''}`}>
-                  <Mail className="i" size={18} aria-hidden="true" />
+                  <Mail className="i" size={15} aria-hidden="true" />
                   <input
                     id="email"
                     ref={emailRef}
@@ -174,7 +131,7 @@ export function LoginPage() {
               <div className="field">
                 <label htmlFor="password">Passwort</label>
                 <div className={`input ${error?.code === 'INVALID_CREDENTIALS' ? 'is-invalid' : ''}`}>
-                  <LockKeyhole className="i" size={18} aria-hidden="true" />
+                  <LockKeyhole className="i" size={15} aria-hidden="true" />
                   <input
                     id="password"
                     ref={passwordRef}
@@ -194,19 +151,25 @@ export function LoginPage() {
               </label>
               <button type="submit" className="btn btn-primary btn-block" disabled={busy || !email.trim() || !password}>
                 {busy ? 'Wird angemeldet …' : 'Anmelden'}
-                {busy ? null : <ArrowRight className="i" size={18} aria-hidden="true" />}
               </button>
-              <p className="note">
-                <Info className="i" size={15} aria-hidden="true" />
-                <span>Zugänge vergibt Ihre Verwaltung. Eine Selbstregistrierung gibt es nicht. Passwort vergessen? Bitte wenden Sie sich an die Verwaltung.</span>
-              </p>
-              <p className="note">
-                <Clock className="i" size={15} aria-hidden="true" />
-                <span>{remember ? 'Mit dieser Auswahl bleiben Sie bis zu 30 Tage angemeldet. Beim Öffnen wird Ihr Zugang geprüft. Ihr Passwort wird nicht gespeichert.' : 'Ohne gespeicherte Anmeldung werden Sie nach 15 Minuten ohne Aktivität abgemeldet. Ihr Passwort wird nicht gespeichert.'}</span>
-              </p>
+              <p className="login-or">oder</p>
+              <button type="button" className="btn btn-secondary btn-block" disabled={busy} onClick={() => {
+                setEmail('test@test.de');
+                passwordRef.current?.focus();
+              }}>Demo-Zugang verwenden</button>
             </form>
+          </section>
+          <div className="login-notes">
+            <p className="note">
+              <Info className="i" size={15} aria-hidden="true" />
+              <span>Zugänge vergibt Ihre Verwaltung. Eine Selbstregistrierung gibt es nicht. Passwort vergessen? Bitte wenden Sie sich an die Verwaltung.</span>
+            </p>
+            <p className="note">
+              <Clock className="i" size={15} aria-hidden="true" />
+              <span>{remember ? 'Mit dieser Auswahl bleiben Sie bis zu 30 Tage angemeldet. Beim Öffnen wird Ihr Zugang geprüft. Ihr Passwort wird nicht gespeichert.' : 'Ohne gespeicherte Anmeldung werden Sie nach 15 Minuten ohne Aktivität abgemeldet. Ihr Passwort wird nicht gespeichert.'}</span>
+            </p>
           </div>
-        </section>
+        </div>
       </div>
     </>
   );

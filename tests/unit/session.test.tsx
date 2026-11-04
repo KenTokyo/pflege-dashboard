@@ -31,7 +31,7 @@ describe('Anmeldung und Sitzung', () => {
   });
 
   it('nach Anmeldung: Dashboard aus Seeddaten und genau ein Server-Touch', async () => {
-    const { fake } = await signedInApp();
+    const { fake } = await signedInApp({}, '/uebersicht');
     expect((await screen.findAllByText(/Martha/)).length).toBeGreaterThan(0);
     expect((await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen')).length).toBeGreaterThan(0);
     await waitFor(() => expect(fake.calls.touch).toBe(1));
@@ -39,7 +39,7 @@ describe('Anmeldung und Sitzung', () => {
 
   it('15 Minuten ohne Aktivität: Server-Ende, Cache leer, lokal abgemeldet, Grund angezeigt', async () => {
     const { fake, queryClient, history, advance } = await signedInApp();
-    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await screen.findByRole('heading', { name: 'Wobei kann ich helfen?' });
     expect(queryClient.getQueryCache().getAll().length).toBeGreaterThan(0);
     act(() => advance(IDLE_MS));
     expect(await screen.findByText('Ihre Anmeldung ist wegen längerer Inaktivität abgelaufen. Bitte melden Sie sich erneut an.')).toBeTruthy();
@@ -53,7 +53,7 @@ describe('Anmeldung und Sitzung', () => {
   it('Netzfehler beim Server-Ende verhindert die lokale Abmeldung nicht', async () => {
     const { fake, queryClient, user } = await signedInApp();
     fake.failSessionEnd = true;
-    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await screen.findByRole('heading', { name: 'Wobei kann ich helfen?' });
     await user.click(screen.getAllByRole('button', { name: /Konto/ })[0] as HTMLElement);
     await user.click(await screen.findByRole('menuitem', { name: 'Abmelden' }));
     expect(await screen.findByText('Sie wurden abgemeldet.')).toBeTruthy();
@@ -83,7 +83,7 @@ describe('Anmeldung und Sitzung', () => {
 
   it('fremdes Rücksprungziel wird ignoriert', async () => {
     const { history } = await signedInApp({}, '/anmelden?weiter=%2F%2Fboese.example');
-    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await screen.findByRole('heading', { name: 'Wobei kann ich helfen?' });
     expect(history.location.pathname).toBe('/');
   });
 
@@ -107,7 +107,7 @@ describe('Anmeldung und Sitzung', () => {
 describe('Bewusst gespeicherte Anmeldung', () => {
   it('bestätigte lange Sitzung bleibt nach 16 Minuten offen und meldet sich nach manueller Abmeldung ab', async () => {
     const { fake, user, advance } = await signedInApp({ rememberSession: true });
-    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await screen.findByRole('heading', { name: 'Wobei kann ich helfen?' });
     await waitFor(() => expect(fake.calls.touch).toBe(1));
     expect((await fake.auth.getSession())?.rememberSession).toBe(true);
     act(() => advance(16 * 60 * 1000));

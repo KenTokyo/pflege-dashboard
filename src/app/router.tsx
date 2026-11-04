@@ -11,7 +11,6 @@ import { Loading } from '../components/States';
 import { AppGate } from '../routes/AppGate';
 import { safeReturnPath } from './returnPath';
 import { LoginPage } from '../routes/LoginPage';
-import { pageCutTypes } from '../motion/pageCut';
 
 // Seiten nach Bedarf laden: Markdown und Chat nur, wenn der Chat geöffnet wird.
 const DashboardPage = lazyRouteComponent(() => import('../routes/DashboardPage'), 'DashboardPage');
@@ -44,7 +43,9 @@ export const loginRoute = createRoute({
   },
 });
 const appRoute = createRoute({ getParentRoute: () => rootRoute, id: 'app', component: AppGate });
-const dashboardRoute = createRoute({ getParentRoute: () => appRoute, path: '/', component: DashboardPage });
+// Chat zuerst (V2): die Startseite ist das neue Gespräch, die Übersicht liegt eine Zeile darunter.
+const newChatRoute = createRoute({ getParentRoute: () => appRoute, path: '/', component: ChatIndexRoute });
+const dashboardRoute = createRoute({ getParentRoute: () => appRoute, path: '/uebersicht', component: DashboardPage });
 const chatIndexRoute = createRoute({ getParentRoute: () => appRoute, path: '/gespraeche', component: ChatIndexRoute });
 export const chatRoute = createRoute({ getParentRoute: () => appRoute, path: '/gespraeche/$conversationId', component: ChatRoute });
 const documentsRoute = createRoute({ getParentRoute: () => appRoute, path: '/dokumente', component: DocumentsPage });
@@ -54,7 +55,7 @@ const staffRoute = createRoute({ getParentRoute: () => appRoute, path: '/sachbea
 
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  appRoute.addChildren([dashboardRoute, chatIndexRoute, chatRoute, documentsRoute, tasksRoute, settingsRoute, staffRoute]),
+  appRoute.addChildren([newChatRoute, dashboardRoute, chatIndexRoute, chatRoute, documentsRoute, tasksRoute, settingsRoute, staffRoute]),
 ]);
 
 export function createAppRouter(history?: RouterHistory) {
@@ -63,10 +64,8 @@ export function createAppRouter(history?: RouterHistory) {
     ...(history ? { history } : {}),
     defaultPreload: false,
     scrollRestoration: false,
-    // Tagwerk: Bereichswechsel als Kamerafahrt (src/motion/motion.css); sonst kein Übergang.
-    defaultViewTransition: { types: pageCutTypes },
     defaultPendingComponent: () => (
-      <div className="p-6">
+      <div className="page-pending">
         <Loading label="Seite wird geladen …" />
       </div>
     ),

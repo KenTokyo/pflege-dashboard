@@ -7,10 +7,11 @@ import { baseName, initials } from '../../lib/format';
 import { Icon, type IconName, type Thing } from '../grundlage/Icon';
 import { Reveal } from '../grundlage/Reveal';
 import './rahmen.css';
+import './tips.css';
 import './mobile.css';
 
 const NAV = [
-  { to: '/', label: 'Übersicht', icon: 'overview', thing: 'person', exact: true },
+  { to: '/uebersicht', label: 'Übersicht', icon: 'overview', thing: 'person', exact: true },
   { to: '/gespraeche', label: 'Gespräche', icon: 'conversation', thing: 'conversation', exact: false },
   { to: '/dokumente', label: 'Dokumente', icon: 'document', thing: 'document', exact: false },
   { to: '/aufgaben', label: 'Aufgaben', icon: 'task', thing: 'task', exact: false },
@@ -78,7 +79,7 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
   return <div className="in-shell">
     <aside className="in-sidebar">
       <Reveal stage="frame">
-        <Link to="/" className="in-brand" aria-label={`Pflege-Dashboard, ${workspace.name}, Übersicht`}>
+        <Link to="/uebersicht" className="in-brand" aria-label={`Pflege-Dashboard, ${workspace.name}, Übersicht`}>
           <span className="in-brand-mark"><Icon name="care" size={22} /></span>
           <span className="in-rail-tip" role="tooltip">Pflege-Dashboard<small>{workspace.name}</small></span>
         </Link>
@@ -94,7 +95,7 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
       </nav>
       <div className="in-sidebar-foot">
         <nav className="in-rail-views" aria-label="Demo-Ansicht wechseln">
-          <Link to="/" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }} aria-label="Kundenansicht">
+          <Link to="/uebersicht" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }} aria-label="Kundenansicht">
             <Icon name="person" size={17} /><span className="in-rail-tip" role="tooltip">Kundenansicht</span>
           </Link>
           <Link to="/sachbearbeitung" activeProps={{ 'aria-current': 'page' }} aria-label="Sachbearbeiter-Test">
@@ -112,7 +113,7 @@ export function InstrumentShell({ children, mainClassName = '' }: { children: Re
           <strong>{staff ? 'Sachbearbeitung' : NAV[selected]?.label ?? 'Gespräch'}</strong></div>
         <div className="in-topbar-actions">
           <nav className="in-view-switch" aria-label="Demo-Ansicht wechseln">
-            <Link to="/" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }}>
+            <Link to="/uebersicht" activeOptions={{ exact: true }} activeProps={{ 'aria-current': 'page' }}>
               <Icon name="person" size={16} /><span>Kundenansicht</span>
             </Link>
             <Link to="/sachbearbeitung" activeProps={{ 'aria-current': 'page' }}>

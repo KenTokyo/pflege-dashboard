@@ -62,9 +62,9 @@
   height: var(--in-nav-h);
   padding: 4px 2px;
   color: var(--text-muted);
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 1.1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   text-align: center;
   text-decoration: none;
   border-radius: 10px;
@@ -159,44 +159,6 @@
 [data-design='instrument'] .in-rail-views a[aria-current='page'] {
   background: var(--surface2);
   color: var(--text);
-}
-
-/* Hinweise der Symbolleiste öffnen nach rechts. */
-[data-design='instrument'] .in-rail-tip,
-[data-design='instrument'] .in-sidebar .in-control-tip {
-  position: absolute;
-  z-index: 40;
-  left: calc(100% + 10px);
-  right: auto;
-  top: 50%;
-  translate: 0 -50%;
-  width: max-content;
-  max-width: 240px;
-  border: 1px solid var(--border-strong);
-  border-radius: 9px;
-  background: var(--surface2);
-  color: var(--text);
-  padding: 7px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  text-align: left;
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 150ms;
-}
-
-[data-design='instrument'] .in-rail-tip small {
-  display: block;
-  color: var(--text-muted);
-  font-weight: 400;
-}
-
-[data-design='instrument'] :is(.in-brand, .in-rail-views a):is(:hover, :focus-visible) .in-rail-tip,
-[data-design='instrument'] .in-sidebar .in-icon-button:is(:hover, :focus-visible) .in-control-tip {
-  visibility: visible;
-  opacity: 1;
 }
 
 [data-design='instrument'] .in-workspace {

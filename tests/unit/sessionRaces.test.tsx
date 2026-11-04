@@ -74,7 +74,7 @@ describe('bounded()', () => {
 describe('Lokale Abmeldung trotz hängendem Server', () => {
   it('nie auflösendes session end und Widerruf: sofort abgemeldet, Token weg, Cache und Entwurf leer', async () => {
     const { fake, queryClient, history } = await signedInApp();
-    await screen.findAllByText('Widerspruch mit Beratungsstelle prüfen');
+    await screen.findByRole('heading', { name: 'Wobei kann ich helfen?' });
     fake.hold.add('end');
     fake.hold.add('revoke');
     setDraftHandoff(SEED_CONVERSATION, 'Entwurf, der die Sitzung nicht überdauern darf');

@@ -7,6 +7,8 @@ import { appendQuestion } from './questionExamples';
 import { useSpeechInput } from '../../chat/useSpeechInput';
 import type { ResponseFormat } from '../../chat/responseFormat';
 import { ResponseFormatSwitch } from './ResponseFormatSwitch';
+import { CareFigure, figurePose, useTypingPulse } from '../../components/CareFigure';
+import { NavIcon } from '../../components/NavIcon';
 
 export const MAX_MESSAGE = 8000;
 
@@ -32,6 +34,7 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
   const ref = inputRef ?? localRef;
   const tooLong = value.length > MAX_MESSAGE;
   const speech = useSpeechInput(value, onChange, streaming || Boolean(blockedReason) || examplesOpen);
+  const [typing, pulse] = useTypingPulse();
   const canSend = !streaming && !blockedReason && !speech.active && value.trim().length > 0 && !tooLong;
 
   // Höhe an den Inhalt anpassen (bis max-height), nur bei Eingabe.
@@ -58,6 +61,83 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
       if (canSend) onSend();
     }
   };
+
+  const examplesDialog = examplesOpen ? (
+    <QuestionExamplesDialog
+      personName={personName}
+      hasDraft={Boolean(value.trim())}
+      onClose={() => setExamplesOpen(false)}
+      onChoose={(question) => {
+        onChange(appendQuestion(value, question));
+        setExamplesOpen(false);
+        ref.current?.focus();
+      }}
+    />
+  ) : null;
+
+  if (design !== 'instrument') return (
+    <div className="composer">
+      {blockedReason ? (
+        <p className="composer-blocked" role="status">
+          <ShieldCheck className="i" size={14} aria-hidden="true" />
+          <span>{blockedReason}</span>
+        </p>
+      ) : null}
+      <form className="cbox" onSubmit={(e) => { e.preventDefault(); if (canSend) onSend(); }}>
+        <div className="composer-host" aria-hidden="true">
+          <CareFigure size="sm" pose={figurePose({ thinking: streaming, typing: typing || speech.active })} />
+        </div>
+        <label htmlFor="composer" className="sr-only">Nachricht an den Sachbearbeiter</label>
+        <textarea id="composer" ref={ref} className="composer-input" rows={1}
+          placeholder={blockedReason ? 'Senden derzeit nicht möglich' : 'Nachricht an den Sachbearbeiter …'}
+          value={value} onChange={(e) => { onChange(e.target.value); pulse(); }} onKeyDown={onKeyDown}
+          aria-describedby="composer-hint" aria-invalid={tooLong} />
+        {speech.status || speech.error || speech.interim ? (
+          <div className={`speech-status ${speech.error ? 'is-error' : ''}`} role={speech.error ? 'alert' : 'status'}>
+            <span>{speech.error ?? speech.status}</span>
+            {speech.interim ? <span className="speech-interim">{speech.interim}</span> : null}
+            {speech.active ? <span className="small muted">Spracherkennung über Ihren Browser. Prüfen Sie den Text vor dem Senden.</span> : null}
+          </div>
+        ) : null}
+        <div className="cbar">
+          <button type="button" className="ibtn" aria-label="Was kann ich fragen?" title="Beispielfragen" onClick={() => setExamplesOpen(true)}>
+            <NavIcon name="examples" />
+          </button>
+          <button type="button" className={`ibtn speech-button ${speech.active ? 'is-recording' : ''}`}
+            onClick={() => (speech.active ? speech.stop() : speech.start())}
+            disabled={!speech.supported || streaming || Boolean(blockedReason) || examplesOpen}
+            aria-label={speech.active ? 'Spracheingabe beenden' : 'Spracheingabe starten'} aria-pressed={speech.active}
+            title={!speech.supported ? 'Dieser Browser bietet keine Spracheingabe an. Bitte Frage eintippen.' : speech.active ? 'Aufnahme beenden und Text prüfen' : 'Frage diktieren, vor dem Senden prüfen'}>
+            <NavIcon name={speech.active ? 'mic-off' : 'mic'} />
+          </button>
+          <ResponseFormatSwitch value={responseFormat} onChange={onResponseFormatChange} saved={responseFormatSaved} />
+          <span className="grow" />
+          {value.length > MAX_MESSAGE * 0.8 ? <span className={`cbar-count num ${tooLong ? 'text-danger' : ''}`}>{value.length.toLocaleString('de-DE')} / 8.000</span> : null}
+          {streaming ? (
+            <button key="stop" type="button" className="btn btn-secondary composer-send" onClick={onStop}
+              onFocus={() => (stopFocused.current = true)} onBlur={(e) => { if (e.target.isConnected) stopFocused.current = false; }}
+              aria-label="Antwort abbrechen" title="Antwort abbrechen">
+              <NavIcon name="stop" size={14} />
+              <span className="btn-label">Stopp</span>
+            </button>
+          ) : (
+            <button key="send" type="submit" className="btn btn-primary composer-send" disabled={!canSend} aria-label="Nachricht senden" title="Senden (Enter)">
+              <NavIcon name="send" size={14} />
+              <span className="btn-label">Senden</span>
+            </button>
+          )}
+        </div>
+      </form>
+      <p id="composer-hint" className="honesty">
+        {tooLong ? (
+          <span className="text-danger">Höchstens {MAX_MESSAGE.toLocaleString('de-DE')} Zeichen je Nachricht.</span>
+        ) : (
+          <span>Keine Rechts- oder Medizinberatung. Fristen und Beträge bitte immer anhand Ihrer Unterlagen prüfen.</span>
+        )}
+      </p>
+      {examplesDialog}
+    </div>
+  );
 
   return (
     <div className="composer">
@@ -148,10 +228,10 @@ export function Composer({ value, onChange, onSend, onStop, streaming, blockedRe
           </button>
         )}
       </form>
-      {design === 'instrument' ? <div className="in-chat-composer-meta">
+      <div className="in-chat-composer-meta">
         <span>Enter senden · Umschalt + Enter neue Zeile</span>
         <span aria-label={`${value.length} von ${MAX_MESSAGE} Zeichen`}>{value.length.toLocaleString('de-DE')} / 8.000</span>
-      </div> : null}
+      </div>
       <p id="composer-hint" className="honesty">
         <ShieldCheck className="i" size={14} aria-hidden="true" />
         {tooLong ? (

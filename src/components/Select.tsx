@@ -1,10 +1,8 @@
-import { LayoutGroup, motion } from 'motion/react';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from 'react';
 import { useDesign } from '../app/ThemeProvider';
-import { SPRING } from '../motion/tokens';
 
 /*
- * Tagwerk-Auswahl statt nativem <select>: Knopf (role combobox) + Glas-Liste in der obersten Ebene (Popover).
+ * Tagwerk-Auswahl statt nativem <select>: Knopf (role combobox) + Liste in der obersten Ebene (Popover), blendet nur ein (V2).
  * Tastatur wie beim nativen Feld: Pfeile, Pos1/Ende, Enter/Leertaste, Esc, Tippen springt zum Eintrag.
  * Der Knopf trägt `value`, damit Formulare und Prüfungen den Wert lesen können. Instrument behält das native Feld.
  */
@@ -29,7 +27,7 @@ type Props<T extends string> = {
   nativeClassName?: string;
 };
 
-const EXIT_MS = 140;
+const EXIT_MS = 90;
 const POPOVER = typeof HTMLElement !== 'undefined' && 'showPopover' in HTMLElement.prototype;
 const optionName = (o: SelectOption) => (o.hint ? `${o.label} · ${o.hint}` : o.label);
 
@@ -208,8 +206,7 @@ function ListSelect<T extends string>({ value, options, onChange, id, disabled =
         <div ref={listRef} id={listId} role="listbox" tabIndex={-1} popover={POPOVER ? 'manual' : undefined}
           aria-label={rest['aria-label']} aria-labelledby={rest['aria-label'] ? undefined : rest['aria-labelledby'] ?? triggerId}
           aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
-          className="sel-list" data-state={phase} style={pos} onKeyDown={onListKey}>
-          <LayoutGroup id={listId}>
+          className="sel-list fx-pop" data-state={phase} style={pos} onKeyDown={onListKey}>
             {options.map((o, i) => {
               const selected = o.value === value;
               return (
@@ -217,7 +214,6 @@ function ListSelect<T extends string>({ value, options, onChange, id, disabled =
                   aria-label={optionName(o)} data-value={o.value} className="sel-opt" data-active={i === active || undefined}
                   onPointerMove={() => { if (!o.disabled && i !== active) setActive(i); }}
                   onClick={() => choose(i)}>
-                  {i === active ? <motion.span layoutId="sel-ink" className="sel-ink" transition={SPRING.snap} aria-hidden="true" /> : null}
                   <span className="sel-tick">{selected ? <Tick /> : null}</span>
                   <span className="sel-opt-text">
                     <span className="sel-opt-label">{o.label}</span>
@@ -226,7 +222,6 @@ function ListSelect<T extends string>({ value, options, onChange, id, disabled =
                 </div>
               );
             })}
-          </LayoutGroup>
         </div>
       ) : null}
     </>

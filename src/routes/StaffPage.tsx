@@ -1,24 +1,37 @@
+import { AlarmClock, ArrowDownWideNarrow, ArrowUpRight, Check, MessageSquareText, RefreshCw, Users } from 'lucide-react';
+import { useState, type ReactNode } from 'react';
 import { useDesign } from '../app/ThemeProvider';
-import { InstrumentStaffPage } from '../instrument/sachbearbeitung/InstrumentStaffPage';
-import { AlarmClock, ArrowDownWideNarrow, ArrowUpRight, BriefcaseBusiness, Check, MessageSquareText, RefreshCw, Users } from 'lucide-react';
-import { useState } from 'react';
+import { Select } from '../components/Select';
 import { Shell } from '../components/Shell';
-import { EmptyState, ErrorState, Loading } from '../components/States';
+import { ErrorState } from '../components/States';
 import { useCareRecipients, useOpenTasks } from '../data/queries';
-import { baseName, daysUntil, formatDate, formatTime, initials, relativeDays } from '../lib/format';
+import { InstrumentStaffPage } from '../instrument/sachbearbeitung/InstrumentStaffPage';
+import { baseName, daysUntil, formatDate, formatTime, relativeDays } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { CaseDialog } from '../staff/CaseDialog';
 import { FilterWorkbench } from '../staff/FilterWorkbench';
-import { DEFAULT_FILTER, PRIORITY_LABEL, STAFF_SORTS, compareDeadline, needsAttention, selectPeople, selectTasks, type StaffFilter } from '../staff/model';
+import { DEFAULT_FILTER, STAFF_SORTS, compareDeadline, needsAttention, selectPeople, selectTasks, type StaffFilter } from '../staff/model';
 import { useStaffOverview } from '../staff/queries';
+import '../styles/staff.css';
 import { NewConversationDialog } from './chat/NewConversationDialog';
-import { Select } from '../components/Select';
+import { Due, EmptyRow, PersonAvatar, PersonDot, PrioIcon, Seg, SkeletonRows, fall } from './dashboard/parts';
 
 const integer = new Intl.NumberFormat('de-DE');
+const VIEWS = [['cases', 'Fälle'], ['tasks', 'Aufgaben']] as const;
 
 export function StaffPage() {
   const { design } = useDesign();
   return design === 'instrument' ? <InstrumentStaffPage /> : <TagwerkStaffPage />;
+}
+
+function Stat({ icon, label, value, note, tone = '' }: { icon: ReactNode; label: string; value: string; note: string; tone?: string }) {
+  return (
+    <div className={`sf-stat ${tone}`}>
+      <span className="sf-stat-k">{icon}{label}</span>
+      <strong className="sf-stat-v">{value}</strong>
+      <small className="sf-stat-d">{note}</small>
+    </div>
+  );
 }
 
 function TagwerkStaffPage() {
@@ -43,45 +56,216 @@ function TagwerkStaffPage() {
   const urgent = taskList.filter((t) => needsAttention(t, now)).length;
   const refresh = () => { void people.refetch(); void tasks.refetch(); void overview.refetch(); };
   const ask = (id: string) => { setSelectedId(null); setAskId(id); };
-  const stat = (value: number | undefined) => value === undefined ? '—' : integer.format(value);
+  const stat = (value: number | undefined) => (value === undefined ? '—' : integer.format(value));
+  const tasksKnown = !(tasks.isError || tasks.isPending);
+  const setView = (view: StaffFilter['view']) =>
+    setFilter(view === 'cases' ? { ...filter, view } : { ...filter, view, sort: filter.sort === 'conversations' || filter.sort === 'name' ? 'deadline' : filter.sort });
 
-  return <Shell mainClassName="staff-main">
-    <header className="page-head staff-page-head"><div><p className="eyebrow">Gemeinsamer Demo-Arbeitsbereich</p><h1>Die richtigen Fälle im Blick.</h1><p className="staff-intro">Sachbearbeiter-Test · Dieser Sichtwechsel ändert keine Zugriffsrechte.</p></div><button type="button" className="btn btn-secondary" onClick={refresh} disabled={refreshing}><RefreshCw className="i" size={16} aria-hidden="true" />{refreshing ? 'Wird aktualisiert …' : 'Aktualisieren'}</button></header>
+  let board: ReactNode;
+  if (people.isPending || tasks.isPending) board = <SkeletonRows rows={4} label="Fälle werden geladen …" />;
+  else if (people.isError) board = <div className="lt-pad"><ErrorState error={people.error} onRetry={() => void people.refetch()} title="Pflegefälle nicht verfügbar" /></div>;
+  else if (tasks.isError) board = <div className="lt-pad"><ErrorState error={tasks.error} onRetry={() => void tasks.refetch()} title="Aufgaben nicht verfügbar" /></div>;
+  else if (filter.view === 'cases') {
+    board = filteredPeople.length ? (
+      <div className="sf-cases">
+        <div className="lt-cols sf-case-cols" aria-hidden="true">
+          <span>Person</span><span>Pflegegrad</span><span>Pflegekasse</span><span>Nächster Termin</span><span>Gespräche</span><span />
+        </div>
+        <div className="lt-list fx-fall" role="list" aria-label="Pflegefälle">
+          {filteredPeople.map((person, i) => {
+            const next = taskList.filter((t) => t.care_recipient_id === person.id).sort(compareDeadline)[0];
+            const summary = personal.get(person.id);
+            const name = baseName(person.name);
+            return (
+              <article key={person.id} role="listitem" className="lt-li" aria-label={`Fall ${name}`} style={fall(i)}>
+                <div className="lt-row sf-case-row">
+                  <span className="pp-name">
+                    <PersonAvatar id={person.id} people={peopleList} />
+                    <h3 className="lt-title">{name}</h3>
+                  </span>
+                  <span className="pp-grade">{person.care_grade ? `Pflegegrad ${person.care_grade}` : 'Kein Pflegegrad'}</span>
+                  <span className="pp-meta">{person.insurerName ? baseName(person.insurerName) : 'Kasse nicht hinterlegt'}</span>
+                  <span className="sf-next">
+                    {next ? (
+                      <>
+                        <strong className={next.due_at && daysUntil(next.due_at, now) < 0 ? 'is-over' : needsAttention(next, now) ? 'is-urgent' : ''}>{next.due_at ? relativeDays(daysUntil(next.due_at, now)) : 'Ohne Termin'}</strong>
+                        <span>{next.title}</span>
+                      </>
+                    ) : (
+                      <>
+                        <strong>Keine offene Aufgabe</strong>
+                        <span>Keine Frist gespeichert</span>
+                      </>
+                    )}
+                  </span>
+                  <span className="sf-convs">
+                    <strong>{summary ? integer.format(summary.conversations) : '—'}</strong>
+                    <span>{summary ? `${summary.completedAnswers} echte KI-Antworten` : 'Zahl nicht verfügbar'}</span>
+                  </span>
+                  <span className="sf-acts">
+                    <button className="btn btn-ghost btn-sm" type="button" onClick={() => ask(person.id)} aria-label={`KI fragen zu ${name}`}>KI fragen</button>
+                    <button className="btn btn-secondary btn-sm" type="button" onClick={() => setSelectedId(person.id)} aria-label={`Fall öffnen: ${name}`}>
+                      Fall öffnen
+                      <ArrowUpRight className="i" size={14} aria-hidden="true" />
+                    </button>
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    ) : (
+      <EmptyRow title={peopleList.length ? 'Keine Fälle für diese Auswahl' : 'Noch keine Pflegefälle gespeichert'}>
+        {peopleList.length ? 'Ändern Sie die Person oder den Dringlichkeitsfilter.' : 'Fiktive Pflegefälle werden in Supabase ergänzt.'}
+      </EmptyRow>
+    );
+  } else {
+    board = filteredTasks.length ? (
+      <>
+        <div className="lt-cols sf-task-cols" aria-hidden="true">
+          <span /><span>Aufgabe</span><span>Person</span><span>Quelle</span><span className="r">Fällig</span><span />
+        </div>
+        <ul className="lt-list fx-fall">
+          {filteredTasks.map((task, i) => {
+            const person = peopleList.find((p) => p.id === task.care_recipient_id);
+            return (
+              <li key={task.id} className="lt-li" style={fall(i)}>
+                <div className="lt-row sf-task-row">
+                  <PrioIcon priority={task.priority} />
+                  <h3 className="lt-title">{task.title}</h3>
+                  {person ? <PersonDot id={person.id} people={peopleList} full /> : <span className="pp-meta">Allgemeine Aufgabe</span>}
+                  <span className="lt-src" title={task.deadline_source ?? undefined}>{task.deadline_source ? `Quelle: ${task.deadline_source}` : '—'}</span>
+                  <Due task={task} now={now} />
+                  <span className="sf-acts">
+                    {person ? (
+                      <button className="btn btn-secondary btn-sm" type="button" onClick={() => setSelectedId(person.id)} aria-label={`Fall öffnen: ${baseName(person.name)} – ${task.title}`}>
+                        Fall öffnen
+                        <ArrowUpRight size={14} className="i" aria-hidden="true" />
+                      </button>
+                    ) : null}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </>
+    ) : (
+      <EmptyRow title="Keine offenen Aufgaben für diese Auswahl">Ändern Sie die Filter oder öffnen Sie die Fallübersicht.</EmptyRow>
+    );
+  }
 
-    <section className="staff-metrics mo-fly" aria-label="Überblick aus gespeicherten Daten" aria-busy={refreshing}>
-      <div className="staff-metric"><span className="staff-metric-icon"><Users size={18} className="i" aria-hidden="true" /></span><div><span>Pflegefälle</span><strong>{stat(people.isError ? undefined : people.data?.length)}</strong><small>Fiktive Personen</small></div></div>
-      <div className="staff-metric staff-metric-urgent"><span className="staff-metric-icon"><AlarmClock size={18} className="i" aria-hidden="true" /></span><div><span>Dringende Aufgaben</span><strong>{stat(tasks.isError || tasks.isPending ? undefined : urgent)}</strong><small>{tasks.isError || tasks.isPending ? 'Aufgaben noch unbekannt' : `von ${integer.format(taskList.length)} offenen Aufgaben`}</small></div></div>
-      <div className="staff-metric"><span className="staff-metric-icon"><MessageSquareText size={18} className="i" aria-hidden="true" /></span><div><span>Gespeicherte Gespräche</span><strong>{stat(metrics?.totals.conversations)}</strong><small>Mit Beispielen und Archiv</small></div></div>
-      <div className="staff-metric staff-metric-success"><span className="staff-metric-icon"><Check size={18} className="i" aria-hidden="true" /></span><div><span>Abgeschlossene KI-Aufrufe</span><strong>{stat(metrics?.totals.completedRequests)}</strong><small>Tatsächlich ausgeführt</small></div></div>
-    </section>
+  return (
+    <Shell mainClassName="staff-main">
+      <div className="pg fx-fall">
+        <header className="pg-head" style={fall(0)}>
+          <div className="min-w-0">
+            <p className="pg-eyebrow">Gemeinsamer Demo-Arbeitsbereich</p>
+            <h1>Die richtigen Fälle im Blick.</h1>
+            <p className="pg-sub">Sachbearbeiter-Test · Dieser Sichtwechsel ändert keine Zugriffsrechte.</p>
+          </div>
+          <div className="pg-acts">
+            <button type="button" className="btn btn-secondary" onClick={refresh} disabled={refreshing}>
+              <RefreshCw className="i" size={14} aria-hidden="true" />
+              {refreshing ? 'Wird aktualisiert …' : 'Aktualisieren'}
+            </button>
+          </div>
+        </header>
 
-    <details className="staff-workbench-slot"><summary>Arbeitsansicht per Anfrage<span>Person und Sortierung in eigenen Worten wählen</span></summary><FilterWorkbench people={peopleList} disabled={dataBlocked} onApply={setFilter} /></details>
+        <section className="sf-stats" aria-label="Überblick aus gespeicherten Daten" aria-busy={refreshing} style={fall(1)}>
+          <Stat icon={<Users size={14} className="i" aria-hidden="true" />} label="Pflegefälle" value={stat(people.isError ? undefined : people.data?.length)} note="Fiktive Personen" />
+          <Stat icon={<AlarmClock size={14} className="i" aria-hidden="true" />} label="Dringende Aufgaben" value={stat(tasksKnown ? urgent : undefined)}
+            note={tasksKnown ? `von ${integer.format(taskList.length)} offenen Aufgaben` : 'Aufgaben noch unbekannt'} tone={tasksKnown && urgent ? 'is-bad' : ''} />
+          <Stat icon={<MessageSquareText size={14} className="i" aria-hidden="true" />} label="Gespeicherte Gespräche" value={stat(metrics?.totals.conversations)} note="Mit Beispielen und Archiv" />
+          <Stat icon={<Check size={14} className="i" aria-hidden="true" />} label="Abgeschlossene KI-Aufrufe" value={stat(metrics?.totals.completedRequests)} note="Tatsächlich ausgeführt" />
+        </section>
 
-    <section className="staff-board" aria-labelledby="staff-board-title">
-      <header className="staff-section-head"><div><h2 id="staff-board-title">{filter.view === 'cases' ? 'Ihre Fälle' : 'Offene Aufgaben'}<span className="count">{dataBlocked ? '—' : filter.view === 'cases' ? filteredPeople.length : filteredTasks.length}</span></h2><p>Dringend: hohe Priorität oder Termin innerhalb von drei Tagen.</p></div><div className="staff-tabs" aria-label="Arbeitsansicht"><button type="button" aria-pressed={filter.view === 'cases'} onClick={() => setFilter({ ...filter, view: 'cases' })}><BriefcaseBusiness size={16} className="i" aria-hidden="true" />Fälle</button><button type="button" aria-pressed={filter.view === 'tasks'} onClick={() => setFilter({ ...filter, view: 'tasks', sort: filter.sort === 'conversations' || filter.sort === 'name' ? 'deadline' : filter.sort })}><AlarmClock size={16} className="i" aria-hidden="true" />Aufgaben</button></div></header>
-      <div className="staff-toolbar"><div className="staff-select"><span id="staff-person-label">Person</span><Select aria-labelledby="staff-person-label" className="sel-field" value={filter.personId} onChange={(personId) => { if (personId === '' || peopleList.some((p) => p.id === personId)) setFilter({ ...filter, personId }); }} options={[{ value: '', label: 'Alle Personen' }, ...peopleList.map((p) => ({ value: p.id, label: baseName(p.name) }))]} /></div><div className="staff-select"><span id="staff-sort-label"><ArrowDownWideNarrow className="i" size={14} aria-hidden="true" />Sortieren nach</span><Select aria-labelledby="staff-sort-label" className="sel-field" value={filter.sort} onChange={(sort) => { if (STAFF_SORTS.includes(sort)) setFilter({ ...filter, sort }); }} options={[{ value: 'deadline', label: 'Nächster Frist' }, { value: 'priority', label: 'Priorität' }, ...(filter.view === 'cases' ? [{ value: 'conversations' as const, label: 'Gesprächszahl', disabled: !metrics }, { value: 'name' as const, label: 'Name' }] : [])]} /></div><label className="staff-checkbox"><input type="checkbox" checked={filter.urgentOnly} onChange={(e) => setFilter({ ...filter, urgentOnly: e.target.checked })} />Nur dringend</label>{filter.personId || filter.urgentOnly || filter.sort !== 'deadline' ? <button type="button" className="btn btn-ghost" onClick={() => setFilter(DEFAULT_FILTER)}>Zurücksetzen</button> : null}</div>
-      {people.isPending || tasks.isPending ? <Loading label="Fälle werden geladen …" lines={4} /> : people.isError ? <ErrorState error={people.error} onRetry={() => void people.refetch()} title="Pflegefälle nicht verfügbar" /> : tasks.isError ? <ErrorState error={tasks.error} onRetry={() => void tasks.refetch()} title="Aufgaben nicht verfügbar" /> : filter.view === 'cases' ? filteredPeople.length ? <div className="staff-cases" role="list" aria-label="Pflegefälle">
-        <div className="staff-case-heading" aria-hidden="true"><span>Person / Pflegekasse</span><span>Nächster Termin</span><span>Gespräche</span><span>Aktionen</span></div>
-        {filteredPeople.map((person, index) => {
-          const personTasks = taskList.filter((t) => t.care_recipient_id === person.id).sort(compareDeadline);
-          const next = personTasks[0];
-          const summary = personal.get(person.id);
-          return <article key={person.id} role="listitem" className="staff-case-row" aria-label={`Fall ${baseName(person.name)}`}><div className="staff-person"><span className={`staff-avatar staff-avatar-${index % 3}`} aria-hidden="true">{initials(person.name)}</span><div><h3>{baseName(person.name)}</h3><p>{person.care_grade ? `Pflegegrad ${person.care_grade}` : 'Kein Pflegegrad'} · {person.insurerName ? baseName(person.insurerName) : 'Kasse nicht hinterlegt'}</p></div></div><div className="staff-next">{next ? <><strong className={needsAttention(next, now) ? 'staff-text-urgent' : ''}>{next.due_at ? relativeDays(daysUntil(next.due_at, now)) : 'Ohne Termin'}</strong><span>{next.title}</span></> : <><strong>Keine offene Aufgabe</strong><span>Keine Frist gespeichert</span></>}</div><div className="staff-conversation-count"><strong>{summary ? integer.format(summary.conversations) : '—'}</strong><span>{summary ? `${summary.completedAnswers} echte KI-Antworten` : 'Zahl nicht verfügbar'}</span></div><div className="staff-row-actions"><button className="btn btn-secondary" type="button" onClick={() => setSelectedId(person.id)} aria-label={`Fall öffnen: ${baseName(person.name)}`}>Fall öffnen<ArrowUpRight className="i" size={15} aria-hidden="true" /></button><button className="btn btn-ghost" type="button" onClick={() => ask(person.id)} aria-label={`KI fragen zu ${baseName(person.name)}`}>KI fragen</button></div></article>;
-        })}
-      </div> : <EmptyState title={peopleList.length ? 'Keine Fälle für diese Auswahl' : 'Noch keine Pflegefälle gespeichert'}><span>{peopleList.length ? 'Ändern Sie die Person oder den Dringlichkeitsfilter.' : 'Fiktive Pflegefälle werden in Supabase ergänzt.'}</span></EmptyState> : filteredTasks.length ? <ul className="staff-task-list">{filteredTasks.map((task) => {
-        const person = peopleList.find((p) => p.id === task.care_recipient_id);
-        return <li key={task.id}><div className="staff-task-title"><span className={`staff-priority staff-priority-${task.priority}`}>{PRIORITY_LABEL[task.priority]}</span><h3>{task.title}</h3><p>{person ? baseName(person.name) : 'Allgemeine Aufgabe'}</p>{task.deadline_source ? <small>Quelle: {task.deadline_source}</small> : null}</div><div className="staff-task-due"><strong>{task.due_at ? formatDate(task.due_at) : 'Ohne Termin'}</strong><span className={needsAttention(task, now) ? 'staff-text-urgent' : ''}>{task.due_at ? relativeDays(daysUntil(task.due_at, now)) : 'Keine Frist gespeichert'}</span></div>{person ? <button className="btn btn-secondary" type="button" onClick={() => setSelectedId(person.id)} aria-label={`Fall öffnen: ${baseName(person.name)} – ${task.title}`}>Fall öffnen<ArrowUpRight size={15} className="i" aria-hidden="true" /></button> : null}</li>;
-      })}</ul> : <EmptyState title="Keine offenen Aufgaben für diese Auswahl"><span>Ändern Sie die Filter oder öffnen Sie die Fallübersicht.</span></EmptyState>}
-    </section>
+        <details className="lt-panel sf-workbench-slot" style={fall(2)}>
+          <summary>
+            <span className="sf-sum-t">Arbeitsansicht per Anfrage</span>
+            <span className="sf-sum-d">Person und Sortierung in eigenen Worten wählen</span>
+          </summary>
+          <FilterWorkbench people={peopleList} disabled={dataBlocked} onApply={setFilter} />
+        </details>
 
-    <section className="staff-usage" aria-labelledby="staff-usage-title"><header className="staff-section-head"><div><h2 id="staff-usage-title">Echte Modellnutzung</h2><p>Gesamter Arbeitsbereich · gespeicherter Stand{metrics ? ` ${formatDate(metrics.generatedAt)}, ${formatTime(metrics.generatedAt)} Uhr` : ''}</p></div><span className="staff-source">Supabase</span></header>
-      {overview.isPending ? <Loading lines={2} /> : overview.isError ? <ErrorState title="Gesprächszahlen und Modellnutzung nicht verfügbar" error={overview.error} onRetry={() => void overview.refetch()} /> : metrics ? <>
-        <p className="staff-usage-totals">{integer.format(metrics.totals.requests)} echte Anfragen <span>·</span> {integer.format(metrics.totals.completedRequests)} abgeschlossen <span>·</span> {integer.format(metrics.totals.failedRequests)} fehlgeschlagen <span>·</span> {integer.format(metrics.totals.interruptedRequests)} unterbrochen</p>
-        {metrics.usage.length ? <ul className="staff-usage-list">{metrics.usage.map((model) => <li key={model.modelId}><div><strong>{model.displayName}</strong><span>{model.provider} · {model.providerModelId}</span></div><div><strong>{integer.format(model.requests)}</strong><span>erfasste Nutzungen</span></div><div><strong>{integer.format(model.inputTokens + model.outputTokens)}</strong><span>Tokens · {integer.format(model.inputTokens)} ein / {integer.format(model.outputTokens)} aus</span></div></li>)}</ul> : <p className="muted">Noch keine abgeschlossene Modellnutzung gespeichert.</p>}
-        <p className="small muted staff-usage-note">Tokens sind Textbausteine des Modells. Beispielgespräche zählen als gespeicherte Gespräche, aber nicht als echte KI-Aufrufe. Abokosten lassen sich daraus nicht zuverlässig berechnen.</p>
-      </> : null}
-    </section>
-    {selected ? <CaseDialog key={selected.id} person={selected} tasks={taskList} tasksError={tasks.error} onClose={() => setSelectedId(null)} onAsk={ask} /> : null}
-    {askId ? <NewConversationDialog key={askId} open onClose={() => setAskId(null)} people={peopleList} initialRecipientId={askId} /> : null}
-  </Shell>;
+        <section className="lt-panel sf-board" aria-labelledby="staff-board-title" style={fall(3)}>
+          <header className="lt-head">
+            <h2 id="staff-board-title">
+              {filter.view === 'cases' ? 'Ihre Fälle' : 'Offene Aufgaben'}
+              <span className="lt-count">{dataBlocked ? '—' : filter.view === 'cases' ? filteredPeople.length : filteredTasks.length}</span>
+            </h2>
+            <p className="lt-head-note">Dringend: hohe Priorität oder Termin innerhalb von drei Tagen.</p>
+            <div className="lt-acts">
+              <Seg label="Arbeitsansicht" value={filter.view} options={VIEWS} onChange={setView} />
+            </div>
+          </header>
+          <div className="sf-toolbar">
+            <div className="sf-select">
+              <span id="staff-person-label">Person</span>
+              <Select aria-labelledby="staff-person-label" size="sm" className="sel-field" value={filter.personId}
+                onChange={(personId) => { if (personId === '' || peopleList.some((p) => p.id === personId)) setFilter({ ...filter, personId }); }}
+                options={[{ value: '', label: 'Alle Personen' }, ...peopleList.map((p) => ({ value: p.id, label: baseName(p.name) }))]} />
+            </div>
+            <div className="sf-select">
+              <span id="staff-sort-label"><ArrowDownWideNarrow className="i" size={14} aria-hidden="true" />Sortieren nach</span>
+              <Select aria-labelledby="staff-sort-label" size="sm" className="sel-field" value={filter.sort}
+                onChange={(sort) => { if (STAFF_SORTS.includes(sort)) setFilter({ ...filter, sort }); }}
+                options={[{ value: 'deadline', label: 'Nächster Frist' }, { value: 'priority', label: 'Priorität' },
+                  ...(filter.view === 'cases' ? [{ value: 'conversations' as const, label: 'Gesprächszahl', disabled: !metrics }, { value: 'name' as const, label: 'Name' }] : [])]} />
+            </div>
+            <label className="sf-check">
+              <input type="checkbox" checked={filter.urgentOnly} onChange={(e) => setFilter({ ...filter, urgentOnly: e.target.checked })} />
+              Nur dringend
+            </label>
+            {filter.personId || filter.urgentOnly || filter.sort !== 'deadline' ? (
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setFilter(DEFAULT_FILTER)}>Zurücksetzen</button>
+            ) : null}
+          </div>
+          {board}
+        </section>
+
+        <section className="lt-panel sf-usage" aria-labelledby="staff-usage-title" style={fall(4)}>
+          <header className="lt-head">
+            <h2 id="staff-usage-title">Echte Modellnutzung</h2>
+            <p className="lt-head-note">Gesamter Arbeitsbereich · gespeicherter Stand{metrics ? ` ${formatDate(metrics.generatedAt)}, ${formatTime(metrics.generatedAt)} Uhr` : ''}</p>
+            <div className="lt-acts"><span className="lt-chip">Supabase</span></div>
+          </header>
+          {overview.isPending ? (
+            <SkeletonRows rows={2} label="Modellnutzung wird geladen …" />
+          ) : overview.isError ? (
+            <div className="lt-pad"><ErrorState title="Gesprächszahlen und Modellnutzung nicht verfügbar" error={overview.error} onRetry={() => void overview.refetch()} /></div>
+          ) : metrics ? (
+            <>
+              <p className="sf-totals">
+                {integer.format(metrics.totals.requests)} echte Anfragen <span>·</span> {integer.format(metrics.totals.completedRequests)} abgeschlossen <span>·</span>{' '}
+                {integer.format(metrics.totals.failedRequests)} fehlgeschlagen <span>·</span> {integer.format(metrics.totals.interruptedRequests)} unterbrochen
+              </p>
+              {metrics.usage.length ? (
+                <>
+                  <div className="lt-cols sf-use-cols" aria-hidden="true"><span>Modell</span><span className="r">Nutzungen</span><span className="r">Tokens</span></div>
+                  <ul className="lt-list">
+                    {metrics.usage.map((model) => (
+                      <li key={model.modelId} className="lt-li">
+                        <div className="lt-row sf-use-row">
+                          <span className="sf-use-name"><strong>{model.displayName}</strong><span>{model.provider} · {model.providerModelId}</span></span>
+                          <span className="sf-num"><strong>{integer.format(model.requests)}</strong><span>erfasste Nutzungen</span></span>
+                          <span className="sf-num"><strong>{integer.format(model.inputTokens + model.outputTokens)}</strong><span>Tokens · {integer.format(model.inputTokens)} ein / {integer.format(model.outputTokens)} aus</span></span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <EmptyRow title="Noch keine abgeschlossene Modellnutzung gespeichert." />
+              )}
+              <p className="sf-usage-note">Tokens sind Textbausteine des Modells. Beispielgespräche zählen als gespeicherte Gespräche, aber nicht als echte KI-Aufrufe. Abokosten lassen sich daraus nicht zuverlässig berechnen.</p>
+            </>
+          ) : null}
+        </section>
+      </div>
+      {selected ? <CaseDialog key={selected.id} person={selected} tasks={taskList} tasksError={tasks.error} onClose={() => setSelectedId(null)} onAsk={ask} /> : null}
+      {askId ? <NewConversationDialog key={askId} open onClose={() => setAskId(null)} people={peopleList} initialRecipientId={askId} /> : null}
+    </Shell>
+  );
 }

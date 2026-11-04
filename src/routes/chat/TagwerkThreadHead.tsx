@@ -1,6 +1,5 @@
-import { Link } from '@tanstack/react-router';
 import { useState, type SubmitEvent } from 'react';
-import { Archive, ArchiveRestore, ArrowLeft, Check, Cpu, Pencil, X } from '../../instrument/chat/ChatIcons';
+import { Archive, ArchiveRestore, Check, Cpu, Pencil, X } from '../../instrument/chat/ChatIcons';
 import { NavIcon } from '../../components/NavIcon';
 import { Select, type SelectOption } from '../../components/Select';
 import { ErrorState } from '../../components/States';
@@ -10,7 +9,7 @@ import { baseName } from '../../lib/format';
 import type { ThreadHeadProps } from './ThreadHead';
 
 /*
- * Tagwerk-Gesprächskopf: oben Titel und eine Zeile mit dem Wichtigsten (Person, Modell, Modus, Region) als
+ * Tagwerk-Gesprächskopf (V2: eine 46-px-Leiste wie OALab): Titel und eine Zeile mit dem Wichtigsten (Person, Modell, Modus, Region) als
  * Aufklapp-Knopf. Aufgeklappt eine Leiste mit den eigentlichen Auswahlfeldern. Die Wahl auf/zu gilt bis zum
  * Neuladen für alle Gespräche (kein Speicher außerhalb des ThemeProviders).
  */
@@ -69,9 +68,6 @@ export function TagwerkThreadHead({ conversation, people, mode, model, models, d
   return (
     <header className="th" data-open={open || undefined}>
       <div className="th-bar">
-        <Link to="/gespraeche" className="icon-btn lg:hidden" aria-label="Zurück zur Gesprächsliste">
-          <ArrowLeft className="i" size={18} aria-hidden="true" />
-        </Link>
         <div className="th-main">
           {editing ? (
             <form className="title-edit th-edit" onSubmit={(e) => void save(e)}>
@@ -103,7 +99,7 @@ export function TagwerkThreadHead({ conversation, people, mode, model, models, d
           <button type="button" className="th-summary" aria-expanded={open} aria-controls="th-details"
             aria-label={open ? 'Gesprächsdetails ausblenden' : 'Gesprächsdetails zeigen'} onClick={() => setOpen(!open)}>
             <span className={`th-pill ${person ? '' : 'is-general'}`}>
-              <NavIcon name="care" size={14} />
+              <NavIcon name={person ? 'person' : 'people'} size={13} />
               {person ? baseName(person.name) : 'Allgemein'}
             </span>
             <span className="th-pill">

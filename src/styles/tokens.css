@@ -1,114 +1,187 @@
 /*
- * Tagwerk – gemeinsames semantisches Tokensystem (Neufassung 03.11.2026: kühles Studio statt warmem Braun).
- * Grund Graphit wie Linear/Studio, EIN Akzent Indigo, Lime als einzige Marker-Farbe (Klebeband, Handstriche).
- * Dunkel ist Standard und eigenständig gestaltet (Flächen nur 3–8 % auseinander), Hell ist ein kühles Weiß.
- * Komponenten verwenden nur diese Namen, nie Rohfarben. Kontraste (AA) prüft tools/check-source.mjs.
+ * Tagwerk V2 (04.11.2026): neutrales Grau und Maße wie die Kundenansicht von Service OALab
+ * (oalab/service-oalab/apps/web/app/styles/workspace/tokens.css), EIN Akzent Beerenrot statt Orange.
+ * Dunkel ist Standard, Hell ist eigenständig gestaltet. Komponenten verwenden nur diese Namen, nie Rohfarben.
+ * Alte Namen (surface2, text-muted, accent-text, primary …) bleiben und zeigen auf die neuen Werte.
+ * Kontraste (AA) prüft tools/check-source.mjs; die geprüften Paare stehen dort.
  */
 :root {
   --font-body: 'Geist Variable', 'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-body);
   --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --fs-base: 14.5px;
-  --fs-small: 13px;
-  --fs-h1: 26px;
-  --fs-h2: 15.5px;
-  --radius: 12px;
-  --radius-sm: 8px;
-  /* Rund wie die NoteTree-Lernbücher: Knöpfe/Felder weich, schwebende Flächen (Popups) deutlich rund. */
-  --radius-btn: 11px;
-  --radius-pop: 20px;
+
+  /* Schrift: OALab-Skala, kleinste Stufe 12 px (Projektregel). */
+  --fs-2xs: 12px;
+  --fs-xs: 12px;
+  --fs-sm: 12.5px;
+  --fs: 13.5px;
+  --fs-md: 14.5px;
+  --fs-lg: 16px;
+  --fs-xl: 19px;
+  --fs-2xl: 23px;
+  --fs-base: var(--fs);
+  --fs-small: var(--fs-sm);
+  --fs-h1: var(--fs-2xl);
+  --fs-h2: var(--fs-md);
+
+  /* Radien und Höhen */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r: 8px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+  --r-full: 999px;
+  --radius: var(--r-lg);
+  --radius-sm: var(--r-sm);
+  --radius-btn: var(--r-sm);
+  --radius-pop: var(--r-lg);
+  --h-xs: 22px;
+  --h-sm: 26px;
+  --h-md: 30px;
+  --h-lg: 36px;
   --row-h: 40px;
-  --control-h: 38px;
-  --icon-stroke: 1.8;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --control-h: var(--h-md);
+  --side-w: 252px;
+  --side-closed: 52px;
+  --side-row: 30px;
+  --topbar-h: 46px;
+  --gutter: 24px;
+  --rail-open: var(--side-w);
+  --rail-closed: var(--side-closed);
+  --icon-stroke: 1.7;
+
+  /* Kurven: nur weiches Ausrollen, keine Federn. */
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.5, 0, 0.75, 0);
-  --rail-open: 232px;
-  --rail-closed: 64px;
+  --dur: 140ms;
 
   color-scheme: dark;
-  --bg: #0b0c0f;
-  --surface: #121317;
-  --surface2: #1a1c21;
-  --sunken: #0e0f12;
-  --border: #23252b;
-  --border-strong: #5d6270;
-  --text: #eceef3;
-  --text-muted: #9a9fac;
-  --accent: #8d95ff;
-  --on-accent: #0b0d26;
-  --accent-text: #aab0ff;
-  --accent-soft: rgba(141, 149, 255, 0.14);
-  --danger: #ff7d8c;
-  --danger-soft: rgba(255, 125, 140, 0.12);
-  --warning: #f3c254;
-  --warning-soft: rgba(243, 194, 84, 0.12);
-  --success: #4fdc9c;
-  --success-soft: rgba(79, 220, 156, 0.12);
-  --marker: #c8f135;
-  /* Primärknopf: kräftiges Blau mit weißer Schrift (Akzent bleibt Indigo für Fokus, Links, Auswahl). */
-  --primary: #3566f0;
-  --primary-hover: #4272f5;
-  --on-primary: #ffffff;
-  /* Glas für alles, was schwebt (Menüs, Auswahllisten, Dialoge, Hinweise). */
-  --glass: rgba(24, 26, 33, 0.7);
-  --glass-strong: rgba(20, 22, 28, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.09);
-  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  --glass-blur: blur(22px) saturate(1.6);
-  --shadow-pop: 0 28px 64px -16px rgba(0, 0, 0, 0.7), 0 2px 10px rgba(0, 0, 0, 0.35);
-  --focus: #aab0ff;
-  --banner-bg: #15172a;
-  --banner-text: #c5c9ff;
-  --glow: rgba(141, 149, 255, 0.16);
-  /* Farbe je Bereich (Studio Graffiti): nur in Symbolen, Punkten, Strichen – nie als Kartenfläche. */
-  --hue-overview: #9aa1ff;
-  --hue-chat: #5fc9ff;
-  --hue-docs: #ffc857;
-  --hue-tasks: #5be3a4;
-  --hue-settings: #c9a2ff;
-  --hue-rose: #ff8fc6;
-  --shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset, 0 16px 40px rgba(0, 0, 0, 0.5);
+  --acc-l: #a3245a;
+  --acc-d: #ee7c9c;
+  --bg: #1a1a19;
+  --bg-side: #151514;
+  --surface: #1d1d1c;
+  --surface2: #252524;
+  --surface-2: var(--surface2);
+  --surface-3: #2d2d2b;
+  --sunken: #181817;
+  --overlay: rgba(0, 0, 0, 0.55);
+  --border: #2c2b29;
+  /* Ruhige Kante für große Flächen (Sprechblase, Eingabekarte) wie OALab; Felder nutzen border-strong (3 : 1). */
+  --line-strong: #3a3936;
+  --border-strong: #6f6c66;
+  --divider: #252523;
+  --text: #eceae5;
+  --text-2: #b5b2ab;
+  --text-3: #9a968f;
+  --text-4: #6f6c66;
+  --text-muted: #9a968f;
+  --text-inv: #151514;
+  --accent: #ee7c9c;
+  --on-accent: #2a0f1a;
+  --accent-text: #f6a9bd;
+  --accent-ink: #f6a9bd;
+  --accent-soft: rgba(238, 124, 156, 0.12);
+  --accent-line: rgba(238, 124, 156, 0.38);
+  /* Tonknopf: Beerenrot 24 % in der Fläche, heller Beerentext – nie ein leuchtender Block. */
+  --primary: #4f343b;
+  --primary-hover: #5d3a44;
+  --on-primary: #f6a9bd;
+  --primary-ring: rgba(238, 124, 156, 0.3);
+  --danger: #f27d69;
+  --danger-soft: rgba(242, 125, 105, 0.12);
+  --warning: #d8a443;
+  --warning-soft: rgba(216, 164, 67, 0.12);
+  --success: #5cba86;
+  --success-soft: rgba(92, 186, 134, 0.11);
+  --red: var(--danger);
+  --amber: var(--warning);
+  --green: var(--success);
+  --blue: #72a5ea;
+  --violet: #a98deb;
+  --st-todo: #a6a39c;
+  --st-progress: #d8a443;
+  --st-done: #5cba86;
+  --marker: #f6a9bd;
+  /* Schwebende Flächen sind deckend wie in OALab (kein Glas). */
+  --glass: #1d1d1c;
+  --glass-strong: #1d1d1c;
+  --glass-border: #3a3936;
+  --glass-hi: 0 0 0 0 transparent;
+  --glass-blur: none;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-pop: 0 16px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px #3a3936;
+  --shadow: 0 0 0 1px #2c2b29;
+  --focus: #ee7c9c;
+  --banner-bg: #2e2226;
+  --banner-text: #f6a9bd;
+  --glow: rgba(238, 124, 156, 0.1);
+  /* Bereichsfarben (V1) sind in V2 still: Symbole bleiben grau, Farbe nur mit Bedeutung. */
+  --hue-overview: #9a968f;
+  --hue-chat: #9a968f;
+  --hue-docs: #9a968f;
+  --hue-tasks: #9a968f;
+  --hue-settings: #9a968f;
+  --hue-rose: #f6a9bd;
 }
 
 :root[data-theme='hell'] {
   color-scheme: light;
-  --bg: #f3f4f7;
+  --bg: #fbfaf8;
+  --bg-side: #f4f3f0;
   --surface: #ffffff;
-  --surface2: #eef0f4;
-  --sunken: #f8f9fb;
-  --border: #e2e5eb;
-  --border-strong: #868c9b;
-  --text: #15171c;
-  --text-muted: #585e6b;
-  --accent: #4b52d8;
+  --surface2: #f6f5f2;
+  --surface-3: #eeede9;
+  --sunken: #f7f6f3;
+  --overlay: rgba(24, 22, 19, 0.28);
+  --border: #e9e7e2;
+  --line-strong: #dad7d0;
+  --border-strong: #8c8880;
+  --divider: #f0eeea;
+  --text: #1d1c1a;
+  --text-2: #57544e;
+  --text-3: #6b6760;
+  --text-4: #8c8880;
+  --text-muted: #6b6760;
+  --text-inv: #ffffff;
+  --accent: #a3245a;
   --on-accent: #ffffff;
-  --accent-text: #3d43c2;
-  --accent-soft: rgba(75, 82, 216, 0.09);
-  --danger: #c0213b;
-  --danger-soft: rgba(192, 33, 59, 0.08);
-  --warning: #855700;
-  --warning-soft: rgba(214, 150, 20, 0.13);
-  --success: #12754a;
-  --success-soft: rgba(18, 117, 74, 0.09);
-  --marker: #b5dc22;
-  --primary: #2f5ee6;
-  --primary-hover: #2a55d4;
+  --accent-text: #8e1d4c;
+  --accent-ink: #8e1d4c;
+  --accent-soft: rgba(163, 36, 90, 0.08);
+  --accent-line: rgba(163, 36, 90, 0.38);
+  /* Hell: voll gefüllt wie eine Kassenseite. */
+  --primary: #a3245a;
+  --primary-hover: #8f2150;
   --on-primary: #ffffff;
-  --glass: rgba(255, 255, 255, 0.7);
-  --glass-strong: rgba(255, 255, 255, 0.84);
-  --glass-border: rgba(20, 24, 40, 0.1);
-  --glass-hi: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --glass-blur: blur(22px) saturate(1.8);
-  --shadow-pop: 0 28px 64px -18px rgba(20, 24, 40, 0.26), 0 2px 10px rgba(20, 24, 40, 0.07);
-  --focus: #4b52d8;
-  --banner-bg: #eceaff;
-  --banner-text: #2c2a86;
-  --glow: rgba(75, 82, 216, 0.1);
-  --hue-overview: #4b52d8;
-  --hue-chat: #0a76ad;
-  --hue-docs: #8a5a00;
-  --hue-tasks: #12754a;
-  --hue-settings: #7440c9;
-  --hue-rose: #b02a6c;
-  --shadow: 0 1px 2px rgba(16, 20, 32, 0.05), 0 12px 32px rgba(16, 20, 32, 0.08);
+  --primary-ring: rgba(0, 0, 0, 0.12);
+  --danger: #c2331f;
+  --danger-soft: rgba(194, 51, 31, 0.08);
+  --warning: #8f5e0e;
+  --warning-soft: rgba(143, 94, 14, 0.12);
+  --success: #25754b;
+  --success-soft: rgba(37, 117, 75, 0.11);
+  --blue: #3570c4;
+  --violet: #7652c2;
+  --st-todo: #7c7870;
+  --st-progress: #c88a14;
+  --st-done: #2e8456;
+  --marker: #f3c6d4;
+  --glass: #ffffff;
+  --glass-strong: #ffffff;
+  --glass-border: #e9e7e2;
+  --shadow-sm: 0 1px 2px rgba(28, 25, 20, 0.05);
+  --shadow-pop: 0 12px 32px -8px rgba(28, 25, 20, 0.16), 0 2px 6px -2px rgba(28, 25, 20, 0.06), 0 0 0 1px #e9e7e2;
+  --shadow: 0 1px 2px rgba(28, 25, 20, 0.04), 0 0 0 1px #e9e7e2;
+  --focus: #a3245a;
+  --banner-bg: #f8e9ef;
+  --banner-text: #7a1a43;
+  --glow: rgba(163, 36, 90, 0.08);
+  --hue-overview: #6b6760;
+  --hue-chat: #6b6760;
+  --hue-docs: #6b6760;
+  --hue-tasks: #6b6760;
+  --hue-settings: #6b6760;
+  --hue-rose: #8e1d4c;
 }

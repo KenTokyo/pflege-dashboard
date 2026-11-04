@@ -1,59 +1,45 @@
-import { useDesign } from '../app/ThemeProvider';
-import { InstrumentDocuments } from '../instrument/dokumente/InstrumentDocuments';
-import { FileText, Info } from 'lucide-react';
+import { ChevronDown, Info } from 'lucide-react';
 import { useState } from 'react';
-import { Shell } from '../components/Shell';
-import { EmptyState, ErrorState, Loading } from '../components/States';
-import { DOC_KIND_LABEL, DOC_STATUS_LABEL, recipientName } from '../data/model';
-import { useCareRecipients, useDocuments, useMarkDocumentStatus } from '../data/queries';
-import { baseName, formatDate } from '../lib/format';
-import { useDocumentTitle } from '../lib/useDocumentTitle';
-import type { DocumentRow, Enums } from '../services/types';
-import { DocStatus } from './DashboardPage';
+import { useDesign } from '../app/ThemeProvider';
 import { Select } from '../components/Select';
+import { Shell } from '../components/Shell';
+import { ErrorState } from '../components/States';
+import { DOC_KIND_LABEL, DOC_STATUS_LABEL } from '../data/model';
+import { useCareRecipients, useDocuments, useMarkDocumentStatus } from '../data/queries';
+import { InstrumentDocuments } from '../instrument/dokumente/InstrumentDocuments';
+import { formatDate } from '../lib/format';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
+import type { CareRecipient, DocumentRow, Enums } from '../services/types';
+import { Chip, EmptyRow, PanelHead, PersonDot, Seg, SkeletonRows, StatusIcon, docStatus, fall } from './dashboard/parts';
 
 type Filter = 'all' | Enums['document_status'];
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'all', label: 'Alle' },
-  { id: 'draft', label: 'Entwurf' },
-  { id: 'reviewed', label: 'Geprüft' },
-  { id: 'sent', label: 'Versendet' },
-];
+const FILTERS = [['all', 'Alle'], ['draft', 'Entwurf'], ['reviewed', 'Geprüft'], ['sent', 'Versendet']] as const;
 const STATUSES: Enums['document_status'][] = ['draft', 'reviewed', 'sent'];
 
-function DocItem({ doc, person }: { doc: DocumentRow; person: string }) {
+function DocItem({ doc, people, i }: { doc: DocumentRow; people: readonly CareRecipient[]; i: number }) {
   const mark = useMarkDocumentStatus();
+  const [open, setOpen] = useState(false);
   return (
-    <li className="doc-row" id={`dok-${doc.id}`}>
-      <FileText className="i" size={18} aria-hidden="true" />
-      <div className="min-w-0">
-        <p className="row-title" style={{ whiteSpace: 'normal' }}>
-          {doc.title}
-        </p>
-        <p className="row-meta">
-          <DocStatus status={doc.status} />
-          <span>
-            {DOC_KIND_LABEL[doc.kind]} · {person} · {formatDate(doc.created_at)}
-          </span>
-        </p>
-        {mark.error ? (
-          <div className="mt-2">
-            <ErrorState error={mark.error} title="Status nicht geändert" />
-          </div>
-        ) : null}
+    <li className="lt-li dc-li" id={`dok-${doc.id}`} style={fall(i)}>
+      <div className="lt-row dc-row">
+        <StatusIcon status={docStatus(doc)} label={DOC_STATUS_LABEL[doc.status]} />
+        <span className="lt-title" title={doc.title}>{doc.title}</span>
+        <span className="lt-kind"><Chip>{DOC_KIND_LABEL[doc.kind]}</Chip></span>
+        <PersonDot id={doc.care_recipient_id} people={people} full />
+        <span className="lt-when">{formatDate(doc.created_at)}</span>
+        <span className="dc-status">
+          <label htmlFor={`st-${doc.id}`} className="sr-only">Status von {doc.title}</label>
+          <Select id={`st-${doc.id}`} size="sm" nativeClassName="status-select" value={doc.status} disabled={mark.isPending}
+            options={STATUSES.map((s) => ({ value: s, label: DOC_STATUS_LABEL[s] }))}
+            onChange={(next) => { if (next !== doc.status) mark.mutate({ id: doc.id, status: next, revision: doc.revision }); }} />
+        </span>
+        <button type="button" className="dc-toggle" aria-expanded={open} aria-controls={`txt-${doc.id}`} onClick={() => setOpen((v) => !v)}>
+          {open ? 'Text ausblenden' : 'Text anzeigen'}
+          <ChevronDown className="i" size={14} aria-hidden="true" />
+        </button>
       </div>
-      <div className="doc-status flex items-center gap-2">
-        <label htmlFor={`st-${doc.id}`} className="sr-only">
-          Status von {doc.title}
-        </label>
-        <Select id={`st-${doc.id}`} size="sm" nativeClassName="status-select" value={doc.status} disabled={mark.isPending}
-          options={STATUSES.map((s) => ({ value: s, label: DOC_STATUS_LABEL[s] }))}
-          onChange={(next) => { if (next !== doc.status) mark.mutate({ id: doc.id, status: next, revision: doc.revision }); }} />
-      </div>
-      <details className="doc-preview">
-        <summary className="cursor-pointer font-bold">Text anzeigen</summary>
-        <div className="mt-2">{doc.rendered_text || 'Kein Text gespeichert.'}</div>
-      </details>
+      {mark.error ? <div className="lt-pad"><ErrorState error={mark.error} title="Status nicht geändert" /></div> : null}
+      {open ? <div id={`txt-${doc.id}`} className="dc-text fx-fall"><p style={fall(0)}>{doc.rendered_text || 'Kein Text gespeichert.'}</p></div> : null}
     </li>
   );
 }
@@ -73,37 +59,38 @@ function TagwerkDocumentsPage() {
 
   return (
     <Shell>
-      <div className="list-page mo-fly">
-        <header className="page-head">
-          <div>
-            <p className="eyebrow">Arbeitsbereich</p>
+      <div className="pg fx-fall">
+        <header className="pg-head" style={fall(0)}>
+          <div className="min-w-0">
+            <p className="pg-eyebrow">Arbeitsbereich</p>
             <h1>Dokumente</h1>
           </div>
         </header>
-        <p className="note mb-3">
-          <Info className="i" size={15} aria-hidden="true" />
+        <p className="pg-note" style={fall(1)}>
+          <Info className="i" size={14} aria-hidden="true" />
           <span>Den Status setzen Sie selbst. „Versendet“ bedeutet: Sie haben das Schreiben selbst verschickt – die App versendet nichts.</span>
         </p>
-        <div className="filters" role="group" aria-label="Nach Status filtern">
-          {FILTERS.map((f) => (
-            <button key={f.id} type="button" className="filter" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <section className="card" aria-label="Dokumentliste">
+        <section className="lt-panel" aria-label="Dokumentliste" style={fall(2)}>
+          <PanelHead id="docs-page-title" title="Schreiben" count={docs.isPending || docs.isError ? null : list.length}>
+            <Seg label="Nach Status filtern" value={filter} options={FILTERS} onChange={setFilter} />
+          </PanelHead>
           {docs.isPending ? (
-            <Loading />
+            <SkeletonRows label="Dokumente werden geladen …" />
           ) : docs.isError ? (
-            <ErrorState error={docs.error} onRetry={() => void docs.refetch()} />
+            <div className="lt-pad"><ErrorState error={docs.error} onRetry={() => void docs.refetch()} /></div>
           ) : list.length === 0 ? (
-            <EmptyState title={filter === 'all' ? 'Noch keine Dokumente' : 'Keine Dokumente mit diesem Status'} />
+            <EmptyRow title={filter === 'all' ? 'Noch keine Dokumente' : 'Keine Dokumente mit diesem Status'}>
+              {filter === 'all' ? 'Vom Sachbearbeiter erstellte Schreiben erscheinen hier mit Status.' : 'Wählen Sie „Alle“, um jedes Schreiben zu sehen.'}
+            </EmptyRow>
           ) : (
-            <ul className="rows">
-              {list.map((d) => (
-                <DocItem key={d.id} doc={d} person={baseName(recipientName(d.care_recipient_id, people.data ?? []) ?? 'Allgemein')} />
-              ))}
-            </ul>
+            <>
+              <div className="lt-cols dc-cols" aria-hidden="true">
+                <span /><span>Titel</span><span>Art</span><span>Person</span><span>Erstellt</span><span>Status</span><span />
+              </div>
+              <ul key={filter} className="lt-list fx-fall">
+                {list.map((d, i) => <DocItem key={d.id} doc={d} people={people.data ?? []} i={i} />)}
+              </ul>
+            </>
           )}
         </section>
       </div>

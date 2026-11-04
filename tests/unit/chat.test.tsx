@@ -30,7 +30,7 @@ describe('Chat', () => {
     expect(fake.calls.chat).toHaveLength(0);
   });
 
-  it('Frage im Dashboard → neues Gespräch über RPC → gestreamte Antwort mit Modell, Region und Quelle', async () => {
+  it('Frage auf „Neues Gespräch“ → neues Gespräch über RPC → gestreamte Antwort mit Modell, Region und Quelle', async () => {
     const { fake, user, history } = await signedInApp({
       modelOperational: true,
       chat: () => ({
@@ -40,7 +40,7 @@ describe('Chat', () => {
       }),
     });
     await user.type(await screen.findByLabelText('Ihre Frage an den Sachbearbeiter'), 'Was muss in einen Widerspruch?');
-    await user.click(screen.getByRole('button', { name: /Fragen/ }));
+    await user.click(screen.getByRole('button', { name: 'Frage senden' }));
     await waitFor(() => expect(history.location.pathname).toMatch(/^\/gespraeche\/[0-9a-f-]{36}$/));
     // Nach Abschluss ersetzt der gespeicherte Verlauf (mit Quellen) den Live-Stand.
     const answer = await waitFor(() => {

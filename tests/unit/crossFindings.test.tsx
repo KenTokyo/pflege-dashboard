@@ -133,7 +133,7 @@ describe('Dashboard bei Ladefehler der Aufgaben', () => {
       <App
         backend={fake}
         queryClient={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-        history={createMemoryHistory({ initialEntries: ['/'] })}
+        history={createMemoryHistory({ initialEntries: ['/uebersicht'] })}
         clock={testClock().clock}
       />,
     );

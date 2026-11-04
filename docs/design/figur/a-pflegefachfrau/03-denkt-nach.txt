@@ -1,0 +1,11 @@
+Use case: app-chat-avatar-state-edit
+Asset type: third transparent PNG state in a three-state avatar set
+Input image: Image 1 is the exact edit source and identity reference. Preserve this same woman and image.
+Primary request: create the “thinking” expression for a care dashboard chat avatar while the assistant prepares a reply.
+Change only gaze, a very slight head tilt, and expression: eyes looking slightly upward to her right (viewer’s left), head minimally tilted, thoughtful and concentrated but kind; lips softly closed.
+Preserve exactly: the same woman, face, short gray-blond hair, glasses, age, skin tone, clothing, burgundy care tunic, blank badge, soft 3D rendering, lighting, camera, straight-on bust crop, image scale, head position and shoulder crop. Keep head near upper center; do not zoom, pan, reframe, or alter the shoulders.
+Square canvas and exact same pixel dimensions as input. Keep clean transparent alpha background with no cast shadow, no background, no circle. High quality, stable identity.
+No text, logos, symbols, watermark, props, added objects, or other changes.
+
+Modell: GPT-6 Luna (Codex, eingebaute Bildgenerierung)
+Vorlagen: 01-begruessen.png (Identität und Bildaufbau); omed-welcome.webp und omed-thinking.webp (nur Stilreferenz; nicht verändert)

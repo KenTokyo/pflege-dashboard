@@ -125,8 +125,8 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
       <section className="thread p-6">
         <EmptyState title="Gespräch nicht gefunden" center>
           <span>Es wurde gelöscht oder ist für Sie nicht sichtbar.</span>
-          <Link to="/gespraeche" className="link">
-            Zur Gesprächsliste
+          <Link to="/" className="link">
+            Neues Gespräch beginnen
           </Link>
         </EmptyState>
       </section>
@@ -157,7 +157,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
       />
       <div
         ref={scroller}
-        className="messages"
+        className="messages fx-fade"
         aria-live="polite"
         aria-relevant="additions"
         onScroll={(e) => {
@@ -171,10 +171,8 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
           <ErrorState error={messages.error} onRetry={() => void messages.refetch()} />
         ) : history.length === 0 && !turn ? (
           <div className="chat-empty">
-            {design === 'instrument' ? <ConversationDrawing /> : <MessageSquareText className="i" size={28} aria-hidden="true" />}
-            <strong className="text-[18px]" style={{ fontFamily: 'var(--font-display)' }}>
-              Was möchten Sie wissen?
-            </strong>
+            {design === 'instrument' ? <ConversationDrawing /> : <MessageSquareText className="i" size={20} aria-hidden="true" />}
+            <strong className="chat-empty-title">Was möchten Sie wissen?</strong>
             <span className="muted">
               Fragen Sie zum Beispiel nach Pflegegrad, Entlastungsbetrag oder einem Widerspruch. Der Sachbearbeiter nennt Unsicherheiten
               und ersetzt keine Rechts- oder Medizinberatung.
@@ -204,7 +202,7 @@ export function Thread({ conversationId, people }: { conversationId: string; peo
         ) : null}
       </div>
       {archived ? (
-        <div className="mx-auto mt-2 w-full max-w-[860px] px-[22px]">
+        <div className="thread-restore">
           <button type="button" className="btn btn-secondary btn-sm" disabled={restore.isPending} onClick={() => restore.mutate({ conversation: conv, archived: false })}>
             Gespräch wiederherstellen
           </button>

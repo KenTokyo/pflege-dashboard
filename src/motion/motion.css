@@ -1,134 +1,116 @@
 /*
- * Tagwerk-Bewegung (Vorlage: shardfall/src/ui/motion/motion.css). Nur transform und opacity; Blur nur auf
- * EINER großen Fläche (Seitenwechsel) und am Ende weg. Gehen ist kürzer als Kommen. Danach Ruhe.
- * --mo-spring-* schreibt src/motion/tokens.ts als echte Federkurve; hier die Rückfälle ohne linear().
+ * Tagwerk V2 – Bewegung ist ein leises Scharfstellen (Skill studio-linear-ui-v2, references/motion.md).
+ * Ein Muster: Blur-Fade-Wasserfall. Inhalte kommen aus opacity 0, blur 6 px, 6 px tiefer in ihre Ruhe,
+ * von oben nach unten je 40 ms versetzt (höchstens 8 Stufen). Popover und Dialoge blenden nur, Laden schimmert.
+ * Keine Kamerafahrten, Federn, gleitenden Tinten oder Hover-Hebungen. Nach dem Auftritt ist alles still.
+ *
+ * Nutzung: Container mit Klasse `fx-fall`, Kinder mit style={{ '--i': n }} (ohne --i zählt die Reihenfolge).
+ * Einzelnes Element: `fx-in` (neue Chatnachricht, 320 ms, keine Staffel). Laden: `.sk` (Shimmer).
  */
 :root {
-  --mo-spring-soft: cubic-bezier(0.16, 1, 0.3, 1);
-  --mo-spring-soft-ms: 560ms;
-  --mo-spring-base: cubic-bezier(0.2, 1, 0.3, 1);
-  --mo-spring-base-ms: 480ms;
-  --mo-spring-snap: cubic-bezier(0.2, 1, 0.3, 1);
-  --mo-spring-snap-ms: 380ms;
-  --mo-spring-pop: cubic-bezier(0.2, 1.5, 0.4, 1);
-  --mo-spring-pop-ms: 520ms;
-  --mo-spring-elastic: cubic-bezier(0.2, 1.6, 0.35, 1);
-  --mo-spring-elastic-ms: 760ms;
-  --mo-spring-camera: cubic-bezier(0.22, 1, 0.36, 1);
-  --mo-spring-camera-ms: 900ms;
-  --mo-ease-in: cubic-bezier(0.5, 0, 0.75, 0);
-  --mo-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --fx-fall-ms: 420ms;
+  --fx-step: 40ms;
+  --fx-curve: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ---------- Seitenwechsel: Kamera fährt seitlich, alte Seite weicht in die Tiefe ---------- */
-:root[data-design='tagwerk'] .main { view-transition-name: tg-page; }
-:root[data-design='tagwerk'] .staff-view-switch { view-transition-name: tg-staff-switch; }
-:root[data-design='tagwerk']::view-transition { pointer-events: none; }
-:root[data-design='tagwerk']::view-transition-old(root),
-:root[data-design='tagwerk']::view-transition-new(root) { animation: none; }
-:root[data-design='tagwerk']::view-transition-group(tg-page) { animation: none; overflow: clip; }
-:root[data-design='tagwerk']::view-transition-image-pair(tg-page) { isolation: auto; }
-
-html:active-view-transition-type(cut-forward)::view-transition-new(tg-page) {
-  --dir: 1;
-  animation: mo-cut-in var(--mo-spring-camera-ms) var(--mo-spring-camera) both, mo-cut-fade 260ms var(--mo-ease-out) both;
+@keyframes fx-blur-in {
+  from { opacity: 0; filter: blur(6px); transform: translateY(6px); }
 }
-html:active-view-transition-type(cut-back)::view-transition-new(tg-page) {
-  --dir: -1;
-  animation: mo-cut-in var(--mo-spring-camera-ms) var(--mo-spring-camera) both, mo-cut-fade 260ms var(--mo-ease-out) both;
+@keyframes fx-fade-in {
+  from { opacity: 0; }
 }
-html:active-view-transition-type(cut-forward)::view-transition-old(tg-page) {
-  --dir: 1;
-  animation: mo-cut-out 340ms var(--mo-ease-in) both;
+@keyframes fx-pop-in {
+  from { opacity: 0; filter: blur(4px); }
 }
-html:active-view-transition-type(cut-back)::view-transition-old(tg-page) {
-  --dir: -1;
-  animation: mo-cut-out 340ms var(--mo-ease-in) both;
+@keyframes fx-fade-out {
+  to { opacity: 0; }
 }
 
-@keyframes mo-cut-in {
-  from {
-    transform: perspective(1600px) translate3d(calc(var(--dir) * 110px), 0, -160px) rotateY(calc(var(--dir) * -9deg)) scale(0.94);
-    filter: blur(10px) brightness(0.55);
-  }
-  55% { filter: none; }
-  to { transform: none; filter: none; }
+/* ---------- Wasserfall ---------- */
+.fx-fall > * {
+  animation: fx-blur-in var(--fx-fall-ms) var(--fx-curve) backwards;
+  animation-delay: calc(min(var(--i, 0), 8) * var(--fx-step));
 }
-@keyframes mo-cut-fade { from { opacity: 0; } }
-@keyframes mo-cut-out {
-  to {
-    opacity: 0;
-    transform: perspective(1600px) translate3d(calc(var(--dir) * -140px), 0, -220px) rotateY(calc(var(--dir) * 8deg)) scale(0.92);
-    filter: blur(9px) brightness(0.5);
-  }
-}
+.fx-fall > :nth-child(2) { --i: 1; }
+.fx-fall > :nth-child(3) { --i: 2; }
+.fx-fall > :nth-child(4) { --i: 3; }
+.fx-fall > :nth-child(5) { --i: 4; }
+.fx-fall > :nth-child(6) { --i: 5; }
+.fx-fall > :nth-child(7) { --i: 6; }
+.fx-fall > :nth-child(n + 8) { --i: 7; }
+:root[data-design='tagwerk'] .fx-in { animation: fx-blur-in 320ms var(--fx-curve) backwards; }
+:root[data-design='tagwerk'] .fx-fade { animation: fx-fade-in 200ms var(--fx-curve) backwards; }
 
-/* ---------- Einflug: Kinder steigen gestaffelt aus der Tiefe ---------- */
-:root[data-design='tagwerk'] .mo-fly > * {
-  animation: mo-fly var(--mo-spring-soft-ms) var(--mo-spring-soft) backwards, mo-cut-fade 300ms var(--mo-ease-out) backwards;
-  animation-delay: calc(60ms + var(--i, 11) * 45ms);
-}
-.mo-fly > :nth-child(1) { --i: 0; }
-.mo-fly > :nth-child(2) { --i: 1; }
-.mo-fly > :nth-child(3) { --i: 2; }
-.mo-fly > :nth-child(4) { --i: 3; }
-.mo-fly > :nth-child(5) { --i: 4; }
-.mo-fly > :nth-child(6) { --i: 5; }
-.mo-fly > :nth-child(7) { --i: 6; }
-.mo-fly > :nth-child(8) { --i: 7; }
-.mo-fly > :nth-child(9) { --i: 8; }
-.mo-fly > :nth-child(10) { --i: 9; }
-.mo-fly > :nth-child(11) { --i: 10; }
-@keyframes mo-fly {
-  from { transform: perspective(900px) translate3d(0, 26px, -60px) rotateX(10deg); }
-}
+/* ---------- Popover, Menü, Auswahl: Fade 140 ms + Blur 4 px, kein Skalieren ---------- */
+.fx-pop[data-state='open'] { animation: fx-pop-in 140ms var(--fx-curve) both; }
+.fx-pop[data-state='closing'] { animation: fx-fade-out 90ms linear both; pointer-events: none; }
 
-/* ---------- Dialog-Dolly: Vorhang dunkelt ab, Tafel fährt aus der Tiefe heran ---------- */
+/* ---------- Dialog: Scrim 180 ms, Tafel blur-fade 280 ms; Ausgang nur Fade ---------- */
 :root[data-design='tagwerk'] dialog.dialog {
-  transition:
-    transform 220ms var(--mo-ease-in),
-    opacity 220ms var(--mo-ease-in),
-    overlay 220ms allow-discrete,
-    display 220ms allow-discrete;
-  transform: perspective(1400px) translate3d(0, 18px, -120px) rotateX(-5deg) scale(0.96);
   opacity: 0;
+  transition: opacity 170ms linear, overlay 170ms allow-discrete, display 170ms allow-discrete;
 }
 :root[data-design='tagwerk'] dialog.dialog[open] {
-  transform: none;
   opacity: 1;
-  transition:
-    transform var(--mo-spring-camera-ms) var(--mo-spring-camera),
-    opacity 300ms var(--mo-ease-out),
-    overlay var(--mo-spring-camera-ms) allow-discrete,
-    display var(--mo-spring-camera-ms) allow-discrete;
+  animation: fx-blur-in 280ms var(--fx-curve) backwards;
+  transition: opacity 180ms linear, overlay 280ms allow-discrete, display 280ms allow-discrete;
 }
 @starting-style {
-  :root[data-design='tagwerk'] dialog.dialog[open] {
-    transform: perspective(1400px) translate3d(0, 34px, -180px) rotateX(9deg) scale(0.94);
-    opacity: 0;
-  }
+  :root[data-design='tagwerk'] dialog.dialog[open] { opacity: 0; }
 }
 :root[data-design='tagwerk'] dialog.dialog::backdrop {
   opacity: 0;
-  transition: opacity 220ms var(--mo-ease-in), overlay 220ms allow-discrete, display 220ms allow-discrete;
+  transition: opacity 110ms linear, overlay 110ms allow-discrete, display 110ms allow-discrete;
 }
 :root[data-design='tagwerk'] dialog.dialog[open]::backdrop {
   opacity: 1;
-  transition: opacity 320ms ease-out, overlay 320ms allow-discrete, display 320ms allow-discrete;
+  transition: opacity 180ms linear, overlay 180ms allow-discrete, display 180ms allow-discrete;
 }
 @starting-style {
   :root[data-design='tagwerk'] dialog.dialog[open]::backdrop { opacity: 0; }
 }
-/* Inhalt steigt nach dem Heranfahren gestaffelt nach (einmal je Öffnen). */
-:root[data-design='tagwerk'] dialog.dialog[open] .dialog-body > * {
-  animation: mo-rise var(--mo-spring-soft-ms) var(--mo-spring-soft) backwards, mo-cut-fade 260ms var(--mo-ease-out) backwards;
-  animation-delay: calc(120ms + var(--i, 7) * 40ms);
+
+/* ---------- Laden: Shimmer, nur solange geladen wird (begrenzte Wiederholung, danach ruhig) ---------- */
+@keyframes fx-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
 }
-.dialog-body > :nth-child(1) { --i: 0; }
-.dialog-body > :nth-child(2) { --i: 1; }
-.dialog-body > :nth-child(3) { --i: 2; }
-.dialog-body > :nth-child(4) { --i: 3; }
-.dialog-body > :nth-child(5) { --i: 4; }
-.dialog-body > :nth-child(6) { --i: 5; }
-.dialog-body > :nth-child(7) { --i: 6; }
-@keyframes mo-rise { from { transform: translateY(16px); } }
+.sk {
+  display: block;
+  border-radius: var(--r-xs);
+  background: linear-gradient(90deg, var(--surface-3) 0%, var(--surface2) 45%, var(--surface-3) 90%) 0 0 / 200% 100%;
+  animation: fx-shimmer 1.3s ease-in-out 12;
+}
+
+/* ---------- Übersicht als Morph: Fläche wächst aus der Seitenleisten-Zeile (Shell.tsx) ---------- */
+:root[data-design='tagwerk']::view-transition-group(root) { animation-duration: 260ms; }
+:root[data-design='tagwerk']::view-transition-group(fx-morph) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease);
+  overflow: clip;
+  border-radius: var(--r);
+}
+:root[data-design='tagwerk']::view-transition-old(fx-morph) { animation: fx-fade-out 120ms linear both; }
+:root[data-design='tagwerk']::view-transition-new(fx-morph) {
+  animation: fx-fade-in 240ms var(--fx-curve) 60ms both;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+}
+/* Hin: Zeile „Übersicht“ (alter Stand) → Hauptfläche der Übersicht (neuer Stand). Zurück umgekehrt in „Neues Gespräch“. */
+:root[data-design='tagwerk']:active-view-transition-type(morph-to) .shell:not([data-route='uebersicht']) .side-overview,
+:root[data-design='tagwerk']:active-view-transition-type(morph-to) .shell[data-route='uebersicht'] .main,
+:root[data-design='tagwerk']:active-view-transition-type(morph-back) .shell[data-route='uebersicht'] .main,
+:root[data-design='tagwerk']:active-view-transition-type(morph-back) .shell[data-route='new'] .side-new {
+  view-transition-name: fx-morph;
+}
+:root[data-design='tagwerk']:active-view-transition-type(morph-back)::view-transition-group(fx-morph) { animation-duration: 260ms; }
+
+/* ---------- Reduzierte Bewegung: gleiche Reihenfolge, nur Fade 200 ms, Staffel 20 ms ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root { --fx-step: 20ms; }
+  .fx-fall > *, :root[data-design='tagwerk'] .fx-in, :root[data-design='tagwerk'] dialog.dialog[open] { animation-name: fx-fade-in; animation-duration: 200ms; }
+  .fx-pop[data-state='open'] { animation-name: fx-fade-in; }
+  .sk { animation: none; }
+  :root[data-design='tagwerk']::view-transition-group(fx-morph) { animation-duration: 1ms; }
+}

@@ -40,7 +40,7 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
   return (
     <>
       {showUser ? (
-        <div className="msg-user">
+        <div className="msg-user fx-in">
           <p className={`bubble ${live ? 'is-pending' : ''}`}>
             <span className="sr-only">Sie schrieben: </span>
             {turn.content}
@@ -49,7 +49,7 @@ export function PendingTurnView({ turn, showUser, showAssistant, onFetchAgain, o
       ) : null}
 
       {showAssistant && (live || preview || turn.presentation) ? (
-        <article className="msg-agent" aria-label="Antwort des KI-Sachbearbeiters" aria-busy={live}>
+        <article className="msg-agent fx-in" aria-label="Antwort des KI-Sachbearbeiters" aria-busy={live}>
           <AgentMeta
             model={model}
             time={null}

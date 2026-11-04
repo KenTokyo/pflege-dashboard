@@ -1,0 +1,11 @@
+Use case: app-chat-avatar-state-edit
+Asset type: second transparent PNG state in a three-state avatar set
+Input image: Image 1 is the exact edit source and identity reference. Preserve this same woman and image.
+Primary request: create the “reading along” expression for a care dashboard chat avatar.
+Change only gaze, a very slight head angle, and mouth expression: eyes and head turned gently downward as if reading text being typed below; attentive, calm expression, lips closed.
+Preserve exactly: the same woman, face, short gray-blond hair, glasses, age, skin tone, clothing, burgundy care tunic, blank badge, soft 3D rendering, lighting, camera, straight-on bust crop, image scale, head position and shoulder crop. Keep the head near upper center; do not zoom, pan, reframe, or alter the shoulders.
+Square canvas and exact same pixel dimensions as input. Keep clean transparent alpha background with no cast shadow, no background, no circle. High quality, stable identity.
+No text, logos, symbols, watermark, props, added objects, or other changes.
+
+Modell: GPT-6 Luna (Codex, eingebaute Bildgenerierung)
+Vorlagen: 01-begruessen.png (Identität und Bildaufbau); omed-welcome.webp und omed-thinking.webp (nur Stilreferenz; nicht verändert)
