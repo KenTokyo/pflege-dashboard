@@ -1,78 +1,58 @@
 # Pflege-Dashboard
 
-Lies vollständig `docs/anforderungen.md`, dann `/Users/kentoky/Documents/React Projects/shared-docs/CODING-RULES.md`. Für Browserprüfungen zusätzlich `~/.claude/CLAUDE.md` und `shared-docs/SCREENSHOT-GUIDE.md` im genannten übergeordneten Ordner lesen.
+- Zuerst ganz lesen: `docs/anforderungen.md`, dann `/Users/kentoky/Documents/React Projects/shared-docs/CODING-RULES.md`
+- Browserprüfungen: zusätzlich `~/.claude/CLAUDE.md` und `shared-docs/SCREENSHOT-GUIDE.md`
+- `docs/anforderungen.md` geht vor allgemeinen Git-Vorgaben
 
-## Auftrag und aktuelles Gate
+## Produkt und Stand
 
-Eigenständige Neuentwicklung in diesem Ordner. Keine Dateien, Imports oder Anwendungsteile aus NoteTree übernehmen. Phase 0 ist abgeschlossen und lokal mit `689e735` gesichert. Der Nutzer hat am 06.10.2026 ausdrücklich gewählt: „tagwerk sieht am besten aus damit weitermachen“. Phase 1 enthält Tagwerk mit Anmeldung, Sitzung, beiden Themes, Dashboard aus Supabase und Streaming-Chat-Schnittstelle. Nach jüngster Nutzerkorrektur erfolgt der Serveranschluss ohne Edge Functions über einen normalen lokalen Node-Server. Der echte angemeldete Nutzer-/KI-Test auf Vercel bleibt das Abschlussgate. Das bestehende Konto samt Mitgliedschaft, DeepSeek-Standard und geschützt hinterlegtem Schlüssel sind inzwischen eingerichtet; der Nutzer verlangt kein App-Ausgabenlimit. Der Node-Anschluss ist geliefert und unabhängig geprüft; beide ursprünglichen Agenten warten danach, keine selbständige neue Phase. Die 24 Designbilder und drei Bewegungsfolgen bleiben als Referenz erhalten. Phase 2 beginnt erst nach dem Phase-1-Gate.
+- Eigenständige Neuentwicklung; keine Dateien, Imports oder Anwendungsteile aus NoteTree
+- Gestaltung **Tagwerk** (Referenz: 24 Designbilder + drei Bewegungsfolgen unter `docs/mocks/`, bleiben erhalten)
+- **Live:** Vercel-Projekt `pflege-dashboard` → `pflege-dashboard-puce.vercel.app`; Server als normale Vercel Node Functions (`api/`, `vercel.json`)
+- **Supabase** (eigenes Projekt, EU Frankfurt) für Auth, Daten, Storage; Einrichtung `docs/supabase-provisioning.md`, Backend-Prüfung `docs/backend-pruefung.md`
+- **Keine Supabase Edge Functions:** KI-Aufrufe nur im Node-Server; Frontend spricht `/api/session` und `/api/chat-stream` über denselben Ursprung
+- **KI-Anbieter:**
+  - Standard: DeepSeek V4.1 Flash über OpenCode Go (Abo aktiv), Modell `deepseek-v4.1-flash`, Endpunkt `https://opencode.ai/zen/go/v1/chat/completions`; vorhandene Secret-Variable (Altname) weiter nutzen, nicht neu kopieren
+  - Reserve: Gemini mit kostenlosem AI-Studio-Schlüssel, nur serverseitig, manuell auswählbar
+  - kein automatischer Providerfallback; kein App-Ausgabenlimit für diesen Workspace, Nutzungsaufzeichnung + Zugriffsschutz bleiben
+- **Anmeldung:** Sitzung bleibt auf dem Gerät gespeichert (auch nach Neuladen); nur gültige Sitzungstokens, nie das Passwort; Abmelden löscht die Sitzung; serverseitige Auth-/Workspaceprüfung bleibt
+- **Testkonto:** bestehendes bestätigtes `test@test.de` mit Demo-Mitgliedschaft; Abnahme auf dem Live-System damit
+- **Funktionen:** Streaming-Chat mit sichtbarem Denk-/Schreibstatus, aufklappbarem technischem Ablauf (echte Thinking-Konfiguration, echte DB-/Provider-Aufrufe, bereinigtes JSON), deutsche Chrome-Spracheingabe, Fragen-Dialog nach Alltagsthemen mit bearbeitbaren Beispielanfragen, Demo-Einstieg
+  - Sichtwechsel zu Sachbearbeiter-Testdashboard: echte Supabase-Analytics, Fallübersichten, KI-Einstiege, anfragebezogene Arbeitsflächen nach OpenUI-Vorbild
+  - Chat: Wechsel Text ↔ Komponentenansicht (OpenUI), Fett/Kursiv in Tagwerk-Farben, Fakten/Schritte/Hinweise für beide Einstiegspfade; Nur-Auskunft-Grenzen bleiben
+  - Uploads noch nicht nötig
+- Nie vortäuschen: Login-/KI-Erfolg, MCP-Aufrufe, Rohgedanken, Modellleistungen, Nutzungszahlen
+- Neue Produktphase oder neuer Providervertrag nur mit eigenem Auftrag; Aufträge und Fortschritt in `docs/tasks/`
 
 ## Arbeitsteilung
 
-- Orchestrator: Aufgaben verteilen, Verträge prüfen, Ergebnisse unabhängig prüfen, bewerten und dokumentieren. Keine App-Implementierung; höchstens kleine Verbindungsänderungen. Er besitzt diese Regeln, `docs/anforderungen.md`, `docs/tasks/` und Gate-Berichte.
-- Derselbe Frontend-Unterchat besitzt `docs/mocks/`, `src/`, Root-Paketdateien und Frontend-Konfiguration, Designwerte, Bewegung und UI-Tests. Backend-Typen unter `types/` liest er nur. Mock-Werkzeuge bleiben unter `docs/mocks/`.
-- Derselbe Backend-Unterchat besitzt `supabase/`, `types/`, `backend/`, `docs/api-contract.md` und Backend-Einrichtungs-/Testdokumentation. Er baut keine UI. Paket-/Testscripts in Phase 0 unter `backend/`, um Dateikollisionen zu vermeiden.
-- Jüngste Nutzerkorrektur vom 06.10.2026: höchstens zwei GPT-6.1-Sol mit `reasoningEffort: xhigh` gleichzeitig, zusätzlich bei Bedarf ein Claude Opus 5.5 mit `effort: high` für Oberfläche/End-to-End. Ausdrücklich beauftragt ist eine unabhängige Anforderungs- und Randfallprüfung einschließlich nötiger Oberflächentests. Ein zusätzlicher Sol-Prüfchat darf Anforderungen und Querverbindungen unabhängig prüfen; Implementierungsnacharbeit bleibt bei den ursprünglichen Bereichsinhabern. Ohne Auftrag des Orchestrators keine weiteren Chats oder Provider-Subagenten starten. Änderungen am API-Vertrag müssen zum Orchestrator.
-- Jüngste Nutzerkorrektur: Die Agenten erledigen ihre Bereiche samt Prüfung und Nacharbeit selbst. Der Orchestrator verbindet die Lieferungen und gibt keine kleinteiligen Feedbackrunden. Er übernimmt keine App-Implementierung.
+- **Orchestrator (Root):** verteilt, prüft Verträge, nimmt unabhängig ab, dokumentiert, veröffentlicht; keine App-Implementierung, nur kleine Verbindungskorrekturen; besitzt diese Datei, `docs/anforderungen.md`, `docs/tasks/`, Gate-Berichte; führt Meilenstein-Commits nach Prüfung aus; koordiniert den einzigen Browserprüfslot
+- **Frontend:** `docs/mocks/` (inkl. Mock-Werkzeuge), `src/`, Root-Paketdateien, Frontend-Konfiguration, Designwerte, Bewegung, Sprache/Debug, UI-Tests; liest `types/` nur
+- **Backend:** `supabase/`, `types/`, `backend/`, `api/`, `vercel.json`, `docs/api-contract.md`, Demobefüllung, Backend-Einrichtungs-/Testdoku; keine UI
+- **Dritter Agent nach Bedarf:** neue Sachbearbeiter-Dateien + abgesprochene Navigation, oder unabhängige Anforderungs-/Randfall-/Browserprüfung
+- Höchstens drei Arbeitsagenten gleichzeitig; Modelle: höchstens zwei GPT-6.1-Sol (`reasoningEffort: xhigh`) + bei Bedarf ein Claude Opus 5.5 (`effort: high`) für Oberfläche/End-to-End
+- Bereiche erledigen Prüfung und Nacharbeit selbst; keine kleinteiligen Feedbackrunden; Nacharbeit bleibt beim Bereichsinhaber
+- Ohne Auftrag des Orchestrators keine weiteren Chats oder Provider-Subagenten; API-Vertragsänderungen über den Orchestrator
+- Unterchats stagen/committen keine fremden Dateien, verändern keine Git-Historie
 
 ## Grenzen
 
-Keine Konten erstellen, auch keine lokalen Auth-Testkonten. Keine Zugangsdaten eingeben oder aus anderen Projekten lesen. Keine Schlüssel ausgeben, loggen oder committen. Lokale Supabase-Status-/Startausgaben vor Anzeige redigieren oder zunächst ausschließlich in ignorierte `.local/`-Dateien schreiben. RLS-Prüfungen mit synthetischen SQL-Claims sind keine angelegten Login-Konten. Noch nicht ausführbare angemeldete Nutzertests ehrlich benennen.
-
-Nur fiktive Daten. Echter nativer Supabase-Start, beide Migrationen, Seed und Zugriffsprüfungen sind inzwischen bestanden; die ursprüngliche Container-Voraussetzung ist damit überholt. Eigene isolierte native Supabase-Läufe sind erlaubt, kein eigenständiger PostgreSQL-Ersatz. Keine sichtbaren Apps öffnen. Phase 1 implementiert KI-Aufrufe nach jüngster Nutzerkorrektur ausschließlich im lokalen Node-Server; Supabase bleibt für Auth, Daten und Storage. Keine tatsächlichen kostenpflichtigen Provideraufrufe ohne nutzerseitig bereitgestellte Secrets und bewusst freigegebenes Budget; keine Erhöhung des bisherigen Nullbudgets. Keine Veröffentlichung der Anwendung. Anforderungen und Setup-Dokumente dürfen keine tatsächlichen Geheimnisse enthalten.
-
-### Konkrete Hosting-Freigabe vom 06.10.2026
-
-Der Nutzer hat anschließend die Anlage des eigenen Supabase-Projekts im bereits geöffneten Browser über das ChatGPT-Browser-Plugin autorisiert, einschließlich Database-Passwort und geschützter lokaler `.env`. Das überschreibt das ältere Projektanlageverbot nur für dieses neue Pflege-Dashboard-Projekt (EU Frankfurt). Kein neues Nutzerkonto, keine Login-Eingabe, kein kostenpflichtiger Plan und keine Änderung fremder Projekte. Ein dritter Sol-6.1-xhigh-Unterchat besitzt dafür ausschließlich `docs/supabase-provisioning.md`, `.env.example` und gegebenenfalls die echte ignorierte `.env`.
-
-Die Freigabe ersetzt keine fehlende Werkzeugfunktion: aktuell ist der TreeChat-Browser im Orchestrator-Scope nicht verbunden und kein ChatGPT-Browser-Plugin-Connector verfügbar. Keine Umgehung über persönlichen Chrome/OS-Automation. Keine Geheimnisse in Toolausgaben, Chat, Doku oder Git; echte Werte nur über einen tatsächlich verfügbaren geschützten Secret-to-file-Weg nach `.env`, sonst bleibt dieser Schritt ehrlich blockiert. Vorhandene Nutzerwerte und Browsertabs erhalten. Hosted-Migrationen erst nach geprüftem Backend-Gate.
-
-### Supabase-Grenze und aktueller Fortsetzungsstand vom 06.10.2026
-
-„nein nur wenn es geht mit supabase oder garnicht“ gilt weiter. Die zwischenzeitlichen Unterbrechungen sind historisch: Beide ursprünglichen Agenten wurden ausdrücklich fortgesetzt und haben Phase 0 abgeschlossen. Der echte lokale Supabase-Gesamtlauf ist in `docs/backend-pruefung.md` belegt. Ein separater nutzerautorisierter Codex-Chat hat das eigene Hosted-Projekt und geschützte `.env` eingerichtet (`docs/supabase-provisioning.md`); daraus folgt kein bereits geprüftes Hosted-App-Schema. Mit der Tagwerk-Wahl dürfen genau der ursprüngliche Frontend- und Backend-Unterchat Phase 1 beginnen. Der Hosting-Unterchat bleibt gestoppt.
-
-Die vorhandene geschützte Projektkonfiguration darf für die autorisierte Anbindung dieses eigenen Pflege-Dashboard-Projekts verwendet werden, ohne Werte auszugeben. Geprüfte App-Migrationen dürfen nach bestandenem lokalem Backend-Gate auf genau dieses eigene neue Projekt übertragen werden; keine fremden Projekte, Konten, Tarifwechsel oder Datenlöschungen. Frontend verwendet ausschließlich öffentliche `VITE_SUPABASE_*`-Werte; Provider- und Datenbankgeheimnisse bleiben serverseitig. Fehlende Auth-Konten und Provider-Secrets bleiben eine echte Grenze für den angemeldeten KI-Nutzertest, keine Einladung zur Kontoanlage oder einem simulierten Produktchat.
-
-Der konkrete Projektauftrag `docs/anforderungen.md` hat Vorrang vor allgemeinen Git-Defaults: pro geprüftem Meilenstein committen und für beauftragte Bereitstellungen ins bestehende Projekt-Repository pushen. Der Orchestrator führt die Meilenstein-Commits nach Prüfung aus. Unterchats stage/committen keine parallelen Dateien und verändern keine Git-Historie.
+- Keine Konten anlegen (auch keine lokalen Auth-Testkonten), keine Zugangsdaten eingeben, keine aus anderen Projekten lesen
+- Schlüssel nie ausgeben, loggen, committen; Supabase-Status-/Startausgaben vor Anzeige redigieren oder nur in ignorierte `.local/`-Dateien
+- Frontend nur öffentliche `VITE_SUPABASE_*`-Werte; Provider- und DB-Geheimnisse bleiben serverseitig; keine echten Geheimnisse in Doku oder `.env.example`
+- RLS-Prüfungen mit synthetischen SQL-Claims sind keine Login-Konten; nicht ausführbare angemeldete Tests ehrlich benennen
+- Nur fiktive Daten; zusätzliche Demodaten additiv + idempotent
+- Native Supabase-Läufe lokal erlaubt, kein eigener PostgreSQL-Ersatz; Migrationen erst nach bestandenem lokalem Backend-Gate, nur auf dieses eigene Projekt
+- Nie: fremde Projekte, Konten, Tarif-/Guthabenwechsel, Datenlöschungen, Edge-Function-Deploys
+- Geprüfte Änderungen dürfen ohne erneute Freigabe gepusht und über Vercel veröffentlicht werden
+- Browser des Nutzers: Tabs und Werte erhalten; keine sichtbaren Ersatz-Apps, keine Umgehung über persönlichen Chrome/OS-Automation
 
 ## Prüfung und Kommunikation
 
-Deutsch, kurze verständliche Sätze. Berichte: Dateien/Ergebnis, tatsächlich ausgeführte Prüfungen samt Ergebnissen, ehrliche Note je Screen/Flow vor und nach Nacharbeit, verbleibende Nachweisgrenzen, Browser-/Prozessbereinigung. Unter 9/10 vor Bericht selbst verbessern.
-
-Erst Node-/Quellprüfungen, dann Bilder. Nie persönliche Chrome-App oder mitgelieferten Playwright-Chrome starten. Chrome for Testing: `~/Library/Caches/chrome-for-testing/current/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`, Version live prüfen. Keine sichtbaren Fenster, kein Fokuswechsel. Maximal 1280×720 und ein Prüfbrowser im gesamten Auftrag gleichzeitig. Keine Flags, die Bildrate oder Hintergrunddrosselung aufheben. Browser, Kontext und eigene Aufnahmeserver mit `try/finally`, Abbruchbehandlung und Zeitlimit schließen und eigene Prozesse nachprüfen. Keine endlosen dekorativen Animationen, kein WebGL/Three.js. Kurze Bewegung nur für den konkreten Aufnahmezweck; reduzierte Bewegung berücksichtigen. Eigene Prüfbrowser spätestens vor jeder Schlussantwort vollständig schließen.
-
-
-## Vorrangige Nutzerkorrektur 06.10.2026: keine Edge Functions
-
-Der Nutzer verlangt jetzt ausdrücklich keine Edge Functions und möchte die Einrichtung nicht selbst übernehmen. Dies ersetzt die ältere Edge-Pflicht und den geplanten Edge-Deployschritt in diesem Dokument und den Anforderungen. Supabase bleibt für Auth/DB/Storage verbindlich. Phase 1 wird durch dieselben ursprünglichen Agenten auf einen normalen lokalen Node-Server umgestellt; Frontend spricht `/api/session` und `/api/chat-stream` über denselben Ursprung. Bestehende geschützte eigene Datenbankkonfiguration darf serverseitig genutzt werden, keine Geheimnisse im Client. Keine Edge Functions deployen, keine zusätzlichen Konten oder Kosten. Gemeinsamer lokaler Start, sichere Session-/Workspace-/Budgetprüfung und echte HTTP-Prüfung sind Teil dieses Anschlusses. Kein Start von Phase 2. Browseranschluss ist aktuell nicht verbunden; Supabase-Plugin inzwischen live bestätigt. Orchestrator verbindet und prüft, implementiert keine Anwendung.
-
-
-## Aktueller Nutzerauftrag: Vercel-Vorführung vom 06.10.2026
-
-Der Nutzer verlangt für die Vorführung am 07.10.2026 funktionierenden Login und echten DeepSeek-Chat auf dem bereits selbst veröffentlichten Vercel-Projekt `pflege-dashboard` (`pflege-dashboard-puce.vercel.app`). Der bestehende Node-Server wird dafür als normale Vercel Node Functions angebunden; keine Supabase Edge Functions. Der aktuelle Hostingauftrag ersetzt die ältere reine Lokal-/Nichtveröffentlichungsgrenze für genau diese Anwendung. Der Nutzer hat am 06.10.2026 die Git-Push-Sperre ausdrücklich aufgehoben. Geprüfte Änderungen dürfen im Rahmen des Projektauftrags hochgeladen und über das bestehende Vercel-Projekt veröffentlicht werden; dafür ist keine erneute Freigabe nötig.
-
-Der Nutzer hat test@test.de selbst in Supabase angelegt. Bestätigtes Konto und normale Demo-Mitgliedschaft sind inzwischen geprüft; keine Agenten-Kontoanlage oder Passworteingabe. Der Nutzer autorisiert ausdrücklich seinen vorhandenen Browser über das ChatGPT-Plugin. Die Verbindung ist nun vorhanden; frühere Browserblockaden sind historisch. Nutzer-Tabs erhalten, keine sichtbare Ersatz-App starten.
-
-Gewünschtes Modell: DeepSeek V4.1 Flash, offizielle API-Kennung `deepseek-flash`. Nutzer gab zunächst 5 USD frei, nahm diese Grenze dann ausdrücklich mit „ersmtal keine limits bei deepseek“ zurück: für diesen Workspace kein App-Ausgabenlimit, Nutzungsaufzeichnung und Zugriffsschutz bleiben. Keine Providerkonto-/Tarif-/Guthabenänderung. Die gezielte Suche nach einem DeepSeek-Key in `notetree-tanstack` wurde ausdrücklich erlaubt; die beiden geprüften Env-Dateien enthalten keinen direkten DeepSeek-Key. Keine anderen fremden Schlüssel übernehmen. Der Nutzer hinterlegt den Schlüssel geschützt.
-
-Ursprünglicher Backend-Bereichsinhaber (Codex `01a11063-220c-7bc1-8ab7-7ca1c68286a8`) übernimmt Vercel-/DeepSeek-Anschluss inklusive `api/`, `vercel.json`, benötigten Root-Abhängigkeiten und Prüfanschluss. Orchestrator prüft unabhängig, konfiguriert Hosting und darf als kleine Verbindungskorrektur den DeepSeek-Anzeigenamen ergänzen. Kein vorgetäuschter Login-/KI-Erfolg; tatsächlicher Online-Endablauf bleibt das Abschlussgate.
-
-## Vorrangige Nutzerfortsetzung: autonome Liveabnahme und Alltagshilfen
-
-Am 06.10.2026 ausdrücklich beauftragt: Fehler bis zur funktionierenden Vercel-Vorführung autonom beheben, höchstens drei Arbeitsagenten gleichzeitig (Backend, Frontend, unabhängige Browserprüfung; maximal zwei Sol für Backendaufgaben). Orchestrator integriert, prüft und veröffentlicht. Die neue Frontendfortsetzung darf einen nach Alltagsthemen sortierten Dialog mit bearbeitbaren Beispielanfragen und einen einfachen Demo-Einstieg ergänzen. Keine Fähigkeiten vortäuschen.
-
-Nutzer verlangt ausdrücklich eine gespeicherte Anmeldung auf seinem Gerät, auch nach Neuladen/erneutem Öffnen. Das ersetzt das frühere Verbot von Remember-me/Sitzungspersistenz. Nur gültige Sitzungstokens speichern, niemals das Passwort; Abmelden löscht die Sitzung. Er meldet sich beim ersten nutzerseitigen Login selbst an. Echte serverseitige Auth-/Workspaceprüfungen bleiben. Abschlussprüfung erfolgt auf dem Live-System mit dem bestehenden bestätigten test@test.de; keine neuen Konten erzeugen.
-
-## Vorrangige Providerkorrektur 06.10.2026
-
-Der Nutzer bestätigt mit seiner OpenCode-Konsole: Der geschützte bestehende Schlüssel stammt von OpenCode. Direkter Aufruf von api.deepseek.com war eine falsche Zuordnung. Gewünschtes Modell bleibt DeepSeek V4.1 Flash; tatsächlicher Anbieter ist OpenCode Go im bereits aktiven Nutzerabo, Modellkennung `deepseek-v4.1-flash`, dokumentierter Anschluss `https://opencode.ai/zen/go/v1/chat/completions`. Die bestehende serverseitige Secretvariable darf als dokumentierter Altname genutzt werden, damit kein erneutes Kopieren/Offenlegen nötig ist. Kein automatischer Providerfallback, keine Kontoeinstellungen oder Tarife ändern. Backend-Bereichsinhaber korrigiert Adapter/Modellkonfiguration, Frontend ergänzt korrekte Anzeige, Orchestrator prüft und veröffentlicht bis zum tatsächlichen Liveergebnis.
-
-## Vorrangiger Demoausbau vom 07.10.2026
-
-Der Nutzer bestätigt den funktionierenden Vercel-DeepSeek-Chat und verlangt die nächste Vorführverbesserung. DeepSeek bleibt Standard. Gemini wird mit dem ausdrücklich bereitgestellten kostenlosen AI-Studio-Schlüssel ausschließlich serverseitig als manuell auswählbare Reserve eingerichtet. Keine CLI auf dem Nutzergerät ist für den Online-Chat erforderlich. Keine Konto-/Tarifänderung oder neuen Ausgabenlimits.
-
-Ausdrücklich beauftragt sind: sichtbarer Denk-/Schreibstatus; aufklappbarer technischer Ablauf mit tatsächlicher Thinking-Konfiguration, echten Datenbank-/Provider-Aufrufen und bereinigtem JSON; hochwertige Tagwerk-Nacharbeit an Fragen-Dialog, Farbe und subtilen Flächenrändern; deutsche Chrome-Spracheingabe; Sichtwechsel im bestehenden Demo-Zugang zu einem Sachbearbeiter-Testdashboard mit echten Supabase-Analytics, Fallübersichten, KI-Einstiegen und sicheren anfragebezogenen Arbeitsflächen nach OpenUI-Vorbild. Keine erfundenen MCP-Aufrufe, Rohgedanken, Modellleistungen oder Nutzungszahlen. Zusätzliche fiktive Demodaten sind additiv/idempotent erlaubt, neue Authkonten nicht. Uploads sind ausdrücklich noch nicht nötig.
-
-Der aktuelle Auftrag erlaubt Subagents nach Zweck; Root orchestriert weiter. Backend besitzt Backend/Schema/Typen/Demobefüllung, Frontend die vorhandenen Oberflächen samt Sprache/Debug, ein dritter Agent neue Sachbearbeiter-Dateien und abgesprochene Navigation. Höchstens drei Arbeitsagenten gleichzeitig. Root koordiniert den einzigen Browserprüfslot, nimmt die Änderungen unabhängig ab und veröffentlicht im bestehenden Repository/Vercel-Projekt. Vollständiger Auftrag und Fortschritt: `docs/tasks/2026-10-07-gemini-live-enhanced-prompt.md` und `docs/tasks/2026-10-07-gemini-live-tasks.md`.
-## Aktuelle Chat-Erweiterung vom 07.10.2026
-
-Der Nutzer hat nach erfolgreichem Demoausbau zusätzlich OpenUI im Chat beauftragt: direkt zwischen Text und echter Komponentenansicht wechseln, Fett/Kursiv in Tagwerk-Farben hervorheben, Fakten/Schritte/Hinweise für beide Einstiegspfade zeigen. Bestehende Anbieter und Nur-Auskunft-Grenzen bleiben. Root integriert, prüft und veröffentlicht; Frontend und Backend bleiben bei ihren Bereichsinhabern. Konkreter Auftrag: `docs/tasks/2026-10-07-chat-ansichten-tasks.md`. Kein allgemeiner Beginn weiterer Produktphasen oder neuer Providervertrag.
+- Deutsch, kurze verständliche Sätze
+- Bericht: Dateien/Ergebnis, ausgeführte Prüfungen samt Ergebnis, ehrliche Note je Screen/Flow vor und nach Nacharbeit, Nachweisgrenzen, Browser-/Prozessbereinigung; unter 9/10 erst selbst verbessern
+- Erst Node-/Quellprüfungen, dann Bilder
+- Nur Chrome for Testing (`~/Library/Caches/chrome-for-testing/current/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing`, Version live prüfen); nie persönlicher Chrome oder Playwright-Chrome
+- Keine sichtbaren Fenster, kein Fokuswechsel; höchstens 1280×720, ein Prüfbrowser gleichzeitig im ganzen Auftrag; keine Flags gegen Bildrate oder Hintergrunddrosselung
+- Browser, Kontext, Aufnahmeserver mit `try/finally`, Abbruchbehandlung, Zeitlimit schließen; eigene Prozesse nachprüfen; spätestens vor jeder Schlussantwort alles zu
+- Keine endlosen dekorativen Animationen, kein WebGL/Three.js; reduzierte Bewegung berücksichtigen

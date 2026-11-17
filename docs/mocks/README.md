@@ -15,7 +15,7 @@ Statische HTML-Mocks für die Designwahl. Kein App-Code, keine Anmeldung, keine 
 
 ## Referenz: echte Oberfläche statt Name
 
-Aufgenommen am 06.10.2026 mit dem unsichtbaren Prüfbrowser (Chrome for Testing 154), 1280×720, Maße direkt aus dem DOM gelesen (`tools/reference.mjs`, Bilder nur lokal unter `.out/reference/`, nicht im Repo).
+Aufgenommen mit dem unsichtbaren Prüfbrowser (Chrome for Testing), 1280×720, Maße direkt aus dem DOM gelesen (`tools/reference.mjs`, Bilder nur lokal unter `.out/reference/`, nicht im Repo).
 
 - **Linear, `https://linear.app/`** – die Startseite bettet eine echte, im DOM gerenderte Produktoberfläche ein. Gemessen: Seitenleiste ca. 240 px, Navigationszeilen 28 px hoch, Inter Variable 13 px mit Gewicht 510, Abschnittslabels 12 px gedämpft, Kopfzeile ca. 44 px mit 12-px-Brotkrumen, Dokumenttitel ca. 20 px halbfett, Aktivitätszeilen 12–13 px. Hierarchie: Seitenleiste → Kopfzeile → Inhalt in einer ruhigen Spalte, Nebenpanel rechts. Text rgb(208, 214, 224) auf fast Schwarz.
 - **Stripe Docs, `https://docs.stripe.com/dashboard/basics`** (deutsch) – für die schmale Ansicht: bei 390 px Kopfleiste ca. 64 px mit Menüknopf, eine Spalte, 24 px Seitenrand, Fließtext 16 px, Navigationszeilen 40 px, Brotkrumen brechen um, Überschrift ca. 30 px. Lineares eingebettetes App-Bild skaliert bei 390 px nur als Grafik und taugt dort nicht als Vorbild.
